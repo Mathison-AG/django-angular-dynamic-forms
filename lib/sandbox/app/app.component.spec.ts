@@ -1,7 +1,7 @@
 import { TestBed, async } from '@angular/core/testing';
 
 import { AppComponent } from './app.component';
-import { GreeterModule } from '../../greeter';
+import {DynamicFormModule} from '../../dynamic-form/dynamic-form.module';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -10,7 +10,7 @@ describe('AppComponent', () => {
         AppComponent
       ],
       imports: [
-        GreeterModule
+        DynamicFormModule
       ]
     }).compileComponents();
   }));
@@ -25,6 +25,6 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('demo-greeter').textContent).toContain('Greetings, John Doe!');
+    // expect(compiled.querySelector('demo-greeter').textContent).toContain('Greetings, John Doe!');
   }));
 });

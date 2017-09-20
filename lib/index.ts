@@ -1,1 +1,1 @@
-export * from './greeter';
+export * from './dynamic-form';
