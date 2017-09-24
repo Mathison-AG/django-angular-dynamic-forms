@@ -2,12 +2,10 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
-import {DynamicFormControlModel, DynamicFormValueControlModel} from '@ng-dynamic-forms/core';
+import {DynamicFormControlModel} from '@ng-dynamic-forms/core';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
 import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
 import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
-import {Subject} from 'rxjs/Subject';
-import {Observable} from 'rxjs/Observable';
 
 /**
  * Form component targeted on django rest framework
@@ -18,8 +16,8 @@ import {Observable} from 'rxjs/Observable';
     styleUrls: ['./internal-django-form.component.scss'],
 })
 export class InternalDjangoFormComponent implements OnInit {
-    formModel: DynamicFormControlModel[] = [];
-    formGroup: FormGroup;
+    form_model: DynamicFormControlModel[] = [];
+    form_group: FormGroup;
     actions: any;
     private last_id = 0;
 
@@ -48,13 +46,13 @@ export class InternalDjangoFormComponent implements OnInit {
     @Input()
     set config(_config: any) {
         if (_config) {
-            this.formModel = [];
+            this.form_model = [];
 
             const controls = this._generate_ui_control_array(_config.layout);
-            this.formModel.push(...controls);
+            this.form_model.push(...controls);
 
-            if (this.formGroup) {
-                this.formService.addFormGroupControl(this.formGroup, controls);
+            if (this.form_group) {
+                this.formService.addFormGroupControl(this.form_group, controls);
             }
 
             // generate buttons
@@ -68,11 +66,11 @@ export class InternalDjangoFormComponent implements OnInit {
             Object.assign(this._external_errors, _errors);
             for (const error_name of Object.getOwnPropertyNames(_errors)) {
                 const error_values = _errors[error_name];
-                const error_model = this.formService.findById(error_name, this.formModel) as DynamicInputModel;
+                const error_model = this.formService.findById(error_name, this.form_model) as DynamicInputModel;
                 // TODO: hack - do not know how to set up the validation message
                 (error_model as any).external_error = error_values[0];
                 // TODO: change this to support arrays
-                const error_control = this.formGroup.get(error_name);
+                const error_control = this.form_group.get(error_name);
                 error_control.markAsDirty();
                 error_control.markAsTouched();
                 error_control.setValue(error_control.value);
@@ -88,20 +86,29 @@ export class InternalDjangoFormComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.formGroup = this.formService.createFormGroup(this.formModel);
+        this.form_group = this.formService.createFormGroup(this.form_model);
         this._trigger_validation();
     }
 
+    public set_initial_data(data: any) {
+        console.log('setting initial data', data);
+        Object.keys(this.form_group.controls).forEach(name => {
+            if (name in data) {
+                this.form_group.controls[name].setValue(data[name]);
+            }
+        });
+    }
+
     private _trigger_validation() {
-        Object.keys(this.formGroup.controls).forEach(field => {
-            const control = this.formGroup.get(field);
+        Object.keys(this.form_group.controls).forEach(field => {
+            const control = this.form_group.get(field);
             control.markAsTouched({onlySelf: true});
         });
     }
 
     private onSubmit(button_id, is_cancel) {
         // clone the value so that button clicks are not remembered
-        const value = Object.assign({}, this.formGroup.value);
+        const value = Object.assign({}, this.form_group.value);
         this._flatten(null, value, null);
         if (button_id) {
             value[button_id] = true;

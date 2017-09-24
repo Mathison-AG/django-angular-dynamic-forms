@@ -1,9 +1,9 @@
 <h1 *ngIf="form_name">{{ form_name }}</h1>
 
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit(null)" (keydown.enter)="onSubmit()">
+<form [formGroup]="form_group" (ngSubmit)="onSubmit(null)" (keydown.enter)="onSubmit()">
 
-  <dynamic-material-form [group]="formGroup"
-                         [model]="formModel"></dynamic-material-form>
+  <dynamic-material-form [group]="form_group"
+                         [model]="form_model"></dynamic-material-form>
 
   <md-button-group>
       <button
@@ -13,7 +13,7 @@
               [color]="button.color"
               (click)="onSubmit(button.id, button.cancel)"
               type="button"
-              [disabled]="formGroup.invalid && !button.cancel"
+              [disabled]="form_group.invalid && !button.cancel"
             >{{ button.label }}</button>
   </md-button-group>
 

@@ -5,32 +5,33 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dy
 import {NG_VALIDATORS, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {external_validator, InternalDjangoFormComponent} from './impl/internal-django-form.component';
-import {MdButtonModule, MdProgressBarModule} from '@angular/material';
+import {MdButtonModule, MdProgressBarModule, MdSnackBarModule} from '@angular/material';
 import {MdButtonGroupModule} from '../material/button-group/button.group.module';
 
 @NgModule({
-  declarations: [
-    DjangoFormComponent,
-    InternalDjangoFormComponent
-  ],
-  imports: [
-    CommonModule,
-    DynamicFormsCoreModule.forRoot(),
-    DynamicFormsMaterialUIModule,
-    ReactiveFormsModule,
-    MdProgressBarModule,
-    MdButtonModule,
-    MdButtonGroupModule
-  ],
-  providers: [
-      {provide: NG_VALIDATORS, useValue: external_validator, multi: true}
-  ],
-  exports: [
-    DjangoFormComponent
-  ],
-  entryComponents: [
-    InternalDjangoFormComponent
-  ]
+    declarations: [
+        DjangoFormComponent,
+        InternalDjangoFormComponent
+    ],
+    imports: [
+        CommonModule,
+        DynamicFormsCoreModule.forRoot(),
+        DynamicFormsMaterialUIModule,
+        ReactiveFormsModule,
+        MdProgressBarModule,
+        MdButtonModule,
+        MdButtonGroupModule,
+        MdSnackBarModule,
+    ],
+    providers: [
+        {provide: NG_VALIDATORS, useValue: external_validator, multi: true}
+    ],
+    exports: [
+        DjangoFormComponent
+    ],
+    entryComponents: [
+        InternalDjangoFormComponent
+    ]
 })
 export class DjangoFormModule {
 }

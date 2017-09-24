@@ -15,6 +15,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
+import {MdSnackBar} from '@angular/material';
 
 /**
  * Form component targeted on django rest framework
@@ -60,7 +61,7 @@ export class DjangoFormComponent implements OnInit {
     @Output()
     cancel = new EventEmitter();
 
-    constructor(private resolver: ComponentFactoryResolver, private http: Http) {
+    constructor(private resolver: ComponentFactoryResolver, private http: Http, private snackBar: MdSnackBar) {
     }
 
     ngOnInit(): void {
@@ -69,6 +70,9 @@ export class DjangoFormComponent implements OnInit {
                 this._config = config;
                 this.form_name = config.name;
                 this._create_form();
+                if (config.has_initial_data) {
+                    this._load_initial_data();
+                }
             });
         } else {
             this._create_form();
@@ -101,6 +105,25 @@ export class DjangoFormComponent implements OnInit {
         this._internal_form.instance.form_name = this.form_name;
     }
 
+    private _load_initial_data() {
+        this.loading = true;
+        this.http.get(this._django_url)
+            .map(response => response.json())
+            .catch((error) => {
+                // TODO: handle error
+                setTimeout(() => {
+                    this.snackBar.open(error, 'Dismiss', {
+                        duration: 2000,
+                    });
+                });
+                return Observable.throw(error);
+            })
+            .subscribe(response => {
+                this.loading = false;
+                this._internal_form.instance.set_initial_data(response);
+            });
+    }
+
     private submitted(data) {
         if (this._django_url) {
             let call;
@@ -116,11 +139,20 @@ export class DjangoFormComponent implements OnInit {
             }
             call.map(response => response.json())
                 .catch((error) => {
+                    setTimeout(() => {
+                        this.snackBar.open(error, 'Dismiss', {
+                            duration: 10000,
+                        });
+                    });
                     this._internal_form.instance.errors = error.json();
                     return Observable.throw(error);
                 })
                 .subscribe(response => {
                     this._internal_form.instance.errors = null;
+                    this.snackBar.open('Saved', 'Dismiss', {
+                        duration: 2000,
+                        politeness: 'polite'
+                    });
                     this.submit.emit({
                             response: response,
                             data: data

@@ -1,4 +1,3 @@
-from django.views import View
 from rest_framework import viewsets, permissions, serializers, renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -89,6 +88,7 @@ class AngularFormMixin(object):
         ret['actions'] = self.get_actions(has_instance, serializer)
 
         ret['method'] = 'patch' if has_instance else 'post'
+        ret['has_initial_data'] = has_instance
 
         return Response(ret)
 
