@@ -13,3 +13,4 @@
 
 .envrc
 lib/sandbox-django/.venv
+__pycache__
