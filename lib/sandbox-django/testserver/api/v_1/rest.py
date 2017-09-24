@@ -21,23 +21,55 @@ class AngularFormMixin(object):
         if self.form_layout:
             return self.form_layout
         # no layout, generate from fields
-        layout = [{'name': field_name} for field_name in fields]
+        layout = [{'id': field_name} for field_name in fields]
         return layout
 
-    def get_form_name(self, serializer):
+    def get_form_name(self, has_instance, serializer):
         if self.form_name:
-            return self.form_name
-        return serializer.Meta.model._meta.verbose_name
+            return self.form_name['edit' if has_instance else 'create']
+
+        name = serializer.Meta.model._meta.verbose_name
+        if has_instance:
+            name = 'Editing %s' % name
+        else:
+            name = 'Creating a new %s' % name
+
+        return name
+
+    def get_actions(self, has_instance, serializer):
+        if has_instance:
+            return [
+                {
+                    'id': 'save',
+                    'label': 'Save'
+                },
+                {
+                    'id': 'cancel',
+                    'label': 'Cancel'
+                },
+            ]
+        else:
+            return [
+                {
+                    'id': 'create',
+                    'label': 'Create'
+                },
+                {
+                    'id': 'cancel',
+                    'label': 'Cancel'
+                },
+            ]
+
 
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form(self, request, *args, **kwargs):
-        return self.get_form_metadata()
+        return self.get_form_metadata(has_instance=True)
 
     @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form_list(self, request, *args, **kwargs):
-        return self.get_form_metadata()
+        return self.get_form_metadata(has_instance=False)
 
-    def get_form_metadata(self):
+    def get_form_metadata(self, has_instance):
         ret = {}
         serializer = self.get_serializer()
         metadata_class = self.metadata_class()
@@ -47,16 +79,23 @@ class AngularFormMixin(object):
         layout = self.get_form_layout(fields_info)
         layout = self.decorate_layout(layout, fields_info)
 
-        ret['form_layout'] = layout
-        ret['form_name']   = self.get_form_name(serializer=serializer)
+        ret['layout'] = layout
+        name = self.get_form_name(has_instance, serializer)
+
+        ret['name'] = name
+
+        ret['actions'] = self.get_actions(has_instance, serializer)
+
+        ret['method'] = 'patch' if has_instance else 'post'
+
         return Response(ret)
 
     def decorate_layout(self, layout, fields_info):
         # layout is a list
         ret = []
         for it in layout:
-            if isinstance(it, dict) and it['name'] in fields_info:
-                md = dict(fields_info[it['name']])
+            if isinstance(it, dict) and it['id'] in fields_info:
+                md = dict(fields_info[it['id']])
                 md.update(it)
                 ret.append(md)
             elif isinstance(it, str) and it in fields_info:

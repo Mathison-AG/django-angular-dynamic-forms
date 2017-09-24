@@ -1,6 +1,19 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()">
+<h1 *ngIf="form_name">{{ form_name }}</h1>
+
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit(null)" (keydown.enter)="onSubmit()">
 
   <dynamic-material-form [group]="formGroup"
                          [model]="formModel"></dynamic-material-form>
+
+  <md-button-group>
+      <button
+              md-raised-button
+              *ngFor="let button of actions"
+              [name]="button.id"
+              [color]="button.color"
+              (click)="onSubmit(button.id)"
+              type="button"
+            >{{ button.label }}</button>
+  </md-button-group>
 
 </form>

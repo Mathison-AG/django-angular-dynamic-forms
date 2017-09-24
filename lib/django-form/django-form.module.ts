@@ -5,7 +5,8 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dy
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {InternalDjangoFormComponent} from './impl/internal-django-form.component';
-import {MdProgressBarModule} from '@angular/material';
+import {MdButtonModule, MdProgressBarModule} from '@angular/material';
+import {MdButtonGroupModule} from '../material/button-group/button.group.module';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,9 @@ import {MdProgressBarModule} from '@angular/material';
     DynamicFormsCoreModule.forRoot(),
     DynamicFormsMaterialUIModule,
     ReactiveFormsModule,
-    MdProgressBarModule
+    MdProgressBarModule,
+    MdButtonModule,
+    MdButtonGroupModule
   ],
   providers: [
   ],

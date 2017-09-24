@@ -1,0 +1,11 @@
+:host {
+}
+
+:host/deep/ button {
+    padding: 0 8px;
+    min-width: 64px;
+    &:not(:first-child) {
+        margin-left: 8px;
+    }
+}
+

@@ -9,9 +9,10 @@
     <div>
       <md-tab-group>
         <md-tab label="One">
-          <django-form-component [config]="config" (submit)="submit($event)"></django-form-component>
+          <django-form-component [django_url]="url" (submit)="submit($event)"></django-form-component>
         </md-tab>
         <md-tab label="Two">
+          <django-form-component [config]="config" (submit)="submit($event)"></django-form-component>
         </md-tab>
       </md-tab-group>
     </div>

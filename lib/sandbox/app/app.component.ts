@@ -43,19 +43,21 @@ import {Component} from '@angular/core';
 })
 export class AppComponent {
   private config: any = {
-    widgets: [
-      ['name', 'Jméno a příjmení', 'char'],
+    layout: [
+      ['name', 'Jméno a příjmení', 'string'],
       ['Adresa',
         ['street', 'Ulice'],
         {id: 'city', label: 'Město'},
         ['zipcode', 'PSČ'],
       ],
     ],
-    buttons: [
-      ['Uložit'],
-      ['Zrušit']
+    actions: [
+      ['Ulož'],
+      ['Zpět']
     ]
   };
+
+  private url = 'http://localhost:8000/api/1.0/cities/';
 
   private submit(value: any) {
     console.log('form submitted', value);
