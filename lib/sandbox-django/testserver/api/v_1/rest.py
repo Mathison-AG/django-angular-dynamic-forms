@@ -45,7 +45,8 @@ class AngularFormMixin(object):
                 },
                 {
                     'id': 'cancel',
-                    'label': 'Cancel'
+                    'label': 'Cancel',
+                    'cancel': True
                 },
             ]
         else:
@@ -56,7 +57,8 @@ class AngularFormMixin(object):
                 },
                 {
                     'id': 'cancel',
-                    'label': 'Cancel'
+                    'label': 'Cancel',
+                    'cancel': True
                 },
             ]
 

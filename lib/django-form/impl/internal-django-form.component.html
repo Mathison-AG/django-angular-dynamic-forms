@@ -11,8 +11,9 @@
               *ngFor="let button of actions"
               [name]="button.id"
               [color]="button.color"
-              (click)="onSubmit(button.id)"
+              (click)="onSubmit(button.id, button.cancel)"
               type="button"
+              [disabled]="formGroup.invalid && !button.cancel"
             >{{ button.label }}</button>
   </md-button-group>
 

@@ -1,11 +1,13 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
-import {FormGroup} from '@angular/forms';
+import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
-import {DynamicFormControlModel} from '@ng-dynamic-forms/core';
+import {DynamicFormControlModel, DynamicFormValueControlModel} from '@ng-dynamic-forms/core';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
 import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
 import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
+import {Subject} from 'rxjs/Subject';
+import {Observable} from 'rxjs/Observable';
 
 /**
  * Form component targeted on django rest framework
@@ -33,9 +35,21 @@ export class InternalDjangoFormComponent implements OnInit {
     @Output()
     submit = new EventEmitter();
 
+    /**
+     * Returns cancelled form data
+     *
+     * @type {EventEmitter<any>}
+     */
+    @Output()
+    cancel = new EventEmitter();
+
+    private _external_errors = {};
+
     @Input()
     set config(_config: any) {
         if (_config) {
+            this.formModel = [];
+
             const controls = this._generate_ui_control_array(_config.layout);
             this.formModel.push(...controls);
 
@@ -48,21 +62,55 @@ export class InternalDjangoFormComponent implements OnInit {
         }
     }
 
+    @Input()
+    set errors(_errors: any) {
+        if (_errors) {
+            Object.assign(this._external_errors, _errors);
+            for (const error_name of Object.getOwnPropertyNames(_errors)) {
+                const error_values = _errors[error_name];
+                const error_model = this.formService.findById(error_name, this.formModel) as DynamicInputModel;
+                // TODO: hack - do not know how to set up the validation message
+                (error_model as any).external_error = error_values[0];
+                // TODO: change this to support arrays
+                const error_control = this.formGroup.get(error_name);
+                error_control.markAsDirty();
+                error_control.markAsTouched();
+                error_control.setValue(error_control.value);
+            }
+        } else {
+            for (const prop of Object.getOwnPropertyNames(this._external_errors)) {
+                delete this._external_errors[prop];
+            }
+        }
+    }
+
     constructor(private formService: DynamicFormService) {
     }
 
     ngOnInit() {
         this.formGroup = this.formService.createFormGroup(this.formModel);
+        this._trigger_validation();
     }
 
-    private onSubmit(button_id) {
+    private _trigger_validation() {
+        Object.keys(this.formGroup.controls).forEach(field => {
+            const control = this.formGroup.get(field);
+            control.markAsTouched({onlySelf: true});
+        });
+    }
+
+    private onSubmit(button_id, is_cancel) {
         // clone the value so that button clicks are not remembered
         const value = Object.assign({}, this.formGroup.value);
         this._flatten(null, value, null);
         if (button_id) {
             value[button_id] = true;
         }
-        this.submit.emit(value);
+        if (is_cancel) {
+            this.cancel.emit(value);
+        } else {
+            this.submit.emit(value);
+        }
     }
 
     private _flatten(name, current, parent) {
@@ -124,10 +172,20 @@ export class InternalDjangoFormComponent implements OnInit {
             type = 'string';
         }
         if (type === 'string') {
-            return new DynamicInputModel({
+            const ret = new DynamicInputModel({
                 id: id,
-                placeholder: label
+                placeholder: label,
+                validators: [
+                    {
+                        name: external_validator.name,
+                        args: {id: id, errors: this._external_errors}
+                    }
+                ],
+                errorMessages: {
+                    external_error: '{{external_error}}'
+                }
             });
+            return ret;
         } else if (type === 'fieldset') {
             return new DynamicFormGroupModel({
                 id: 'generated_' + (this.last_id++),
@@ -145,6 +203,8 @@ export class InternalDjangoFormComponent implements OnInit {
             for (const action of actions) {
                 let action_id;
                 let action_label;
+                let action_cancel = false;
+                let action_color = 'primary';
 
                 if (Array.isArray(action)) {
                     action_id = action[0];
@@ -155,16 +215,34 @@ export class InternalDjangoFormComponent implements OnInit {
                 } else if (Object(action) !== action) {
                     action_id = action_label = action;
                 } else {
-                    action_id    = action.id;
+                    action_id = action.id;
                     action_label = action.label;
+                    action_cancel = action.cancel;
+                    if (action.color) {
+                        action_color = action.color;
+                    }
                 }
                 ret.push({
-                    'id'        : action_id,
-                    'label'     : action_label,
-                    'color'     : 'primary'
+                    'id': action_id,
+                    'label': action_label,
+                    'color': action_color,
+                    'cancel': action.cancel
                 });
             }
         }
         return ret;
     }
+}
+
+export function external_validator(conf: { id: string, errors: any }): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+        console.log(control);
+        if (conf.id in conf.errors) {
+            const ret = {'external_error': {value: conf.errors[conf.id][0]}};
+            delete conf.errors[conf.id];
+            return ret;
+        } else {
+            return null;
+        }
+    };
 }

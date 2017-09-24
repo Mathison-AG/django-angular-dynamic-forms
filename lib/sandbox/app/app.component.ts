@@ -62,4 +62,8 @@ export class AppComponent {
   private submit(value: any) {
     console.log('form submitted', value);
   }
+
+  private cancel(value: any) {
+    console.log('form cancelled', value);
+  }
 }

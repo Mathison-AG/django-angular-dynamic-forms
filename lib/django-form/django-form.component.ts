@@ -1,17 +1,20 @@
 import {
-    Component, ComponentFactoryResolver, ComponentRef, EventEmitter, Input, OnInit, Output, ViewChild,
+    Component,
+    ComponentFactoryResolver,
+    ComponentRef,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
     ViewContainerRef
 } from '@angular/core';
-
-import {FormGroup} from '@angular/forms';
-
-import {DynamicFormControlModel} from '@ng-dynamic-forms/core';
-import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
-import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
-import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
 import {InternalDjangoFormComponent} from './impl/internal-django-form.component';
 import {Http} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/throw';
 
 /**
  * Form component targeted on django rest framework
@@ -41,6 +44,22 @@ export class DjangoFormComponent implements OnInit {
         this._django_url = _url;
     }
 
+    /**
+     * Returns submitted form data
+     *
+     * @type {EventEmitter<any>}
+     */
+    @Output()
+    submit = new EventEmitter();
+
+    /**
+     * Returns cancelled form data
+     *
+     * @type {EventEmitter<any>}
+     */
+    @Output()
+    cancel = new EventEmitter();
+
     constructor(private resolver: ComponentFactoryResolver, private http: Http) {
     }
 
@@ -63,7 +82,10 @@ export class DjangoFormComponent implements OnInit {
             django_form_url += '/';
         }
         django_form_url += 'form';
-        return this.http.get(django_form_url).map(response => { this.loading = false; return response.json(); });
+        return this.http.get(django_form_url).map(response => {
+            this.loading = false;
+            return response.json();
+        });
     }
 
     private _create_form() {
@@ -75,6 +97,7 @@ export class DjangoFormComponent implements OnInit {
         this._internal_form = this.target.createComponent(childComponent);
         this._internal_form.instance.config = this._config;
         this._internal_form.instance.submit.subscribe(data => this.submitted(data));
+        this._internal_form.instance.cancel.subscribe(data => this.cancelled(data));
         this._internal_form.instance.form_name = this.form_name;
     }
 
@@ -91,9 +114,25 @@ export class DjangoFormComponent implements OnInit {
                 default:
                     throw new Error(`Unimplemented method ${this._config.method}`);
             }
-            call.subscribe(response => {
-                console.log(response);
-            });
+            call.map(response => response.json())
+                .catch((error) => {
+                    this._internal_form.instance.errors = error.json();
+                    return Observable.throw(error);
+                })
+                .subscribe(response => {
+                    this._internal_form.instance.errors = null;
+                    this.submit.emit({
+                            response: response,
+                            data: data
+                        }
+                    );
+                });
         }
+    }
+
+    private cancelled(data) {
+        this.cancel.emit({
+            data: data
+        });
     }
 }
