@@ -1,1 +1,21 @@
-
+<div class="flex-container"
+     fxLayout="row"
+     fxLayout.xs="column"
+     fxLayoutAlign="center center"
+     fxLayoutAlign.xs="start">
+  <div class="flex-item" fxFlex="30%" fxFlex.xs="20%">
+  </div>
+  <div class="flex-item" fxFlex="40%" fxFlex.xs="60%">
+    <div>
+      <md-tab-group>
+        <md-tab label="One">
+          <django-form-component [config]="config" (submit)="submit($event)"></django-form-component>
+        </md-tab>
+        <md-tab label="Two">
+        </md-tab>
+      </md-tab-group>
+    </div>
+  </div>
+  <div class="flex-item" fxFlex="30%" fxFlex.xs="20%">
+  </div>
+</div>

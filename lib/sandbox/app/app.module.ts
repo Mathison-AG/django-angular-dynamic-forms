@@ -1,10 +1,18 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CookieXSRFStrategy, HttpModule, XSRFStrategy} from '@angular/http';
+import {DynamicFormsCoreModule} from '@ng-dynamic-forms/core';
 
 import {AppComponent} from './app.component';
-import {DynamicFormModule} from '../../dynamic-form/dynamic-form.module';
+import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
+import {DynamicFormValidationService} from '@ng-dynamic-forms/core/src/service/dynamic-form-validation.service';
+import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dynamic-material-form-ui.module';
+import {MaterialModule, MdCardModule, MdProgressSpinnerModule} from '@angular/material';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {DjangoFormModule} from '../../django-form/django-form.module';
+import {FlexLayoutModule} from "@angular/flex-layout";
+
 
 export function xsrfFactory() {
   return new CookieXSRFStrategy('csrftoken', 'X-CSRFToken');
@@ -16,17 +24,26 @@ export function xsrfFactory() {
     AppComponent
   ],
   imports: [
-    BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpModule,
-    DynamicFormModule
+    DynamicFormsCoreModule.forRoot(),
+    DynamicFormsMaterialUIModule,
+    MdCardModule,
+    MaterialModule,
+    DjangoFormModule,
+    MdProgressSpinnerModule,
+    FlexLayoutModule
   ],
   providers: [
     {
       // use django csrf cookie for HTTP PUT/POST/DELETE
       provide: XSRFStrategy,
-      useFactory : xsrfFactory
+      useFactory: xsrfFactory
     },
+    DynamicFormService,
+    DynamicFormValidationService
   ],
   bootstrap: [AppComponent]
 })

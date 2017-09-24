@@ -1,1 +1,1 @@
-export * from './dynamic-form';
+export * from './django-form';
