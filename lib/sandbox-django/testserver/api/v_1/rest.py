@@ -14,7 +14,7 @@ class CitySerializer(serializers.ModelSerializer):
 # noinspection PyUnresolvedReferences
 class AngularFormMixin(object):
     form_layout = None
-    form_name   = None
+    form_title   = None
 
     def get_form_layout(self, fields):
         if self.form_layout:
@@ -23,9 +23,9 @@ class AngularFormMixin(object):
         layout = [{'id': field_name} for field_name in fields]
         return layout
 
-    def get_form_name(self, has_instance, serializer):
-        if self.form_name:
-            return self.form_name['edit' if has_instance else 'create']
+    def get_form_title(self, has_instance, serializer):
+        if self.form_title:
+            return self.form_title['edit' if has_instance else 'create']
 
         name = serializer.Meta.model._meta.verbose_name
         if has_instance:
@@ -81,9 +81,8 @@ class AngularFormMixin(object):
         layout = self.decorate_layout(layout, fields_info)
 
         ret['layout'] = layout
-        name = self.get_form_name(has_instance, serializer)
 
-        ret['name'] = name
+        ret['form_title'] = self.get_form_title(has_instance, serializer)
 
         ret['actions'] = self.get_actions(has_instance, serializer)
 

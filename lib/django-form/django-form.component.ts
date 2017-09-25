@@ -30,7 +30,7 @@ export class DjangoFormComponent implements OnInit {
     private _django_url: any;
     private loading = false;
     private data: any;
-    private form_name: string;
+    private form_title: string;
 
     @ViewChild('dynamicComponentContainer', {read: ViewContainerRef}) target: ViewContainerRef;
     private _internal_form: ComponentRef<InternalDjangoFormComponent>;
@@ -38,6 +38,7 @@ export class DjangoFormComponent implements OnInit {
     @Input()
     set config(_config: any) {
         this._config = _config;
+        this.form_title = _config.form_title;
     }
 
     @Input()
@@ -67,8 +68,7 @@ export class DjangoFormComponent implements OnInit {
     ngOnInit(): void {
         if (this._django_url) {
             this._download_django_form().subscribe(config => {
-                this._config = config;
-                this.form_name = config.name;
+                this.config = config;
                 this._create_form();
                 if (config.has_initial_data) {
                     this._load_initial_data();
@@ -102,7 +102,7 @@ export class DjangoFormComponent implements OnInit {
         this._internal_form.instance.config = this._config;
         this._internal_form.instance.submit.subscribe(data => this.submitted(data));
         this._internal_form.instance.cancel.subscribe(data => this.cancelled(data));
-        this._internal_form.instance.form_name = this.form_name;
+        this._internal_form.instance.form_title = this.form_title;
     }
 
     private _load_initial_data() {

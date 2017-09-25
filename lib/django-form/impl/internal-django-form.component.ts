@@ -23,7 +23,7 @@ export class InternalDjangoFormComponent implements OnInit {
 
 
     @Input()
-    form_name: string;
+    form_title: string;
 
     /**
      * Returns submitted form data
