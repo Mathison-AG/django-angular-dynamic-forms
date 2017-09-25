@@ -9,7 +9,7 @@ import {
     ViewChild,
     ViewContainerRef
 } from '@angular/core';
-import {InternalDjangoFormComponent} from './impl/internal-django-form.component';
+import {InPageDjangoFormComponent} from './impl/inpage-django-form.component';
 import {Http} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -29,11 +29,10 @@ export class DjangoFormComponent implements OnInit {
     private _config: any;
     private _django_url: any;
     private loading = false;
-    private data: any;
     private form_title: string;
 
     @ViewChild('dynamicComponentContainer', {read: ViewContainerRef}) target: ViewContainerRef;
-    private _internal_form: ComponentRef<InternalDjangoFormComponent>;
+    private _internal_form: ComponentRef<InPageDjangoFormComponent>;
 
     @Input()
     set config(_config: any) {
@@ -97,7 +96,7 @@ export class DjangoFormComponent implements OnInit {
         if (this._internal_form) {
             this._internal_form.destroy();
         }
-        const childComponent = this.resolver.resolveComponentFactory(InternalDjangoFormComponent);
+        const childComponent = this.resolver.resolveComponentFactory(InPageDjangoFormComponent);
         this._internal_form = this.target.createComponent(childComponent);
         this._internal_form.instance.config = this._config;
         this._internal_form.instance.submit.subscribe(data => this.submitted(data));
@@ -120,7 +119,7 @@ export class DjangoFormComponent implements OnInit {
             })
             .subscribe(response => {
                 this.loading = false;
-                this._internal_form.instance.set_initial_data(response);
+                this._internal_form.instance.initial_data = response;
             });
     }
 

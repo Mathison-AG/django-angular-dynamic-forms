@@ -11,19 +11,15 @@ import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group
  * Form component targeted on django rest framework
  */
 @Component({
-    selector: 'internal-django-form-component',
-    templateUrl: './internal-django-form.component.html',
-    styleUrls: ['./internal-django-form.component.scss'],
+    selector: 'internal-django-form-content',
+    templateUrl: './internal-django-form-content.component.html',
+    styleUrls: ['./internal-django-form-content.component.scss'],
 })
-export class InternalDjangoFormComponent implements OnInit {
+export class InternalDjangoFormContentComponent implements OnInit {
+
     form_model: DynamicFormControlModel[] = [];
     form_group: FormGroup;
-    actions: any;
     private last_id = 0;
-
-
-    @Input()
-    form_title: string;
 
     /**
      * Returns submitted form data
@@ -33,30 +29,21 @@ export class InternalDjangoFormComponent implements OnInit {
     @Output()
     submit = new EventEmitter();
 
-    /**
-     * Returns cancelled form data
-     *
-     * @type {EventEmitter<any>}
-     */
-    @Output()
-    cancel = new EventEmitter();
-
     private _external_errors = {};
+    private _initial_data = null;
 
     @Input()
-    set config(_config: any) {
-        if (_config) {
+    set layout(_layout: any) {
+        if (_layout) {
             this.form_model = [];
 
-            const controls = this._generate_ui_control_array(_config.layout);
+            const controls = this._generate_ui_control_array(_layout);
             this.form_model.push(...controls);
 
             if (this.form_group) {
                 this.formService.addFormGroupControl(this.form_group, controls);
+                this._update_initial_data();
             }
-
-            // generate buttons
-            this.actions = this._generate_actions(_config.actions);
         }
     }
 
@@ -82,21 +69,19 @@ export class InternalDjangoFormComponent implements OnInit {
         }
     }
 
+    @Input()
+    set initial_data(data: any) {
+        this._initial_data = data;
+        this._update_initial_data();
+    }
+
     constructor(private formService: DynamicFormService) {
     }
 
     ngOnInit() {
         this.form_group = this.formService.createFormGroup(this.form_model);
+        this._update_initial_data();
         this._trigger_validation();
-    }
-
-    public set_initial_data(data: any) {
-        console.log('setting initial data', data);
-        Object.keys(this.form_group.controls).forEach(name => {
-            if (name in data) {
-                this.form_group.controls[name].setValue(data[name]);
-            }
-        });
     }
 
     private _trigger_validation() {
@@ -104,36 +89,6 @@ export class InternalDjangoFormComponent implements OnInit {
             const control = this.form_group.get(field);
             control.markAsTouched({onlySelf: true});
         });
-    }
-
-    private onSubmit(button_id, is_cancel) {
-        // clone the value so that button clicks are not remembered
-        const value = Object.assign({}, this.form_group.value);
-        this._flatten(null, value, null);
-        if (button_id) {
-            value[button_id] = true;
-        }
-        if (is_cancel) {
-            this.cancel.emit(value);
-        } else {
-            this.submit.emit(value);
-        }
-    }
-
-    private _flatten(name, current, parent) {
-        if (current !== Object(current)) {
-            return;
-        }
-        for (const k of Object.getOwnPropertyNames(current)) {
-            const val = current[k];
-            this._flatten(k, val, current);
-        }
-        if (name && name.startsWith('generated_')) {
-            for (const k of Object.getOwnPropertyNames(current)) {
-                parent[k] = current[k];
-            }
-            delete parent[name];
-        }
     }
 
     private _generate_ui_control_array(configs: any[]): DynamicFormControlModel[] {
@@ -179,7 +134,7 @@ export class InternalDjangoFormComponent implements OnInit {
             type = 'string';
         }
         if (type === 'string') {
-            const ret = new DynamicInputModel({
+            return new DynamicInputModel({
                 id: id,
                 placeholder: label,
                 validators: [
@@ -192,7 +147,6 @@ export class InternalDjangoFormComponent implements OnInit {
                     external_error: '{{external_error}}'
                 }
             });
-            return ret;
         } else if (type === 'fieldset') {
             return new DynamicFormGroupModel({
                 id: 'generated_' + (this.last_id++),
@@ -204,40 +158,23 @@ export class InternalDjangoFormComponent implements OnInit {
         }
     }
 
-    _generate_actions(actions) {
-        const ret = [];
-        if (actions) {
-            for (const action of actions) {
-                let action_id;
-                let action_label;
-                let action_cancel = false;
-                let action_color = 'primary';
-
-                if (Array.isArray(action)) {
-                    action_id = action[0];
-                    action_label = action[1];
-                    if (action_label === undefined) {
-                        action_label = action_id;
-                    }
-                } else if (Object(action) !== action) {
-                    action_id = action_label = action;
-                } else {
-                    action_id = action.id;
-                    action_label = action.label;
-                    action_cancel = action.cancel;
-                    if (action.color) {
-                        action_color = action.color;
-                    }
+    private _update_initial_data() {
+        if (this._initial_data && this.form_group) {
+            console.log('setting initial data', this._initial_data);
+            Object.keys(this.form_group.controls).forEach(name => {
+                if (name in this._initial_data) {
+                    this.form_group.controls[name].setValue(this._initial_data[name]);
                 }
-                ret.push({
-                    'id': action_id,
-                    'label': action_label,
-                    'color': action_color,
-                    'cancel': action.cancel
-                });
-            }
+            });
         }
-        return ret;
+    }
+
+    public get valid() {
+        return this.form_group.valid;
+    }
+
+    public get value() {
+        return this.form_group.value;
     }
 }
 
