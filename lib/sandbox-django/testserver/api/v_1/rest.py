@@ -132,6 +132,15 @@ class TestModelViewSet(AngularFormMixin, viewsets.ModelViewSet):
     queryset = TestModel.objects.all()
     serializer_class = TestModelSerializer
     permission_classes = (permissions.AllowAny,)
+
+
+class TestModel2ViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    """
+    API for cities
+    """
+    queryset = TestModel.objects.all()
+    serializer_class = TestModelSerializer
+    permission_classes = (permissions.AllowAny,)
     form_defaults = {
         'radio': {'type': 'radio'}
     }

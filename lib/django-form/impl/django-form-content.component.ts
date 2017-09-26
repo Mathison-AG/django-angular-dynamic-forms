@@ -7,6 +7,7 @@ import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-for
 import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
 import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
 import {DynamicRadioGroupModel} from '@ng-dynamic-forms/core/src/model/radio/dynamic-radio-group.model';
+import {DynamicSelectModel} from '@ng-dynamic-forms/core/src/model/select/dynamic-select.model';
 
 /**
  * Form component targeted on django rest framework
@@ -137,6 +138,7 @@ export class DjangoFormContentComponent implements OnInit {
         if (type === undefined) {
             type = 'string';
         }
+        const options = [];
         switch (type) {
             case 'string':
                 return new DynamicInputModel({
@@ -153,7 +155,6 @@ export class DjangoFormContentComponent implements OnInit {
                     }
                 });
             case 'radio':
-                const options = [];
                 for (const option of config.choices) {
                     options.push({
                         'label': option.display_name,
@@ -162,7 +163,19 @@ export class DjangoFormContentComponent implements OnInit {
                 }
                 return new DynamicRadioGroupModel({
                     id: id,
-                    legend: label,
+                    label: label,
+                    options: options
+                });
+            case 'choice':
+                for (const option of config.choices) {
+                    options.push({
+                        'label': option.display_name,
+                        'value': option.value
+                    });
+                }
+                return new DynamicSelectModel({
+                    id: id,
+                    placeholder: label,
                     options: options
                 });
             case 'fieldset':
