@@ -23,7 +23,8 @@ export class AppComponent {
         ]
     };
 
-    private url = 'http://localhost:8000/api/1.0/cities/1/';
+    private city_create_url = 'http://localhost:8000/api/1.0/cities/';
+    private city_url = 'http://localhost:8000/api/1.0/cities/1/';
     private test_model_create_url = 'http://localhost:8000/api/1.0/test/';
 
 
@@ -38,7 +39,7 @@ export class AppComponent {
     }
 
     private open() {
-        this.dialog.open(this.url, (data, response) => {
+        this.dialog.open(this.city_url, (data, response) => {
             console.log('submit ok', data, response);
         }, data => {
             console.log('submit cancelled', data);

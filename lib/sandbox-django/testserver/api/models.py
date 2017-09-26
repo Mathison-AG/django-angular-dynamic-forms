@@ -15,7 +15,7 @@ class Address(models.Model):
 
 
 class TestModel(models.Model):
-    name = models.CharField(verbose_name='aaa', max_length=10)
+    name = models.CharField(verbose_name='blah', max_length=10)
     radio = models.CharField(max_length=1, choices=(
         (1, "One"),
         (2, "Two"),
