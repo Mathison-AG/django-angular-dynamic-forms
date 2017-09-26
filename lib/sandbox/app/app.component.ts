@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {DjangoFormDialogService} from '../../django-form';
 
 @Component({
     selector: 'demo-root',
@@ -24,11 +25,22 @@ export class AppComponent {
 
     private url = 'http://localhost:8000/api/1.0/cities/1/';
 
+
+    constructor(private dialog: DjangoFormDialogService) {}
+
     private submit(value: any) {
         console.log('form submitted', value);
     }
 
     private cancel(value: any) {
         console.log('form cancelled', value);
+    }
+
+    private open() {
+        this.dialog.open(this.url, (data, response) => {
+            console.log('submit ok', data, response);
+        }, data => {
+            console.log('submit cancelled', data);
+        });
     }
 }

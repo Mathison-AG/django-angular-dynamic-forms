@@ -1,0 +1,7 @@
+<form [formGroup]="form_group" (ngSubmit)="on_submit_on_enter()" (keydown.enter)="on_submit_on_enter()">
+
+  <dynamic-material-form
+          [group]="form_group"
+          [model]="form_model"></dynamic-material-form>
+
+</form>

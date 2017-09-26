@@ -9,10 +9,10 @@
     <div>
       <md-tab-group>
         <md-tab label="One">
-          <django-form-component [django_url]="url" (submit)="submit($event)" (cancel)="cancel($event)"></django-form-component>
+          <inpage-django-form [django_url]="url" (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
         </md-tab>
         <md-tab label="Two">
-          <django-form-component [config]="config" (submit)="submit($event)" (cancel)="cancel($event)"></django-form-component>
+          <inpage-django-form [config]="config" (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
         </md-tab>
       </md-tab-group>
     </div>
@@ -20,3 +20,5 @@
   <div class="flex-item" fxFlex="30%" fxFlex.xs="20%">
   </div>
 </div>
+
+<button md-raised-button (click) = 'open()'>Open dialog</button>

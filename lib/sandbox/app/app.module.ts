@@ -7,10 +7,11 @@ import {AppComponent} from './app.component';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
 import {DynamicFormValidationService} from '@ng-dynamic-forms/core/src/service/dynamic-form-validation.service';
 import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dynamic-material-form-ui.module';
-import {MdButtonModule, MdCardModule, MdProgressSpinnerModule, MdTabsModule} from '@angular/material';
+import {MdButtonModule, MdCardModule, MdDialogModule, MdProgressSpinnerModule, MdTabsModule} from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {DjangoFormModule} from '../../django-form/django-form.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import {DjangoFormDialogService} from '../../django-form/django-form-dialog.service';
 
 
 export function xsrfFactory() {
@@ -34,6 +35,7 @@ export function xsrfFactory() {
         MdProgressSpinnerModule,
         MdButtonModule,
         MdTabsModule,
+        MdDialogModule,
         FlexLayoutModule
     ],
     providers: [
@@ -44,6 +46,7 @@ export function xsrfFactory() {
         },
         DynamicFormService,
         DynamicFormValidationService,
+        DjangoFormDialogService
     ],
     bootstrap: [AppComponent]
 })
