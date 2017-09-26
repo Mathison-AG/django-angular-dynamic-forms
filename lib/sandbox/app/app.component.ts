@@ -24,6 +24,7 @@ export class AppComponent {
     };
 
     private url = 'http://localhost:8000/api/1.0/cities/1/';
+    private test_model_create_url = 'http://localhost:8000/api/1.0/test/';
 
 
     constructor(private dialog: DjangoFormDialogService) {}

@@ -6,6 +6,7 @@ import {DynamicFormControlModel} from '@ng-dynamic-forms/core';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
 import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
 import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
+import {DynamicRadioGroupModel} from '@ng-dynamic-forms/core/src/model/radio/dynamic-radio-group.model';
 
 /**
  * Form component targeted on django rest framework
@@ -136,28 +137,42 @@ export class DjangoFormContentComponent implements OnInit {
         if (type === undefined) {
             type = 'string';
         }
-        if (type === 'string') {
-            return new DynamicInputModel({
-                id: id,
-                placeholder: label,
-                validators: [
-                    {
-                        name: external_validator.name,
-                        args: {id: id, errors: this._external_errors}
+        switch (type) {
+            case 'string':
+                return new DynamicInputModel({
+                    id: id,
+                    placeholder: label,
+                    validators: [
+                        {
+                            name: external_validator.name,
+                            args: {id: id, errors: this._external_errors}
+                        }
+                    ],
+                    errorMessages: {
+                        external_error: '{{external_error}}'
                     }
-                ],
-                errorMessages: {
-                    external_error: '{{external_error}}'
+                });
+            case 'radio':
+                const options = [];
+                for (const option of config.choices) {
+                    options.push({
+                        'label': option.display_name,
+                        'value': option.value
+                    });
                 }
-            });
-        } else if (type === 'fieldset') {
-            return new DynamicFormGroupModel({
-                id: 'generated_' + (this.last_id++),
-                legend: label,
-                group: this._generate_ui_control_array(controls)
-            });
-        } else {
-            throw new Error(`No ui control model for ${type}`);
+                return new DynamicRadioGroupModel({
+                    id: id,
+                    legend: label,
+                    options: options
+                });
+            case 'fieldset':
+                return new DynamicFormGroupModel({
+                    id: 'generated_' + (this.last_id++),
+                    legend: label,
+                    group: this._generate_ui_control_array(controls)
+                });
+            default:
+                throw new Error(`No ui control model for ${type}`);
         }
     }
 

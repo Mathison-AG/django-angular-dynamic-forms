@@ -2,25 +2,23 @@ from rest_framework import viewsets, permissions, serializers, renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-from api.models import City
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ('name',)
+from api.models import City, TestModel
 
 
 # noinspection PyUnresolvedReferences
 class AngularFormMixin(object):
-    form_layout = None
-    form_title   = None
+    form_layout   = None
+    form_title    = None
+    form_defaults = None
 
     def get_form_layout(self, fields):
         if self.form_layout:
             return self.form_layout
         # no layout, generate from fields
         layout = [{'id': field_name} for field_name in fields]
+        for field in layout:
+            if self.form_defaults and field['id'] in self.form_defaults:
+                field.update(self.form_defaults[field['id']])
         return layout
 
     def get_form_title(self, has_instance, serializer):
@@ -106,6 +104,12 @@ class AngularFormMixin(object):
         return ret
 
 
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('name',)
+
+
 class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     """
     API for cities
@@ -113,3 +117,21 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     permission_classes = (permissions.AllowAny,)
+
+
+class TestModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestModel
+        fields = ('name', 'radio')
+
+
+class TestModelViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    """
+    API for cities
+    """
+    queryset = TestModel.objects.all()
+    serializer_class = TestModelSerializer
+    permission_classes = (permissions.AllowAny,)
+    form_defaults = {
+        'radio': {'type': 'radio'}
+    }

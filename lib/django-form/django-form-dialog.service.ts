@@ -16,7 +16,7 @@ export class DjangoFormDialogService {
                 extra_options?: {config?: any, form_title?: string}) {
 
         const dialogRef = this.dialog.open(DialogDjangoFormComponent, {
-            width: '250px',
+            // width: '250px',
             data: {
                 django_url: django_url,
                 config: extra_options ? extra_options.config : null,
