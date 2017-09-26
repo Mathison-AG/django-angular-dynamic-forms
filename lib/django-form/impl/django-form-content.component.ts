@@ -11,23 +11,23 @@ import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group
  * Form component targeted on django rest framework
  */
 @Component({
-    selector: 'internal-django-form-content',
-    templateUrl: './internal-django-form-content.component.html',
-    styleUrls: ['./internal-django-form-content.component.scss'],
+    selector: 'django-form-content',
+    templateUrl: './django-form-content.component.html',
+    styleUrls: ['./django-form-content.component.scss'],
 })
-export class InternalDjangoFormContentComponent implements OnInit {
+export class DjangoFormContentComponent implements OnInit {
 
     form_model: DynamicFormControlModel[] = [];
     form_group: FormGroup;
     private last_id = 0;
 
     /**
-     * Returns submitted form data
+     * Returns submitted form data on enter
      *
      * @type {EventEmitter<any>}
      */
     @Output()
-    submit = new EventEmitter();
+    submit_on_enter = new EventEmitter();
 
     private _external_errors = {};
     private _initial_data = null;
@@ -37,11 +37,10 @@ export class InternalDjangoFormContentComponent implements OnInit {
         if (_layout) {
             this.form_model = [];
 
-            const controls = this._generate_ui_control_array(_layout);
-            this.form_model.push(...controls);
+            this.form_model = this._generate_ui_control_array(_layout);
 
             if (this.form_group) {
-                this.formService.addFormGroupControl(this.form_group, controls);
+                this.form_group = this.formService.createFormGroup(this.form_model);
                 this._update_initial_data();
             }
         }
@@ -79,16 +78,20 @@ export class InternalDjangoFormContentComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.form_group = this.formService.createFormGroup(this.form_model);
-        this._update_initial_data();
+        // create an empty form group, will be filled later
+        if (!this.form_group) {
+            this.form_group = this.formService.createFormGroup(this.form_model);
+        }
         this._trigger_validation();
     }
 
     private _trigger_validation() {
-        Object.keys(this.form_group.controls).forEach(field => {
-            const control = this.form_group.get(field);
-            control.markAsTouched({onlySelf: true});
-        });
+        if (this.form_group) {
+            Object.keys(this.form_group.controls).forEach(field => {
+                const control = this.form_group.get(field);
+                control.markAsTouched({onlySelf: true});
+            });
+        }
     }
 
     private _generate_ui_control_array(configs: any[]): DynamicFormControlModel[] {
@@ -170,11 +173,21 @@ export class InternalDjangoFormContentComponent implements OnInit {
     }
 
     public get valid() {
-        return this.form_group.valid;
+        if (this.form_group) {
+            return this.form_group.valid;
+        }
+        return true;
     }
 
     public get value() {
-        return this.form_group.value;
+        if (this.form_group) {
+            return this.form_group.value;
+        }
+        return true;
+    }
+
+    protected on_submit_on_enter() {
+        this.submit_on_enter.next(this.value);
     }
 }
 

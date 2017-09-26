@@ -1,7 +1,8 @@
 <h1 *ngIf="form_title">{{ form_title }}</h1>
 
-<internal-django-form-content [layout]="config.layout" [initial_data]="initial_data" [errors]="errors" (submit)="submit()" #form>
-</internal-django-form-content>
+<django-form-content [layout]="layout" [initial_data]="initial_data" [errors]="errors"
+                              (submit)="submitted()" #form>
+</django-form-content>
 
 <md-button-group>
   <button
@@ -9,7 +10,7 @@
           *ngFor="let button of actions"
           [name]="button.id"
           [color]="button.color"
-          (click)="onSubmit(button.id, button.cancel)"
+          (click)="submitted(button.id, button.cancel)"
           type="button"
           [disabled]="!form.valid && !button.cancel"
         >{{ button.label }}</button>
