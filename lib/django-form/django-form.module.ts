@@ -4,8 +4,8 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dy
 import {NG_VALIDATORS, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {InPageDjangoFormComponent} from './impl/inpage-django-form.component';
-import {MdButtonModule, MdDialogModule, MdProgressBarModule, MdSnackBarModule} from '@angular/material';
-import {MdButtonGroupModule} from '../material/button-group/button.group.module';
+import {MatButtonModule, MatDialogModule, MatProgressBarModule, MatSnackBarModule} from '@angular/material';
+import {MatButtonGroupModule} from '../material/button-group/button.group.module';
 import {DjangoFormContentComponent, external_validator} from './impl/django-form-content.component';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 
@@ -20,11 +20,11 @@ import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
         DynamicFormsCoreModule.forRoot(),
         DynamicFormsMaterialUIModule,
         ReactiveFormsModule,
-        MdProgressBarModule,
-        MdButtonModule,
-        MdButtonGroupModule,
-        MdSnackBarModule,
-        MdDialogModule
+        MatProgressBarModule,
+        MatButtonModule,
+        MatButtonGroupModule,
+        MatSnackBarModule,
+        MatDialogModule
     ],
     providers: [
         {provide: NG_VALIDATORS, useValue: external_validator, multi: true}

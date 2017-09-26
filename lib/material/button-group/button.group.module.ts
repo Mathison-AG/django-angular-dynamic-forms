@@ -1,11 +1,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MdButtonModule} from '@angular/material';
-import {MdButtonGroupComponent} from './button-group.component';
+import {MatButtonGroupComponent} from './button-group.component';
 
 @NgModule({
   declarations: [
-    MdButtonGroupComponent,
+    MatButtonGroupComponent,
   ],
   imports: [
     CommonModule,
@@ -14,8 +14,8 @@ import {MdButtonGroupComponent} from './button-group.component';
   providers: [
   ],
   exports: [
-    MdButtonGroupComponent
+    MatButtonGroupComponent
   ],
 })
-export class MdButtonGroupModule {
+export class MatButtonGroupModule {
 }

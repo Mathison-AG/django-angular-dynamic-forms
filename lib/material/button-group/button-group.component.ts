@@ -11,11 +11,11 @@ import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group
  * Form component targeted on django rest framework
  */
 @Component({
-    selector: 'md-button-group',
+    selector: 'mat-button-group',
     templateUrl: './button-group.component.html',
     styleUrls: ['./button-group.component.scss'],
 })
-export class MdButtonGroupComponent implements OnInit {
+export class MatButtonGroupComponent implements OnInit {
     ngOnInit(): void {
     }
 }

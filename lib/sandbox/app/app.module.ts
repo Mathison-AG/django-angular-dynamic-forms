@@ -7,14 +7,19 @@ import {AppComponent} from './app.component';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
 import {DynamicFormValidationService} from '@ng-dynamic-forms/core/src/service/dynamic-form-validation.service';
 import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material/src/dynamic-material-form-ui.module';
-import {
-    MdButtonModule, MdCardModule, MdDialogModule, MdProgressSpinnerModule, MdRadioModule, MdSelectModule,
-    MdTabsModule
-} from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {DjangoFormModule} from '../../django-form/django-form.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {DjangoFormDialogService} from '../../django-form/django-form-dialog.service';
+import {
+    MatButtonModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatTabsModule,
+    MdCardModule,
+} from '@angular/material';
 
 
 export function xsrfFactory() {
@@ -35,13 +40,13 @@ export function xsrfFactory() {
         DynamicFormsMaterialUIModule,
         MdCardModule,
         DjangoFormModule,
-        MdProgressSpinnerModule,
-        MdButtonModule,
-        MdTabsModule,
-        MdDialogModule,
+        MatProgressSpinnerModule,
+        MatButtonModule,
+        MatTabsModule,
+        MatDialogModule,
         FlexLayoutModule,
-        MdSelectModule,
-        MdRadioModule
+        MatSelectModule,
+        MatRadioModule
     ],
     providers: [
         {

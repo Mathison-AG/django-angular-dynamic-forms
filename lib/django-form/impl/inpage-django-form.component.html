@@ -4,7 +4,7 @@
                               (submit)="submitted()" #form>
 </django-form-content>
 
-<md-button-group>
+<mat-button-group>
   <button
           md-raised-button
           *ngFor="let button of actions"
@@ -14,4 +14,4 @@
           type="button"
           [disabled]="!form.valid && !button.cancel"
         >{{ button.label }}</button>
-</md-button-group>
+</mat-button-group>
