@@ -25,9 +25,9 @@ export class DjangoFormDialogService {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            if (result.cancel) {
+            if (result.cancel && cancel) {
                 cancel(result.data);
-            } else {
+            } else if (submit) {
                 submit(result.data, result.response);
             }
         });
