@@ -177,6 +177,10 @@ export class DjangoFormContentComponent implements OnInit {
                     id: id,
                     placeholder: label,
                     options: options
+                }, {
+                    grid: {
+                        container: 'blah'
+                    }
                 });
             case 'fieldset':
                 return new DynamicFormGroupModel({
