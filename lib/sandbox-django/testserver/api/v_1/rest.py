@@ -1,14 +1,18 @@
+from functools import lru_cache
+
+from django.utils.functional import cached_property
 from rest_framework import viewsets, permissions, serializers, renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from api.models import City, TestModel
 
 
 # noinspection PyUnresolvedReferences
 class AngularFormMixin(object):
-    form_layout   = None
-    form_title    = None
+    form_layout = None
+    form_title = None
     form_defaults = None
 
     def get_form_layout(self, fields):
@@ -59,7 +63,6 @@ class AngularFormMixin(object):
                 },
             ]
 
-
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form(self, request, *args, **kwargs):
         return self.get_form_metadata(has_instance=True)
@@ -96,12 +99,99 @@ class AngularFormMixin(object):
             if isinstance(it, dict) and it['id'] in fields_info:
                 md = dict(fields_info[it['id']])
                 md.update(it)
-                ret.append(md)
             elif isinstance(it, str) and it in fields_info:
-                ret.append(fields_info[it])
+                md = fields_info[it]
             else:
                 raise NotImplementedError('Fieldsets and other constructs not yet implemented')
+            self.decorate_layout_item(md)
+            ret.append(md)
         return ret
+
+    def decorate_layout_item(self, item):
+        pass
+
+
+class AutoCompleteMixin(object):
+    namespace = None
+    max_returned_items = 10
+
+    class __AutoCompleteRec:
+        def __init__(self, search_method, serializer_class, formatter):
+            self.search_method = search_method
+            self.serializer_class = serializer_class
+            self.formatter = formatter
+
+    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
+                  methods=['get', 'post'])
+    def autocomplete(self, request, *args, **kwargs):
+        return self._autocomplete(request, has_instance=True, **kwargs)
+
+    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
+                methods=['get', 'post'])
+    def autocomplete_list(self, request, *args, **kwargs):
+        return self._autocomplete(request, has_instance=False, **kwargs)
+
+    @cached_property
+    def _autocomplete_defs(self):
+        ret = {}
+        for method_name in dir(self):
+            # prevent recursion ...
+            if method_name == '_autocomplete_defs':
+                continue
+            try:
+                method = getattr(self, method_name)
+            except AttributeError:
+                continue
+            if not callable(method):
+                continue
+            if not hasattr(method, '_autocomplete_field'):
+                continue
+            # noinspection PyUnresolvedReferences,PyProtectedMember
+            ret[method._autocomplete_field] = \
+                AutoCompleteMixin.__AutoCompleteRec(method, method._autocomplete_serializer_class,
+                                                    method._autocomplete_formatter)
+        return ret
+
+    def decorate_layout_item(self, item):
+        name = item['id']
+        if name in self._autocomplete_defs:
+            item['autocomplete_url'] = self.request.build_absolute_uri(
+                reverse('%s:testmodel-autocomplete/(?P<autocomplete-id>.*)' % self.namespace,
+                        kwargs={
+                            'autocomplete_id': name
+                        }))
+            item['autocomplete_formatter'] = self._autocomplete_defs[name].formatter
+
+    def _autocomplete(self, request, has_instance, **kwargs):
+        name = kwargs['autocomplete_id']
+        qs = self._autocomplete_defs[name].search_method
+        query = request.GET['query']
+        print("query: ", query)
+        qs = qs(query)[:self.max_returned_items]
+        # serialize the response
+        clz = self._serializer_with_id(self._autocomplete_defs[name].serializer_class)
+        serializer = clz(qs, many=True)
+        return Response(serializer.data)
+
+    @lru_cache(maxsize=None)
+    def _serializer_with_id(self, serializer):
+        meta = type('Meta', (serializer.Meta,), {
+            'fields': serializer.Meta.fields + ('id',)
+        })
+        clz = type('_clz', (serializer,), {
+            'Meta': meta
+        })
+        return clz
+
+
+def autocomplete(field, serializer_class, formatter):
+    def wrapper(real_func):
+        real_func._autocomplete_field = field
+        real_func._autocomplete_serializer_class = serializer_class
+        real_func._autocomplete_formatter = formatter
+        return real_func
+
+    return wrapper
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -122,16 +212,23 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
 class TestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestModel
-        fields = ('name', 'radio')
+        fields = ('name', 'radio', 'number', 'checkbox')
 
 
-class TestModelViewSet(AngularFormMixin, viewsets.ModelViewSet):
+class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     """
     API for cities
     """
     queryset = TestModel.objects.all()
     serializer_class = TestModelSerializer
     permission_classes = (permissions.AllowAny,)
+
+    # namespace in urls of this viewset
+    namespace = 'api_v_1'
+
+    @autocomplete(field='name', serializer_class=CitySerializer, formatter='{{name}} [{{id}}]')
+    def name_autocomplete(self, search):
+        return City.objects.filter(name__istartswith=search).order_by('name')
 
 
 class TestModel2ViewSet(AngularFormMixin, viewsets.ModelViewSet):
@@ -142,5 +239,8 @@ class TestModel2ViewSet(AngularFormMixin, viewsets.ModelViewSet):
     serializer_class = TestModelSerializer
     permission_classes = (permissions.AllowAny,)
     form_defaults = {
-        'radio': {'type': 'radio'}
+        'radio': {'type': 'radio'},
+        'name': {
+            'autocomplete_list': [chr(x) for x in range(40, 256)]
+        }
     }

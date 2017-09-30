@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -21,3 +22,8 @@ class TestModel(models.Model):
         (2, "Two"),
         (3, "Three")
     ))
+    number = models.IntegerField(validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)
+        ])
+    checkbox = models.BooleanField()

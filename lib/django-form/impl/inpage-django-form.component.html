@@ -4,7 +4,7 @@
                               (submit)="submitted()" #form>
 </django-form-content>
 
-<mat-button-group>
+<mat-button-group *ngIf="actions">
   <button
           md-raised-button
           *ngFor="let button of actions"

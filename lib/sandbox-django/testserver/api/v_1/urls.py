@@ -10,5 +10,5 @@ router.register(r'test', TestModelViewSet)
 router.register(r'test2', TestModel2ViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+    url(r'^', include(router.urls, namespace='api_v_1')),
 ]

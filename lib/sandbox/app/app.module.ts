@@ -22,6 +22,7 @@ import {
 } from '@angular/material';
 
 
+
 export function xsrfFactory() {
     return new CookieXSRFStrategy('csrftoken', 'X-CSRFToken');
 }
@@ -46,7 +47,7 @@ export function xsrfFactory() {
         MatDialogModule,
         FlexLayoutModule,
         MatSelectModule,
-        MatRadioModule
+        MatRadioModule,
     ],
     providers: [
         {
@@ -56,7 +57,7 @@ export function xsrfFactory() {
         },
         DynamicFormService,
         DynamicFormValidationService,
-        DjangoFormDialogService
+        DjangoFormDialogService,
     ],
     bootstrap: [AppComponent]
 })

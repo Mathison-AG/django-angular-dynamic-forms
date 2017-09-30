@@ -4,10 +4,16 @@ import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
 import {DynamicFormControlModel} from '@ng-dynamic-forms/core';
 import {DynamicFormService} from '@ng-dynamic-forms/core/src/service/dynamic-form.service';
-import {DynamicInputModel} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
+import {
+    DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
+    DynamicInputModel
+} from '@ng-dynamic-forms/core/src/model/input/dynamic-input.model';
 import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group/dynamic-form-group.model';
 import {DynamicRadioGroupModel} from '@ng-dynamic-forms/core/src/model/radio/dynamic-radio-group.model';
 import {DynamicSelectModel} from '@ng-dynamic-forms/core/src/model/select/dynamic-select.model';
+import {DynamicCheckboxModel} from '@ng-dynamic-forms/core/src/model/checkbox/dynamic-checkbox.model';
+import {InterpolationService} from './interpolation.service';
+import {Http} from '@angular/http';
 
 /**
  * Form component targeted on django rest framework
@@ -20,6 +26,7 @@ import {DynamicSelectModel} from '@ng-dynamic-forms/core/src/model/select/dynami
 export class DjangoFormContentComponent implements OnInit {
 
     form_model: DynamicFormControlModel[] = [];
+    private autocompleters: AutoCompleter[] = [];
     form_group: FormGroup;
     private last_id = 0;
 
@@ -38,11 +45,12 @@ export class DjangoFormContentComponent implements OnInit {
     set layout(_layout: any) {
         if (_layout) {
             this.form_model = [];
-
+            this.autocompleters = [];
             this.form_model = this._generate_ui_control_array(_layout);
 
             if (this.form_group) {
                 this.form_group = this.formService.createFormGroup(this.form_model);
+                this._bind_autocomplete();
                 this._update_initial_data();
             }
         }
@@ -76,15 +84,27 @@ export class DjangoFormContentComponent implements OnInit {
         this._update_initial_data();
     }
 
-    constructor(private formService: DynamicFormService) {
+    constructor(private formService: DynamicFormService, private interp: InterpolationService,
+                private http: Http) {
     }
 
     ngOnInit() {
         // create an empty form group, will be filled later
         if (!this.form_group) {
             this.form_group = this.formService.createFormGroup(this.form_model);
+            this._bind_autocomplete();
         }
         this._trigger_validation();
+    }
+
+    private _bind_autocomplete() {
+        for (const autocompleter of this.autocompleters) {
+            console.log('autocomplete model', autocompleter.model);
+            const widget = this.form_group.get(this.formService.getPath(autocompleter.model));
+            widget.valueChanges.subscribe(value => {
+                autocompleter.change(widget, value, this.value);
+            });
+        }
     }
 
     private _trigger_validation() {
@@ -109,6 +129,15 @@ export class DjangoFormContentComponent implements OnInit {
         let type: string;
         let label: string;
         let controls: any[];
+        let required = false;
+        let disabled = false;
+        let min_value = undefined;
+        let max_value = undefined;
+        let max_length = undefined;
+        let min_length = undefined;
+        let autocomplete_list = undefined;
+        let autocomplete_url = undefined;
+        let autocomplete_formatter = undefined;
 
         const config_is_array = Array.isArray(config);
 
@@ -131,6 +160,15 @@ export class DjangoFormContentComponent implements OnInit {
             label = config.label;
             type = config.type;
             controls = config.controls;
+            required = config.required;
+            disabled = config.read_only;
+            min_value = config.min_value;
+            max_value = config.max_value;
+            max_length = config.max_length;
+            min_length = config.min_length;
+            autocomplete_list = config.autocomplete_list;
+            autocomplete_url = config.autocomplete_url;
+            autocomplete_formatter = config.autocomplete_formatter;
         }
         if (label === undefined) {
             label = '';
@@ -141,15 +179,66 @@ export class DjangoFormContentComponent implements OnInit {
         const options = [];
         switch (type) {
             case 'string':
+                const model = new DynamicInputModel({
+                    id: id,
+                    placeholder: label,
+                    required: required,
+                    disabled: disabled,
+                    validators: {
+                        external_validator: {
+                            name: external_validator.name,
+                            args: {id: id, errors: this._external_errors}
+                        },
+                        maxLength: max_length,
+                        minLength: min_length,
+                    },
+                    errorMessages: {
+                        external_error: '{{external_error}}'
+                    },
+                    list: autocomplete_list
+                });
+                if (autocomplete_list || autocomplete_url) {
+                    this.autocompleters.push(
+                        new AutoCompleter(this.interp, this.http,
+                                          autocomplete_list, autocomplete_url,
+                                          autocomplete_formatter, model));
+                }
+                return model;
+            case 'integer':
                 return new DynamicInputModel({
                     id: id,
                     placeholder: label,
-                    validators: [
-                        {
+                    inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
+                    required: required,
+                    disabled: disabled,
+                    min: min_value,
+                    max: max_value,
+                    validators: {
+                        external_validator: {
                             name: external_validator.name,
                             args: {id: id, errors: this._external_errors}
-                        }
-                    ],
+                        },
+                        min: min_value,
+                        max: max_value,
+                    },
+                    errorMessages: {
+                        external_error: '{{external_error}}',
+                        min: `Value must be in range ${min_value} - ${max_value}`,
+                        max: `Value must be in range ${min_value} - ${max_value}`
+                    }
+                });
+            case 'boolean':
+                return new DynamicCheckboxModel({
+                    id: id,
+                    label: label,
+                    required: required,
+                    disabled: disabled,
+                    validators: {
+                        external_validator: {
+                            name: external_validator.name,
+                            args: {id: id, errors: this._external_errors}
+                        },
+                    },
                     errorMessages: {
                         external_error: '{{external_error}}'
                     }
@@ -164,7 +253,18 @@ export class DjangoFormContentComponent implements OnInit {
                 return new DynamicRadioGroupModel({
                     id: id,
                     label: label,
-                    options: options
+                    options: options,
+                    required: required,
+                    disabled: disabled,
+                    validators: {
+                        external_validator: {
+                            name: external_validator.name,
+                            args: {id: id, errors: this._external_errors}
+                        },
+                    },
+                    errorMessages: {
+                        external_error: '{{external_error}}'
+                    }
                 });
             case 'choice':
                 for (const option of config.choices) {
@@ -176,7 +276,18 @@ export class DjangoFormContentComponent implements OnInit {
                 return new DynamicSelectModel({
                     id: id,
                     placeholder: label,
-                    options: options
+                    options: options,
+                    required: required,
+                    disabled: disabled,
+                    validators: {
+                        external_validator: {
+                            name: external_validator.name,
+                            args: {id: id, errors: this._external_errors}
+                        },
+                    },
+                    errorMessages: {
+                        external_error: '{{external_error}}'
+                    }
                 }, {
                     grid: {
                         container: 'blah'
@@ -185,7 +296,7 @@ export class DjangoFormContentComponent implements OnInit {
             case 'fieldset':
                 return new DynamicFormGroupModel({
                     id: 'generated_' + (this.last_id++),
-                    legend: label,
+                    label: label,
                     group: this._generate_ui_control_array(controls)
                 });
             default:
@@ -225,7 +336,6 @@ export class DjangoFormContentComponent implements OnInit {
 
 export function external_validator(conf: { id: string, errors: any }): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-        console.log(control);
         if (conf.id in conf.errors) {
             const ret = {'external_error': {value: conf.errors[conf.id][0]}};
             delete conf.errors[conf.id];
@@ -234,4 +344,33 @@ export function external_validator(conf: { id: string, errors: any }): Validator
             return null;
         }
     };
+}
+
+class AutoCompleter {
+    constructor(private interp: InterpolationService,
+                private http: Http,
+                private autocompletion_list: any[],
+                private autocompletion_url: string,
+                private autocompletion_formatter: string,
+                public model) {
+    }
+
+    public change(widget, value, form_value) {
+        console.log(widget, value);
+        let filtered_list;
+        if (this.autocompletion_url) {
+            this.http.post(this.autocompletion_url + '?query=' + encodeURIComponent(value), form_value).map(resp => resp.json()).subscribe(
+                resp => {
+                    filtered_list = resp.map(x => this.interp.interpolate(this.autocompletion_formatter, x));
+                    this.model.list = filtered_list;
+                }
+            );
+        } else {
+            filtered_list = this.autocompletion_list.filter(x => x.indexOf(value) >= 0);
+            if (this.autocompletion_formatter) {
+                filtered_list = filtered_list.map(x => this.interp.interpolate(this.autocompletion_formatter, x));
+            }
+            this.model.list = filtered_list;
+        }
+    }
 }
