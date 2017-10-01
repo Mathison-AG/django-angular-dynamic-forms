@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from django.template import Template, Context
 from django.utils.functional import cached_property
 from rest_framework import viewsets, permissions, serializers, renderers
 from rest_framework.decorators import detail_route, list_route
@@ -115,11 +116,17 @@ class AutoCompleteMixin(object):
     namespace = None
     max_returned_items = 10
 
+    class __DummyFormatter:
+        def render(self, context):
+            return str(context['item'])
+
     class __AutoCompleteRec:
-        def __init__(self, search_method, serializer_class, formatter):
+        def __init__(self, search_method, formatter):
             self.search_method = search_method
-            self.serializer_class = serializer_class
-            self.formatter = formatter
+            if formatter:
+                self.formatter = Template(formatter)
+            else:
+                self.formatter = AutoCompleteMixin.__DummyFormatter()
 
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
                   methods=['get', 'post'])
@@ -148,8 +155,7 @@ class AutoCompleteMixin(object):
                 continue
             # noinspection PyUnresolvedReferences,PyProtectedMember
             ret[method._autocomplete_field] = \
-                AutoCompleteMixin.__AutoCompleteRec(method, method._autocomplete_serializer_class,
-                                                    method._autocomplete_formatter)
+                AutoCompleteMixin.__AutoCompleteRec(method, method._autocomplete_formatter)
         return ret
 
     def decorate_layout_item(self, item):
@@ -160,18 +166,18 @@ class AutoCompleteMixin(object):
                         kwargs={
                             'autocomplete_id': name
                         }))
-            item['autocomplete_formatter'] = self._autocomplete_defs[name].formatter
 
     def _autocomplete(self, request, has_instance, **kwargs):
         name = kwargs['autocomplete_id']
         qs = self._autocomplete_defs[name].search_method
         query = request.GET['query']
-        print("query: ", query)
         qs = qs(query)[:self.max_returned_items]
-        # serialize the response
-        clz = self._serializer_with_id(self._autocomplete_defs[name].serializer_class)
-        serializer = clz(qs, many=True)
-        return Response(serializer.data)
+        formatter = self._autocomplete_defs[name].formatter
+        qs = [{
+            'id'    : item.id,
+            'label' : formatter.render(context=Context({'item': item}))
+        } for item in qs]
+        return Response(qs)
 
     @lru_cache(maxsize=None)
     def _serializer_with_id(self, serializer):
@@ -184,10 +190,9 @@ class AutoCompleteMixin(object):
         return clz
 
 
-def autocomplete(field, serializer_class, formatter):
+def autocomplete(field, formatter):
     def wrapper(real_func):
         real_func._autocomplete_field = field
-        real_func._autocomplete_serializer_class = serializer_class
         real_func._autocomplete_formatter = formatter
         return real_func
 
@@ -226,7 +231,7 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
     # namespace in urls of this viewset
     namespace = 'api_v_1'
 
-    @autocomplete(field='name', serializer_class=CitySerializer, formatter='{{name}} [{{id}}]')
+    @autocomplete(field='name', formatter='{{item.name}} [{{item.id}}]')
     def name_autocomplete(self, search):
         return City.objects.filter(name__istartswith=search).order_by('name')
 

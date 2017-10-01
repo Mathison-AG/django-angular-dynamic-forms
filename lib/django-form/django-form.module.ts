@@ -8,7 +8,6 @@ import {MatButtonModule, MatDialogModule, MatProgressBarModule, MatSnackBarModul
 import {MatButtonGroupModule} from '../material/button-group/button.group.module';
 import {DjangoFormContentComponent, external_validator} from './impl/django-form-content.component';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
-import {InterpolationService} from './impl/interpolation.service';
 
 @NgModule({
     declarations: [
@@ -29,7 +28,6 @@ import {InterpolationService} from './impl/interpolation.service';
     ],
     providers: [
         {provide: NG_VALIDATORS, useValue: external_validator, multi: true},
-        InterpolationService,
     ],
     exports: [
         InPageDjangoFormComponent,

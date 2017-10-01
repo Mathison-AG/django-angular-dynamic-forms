@@ -12,7 +12,6 @@ import {DynamicFormGroupModel} from '@ng-dynamic-forms/core/src/model/form-group
 import {DynamicRadioGroupModel} from '@ng-dynamic-forms/core/src/model/radio/dynamic-radio-group.model';
 import {DynamicSelectModel} from '@ng-dynamic-forms/core/src/model/select/dynamic-select.model';
 import {DynamicCheckboxModel} from '@ng-dynamic-forms/core/src/model/checkbox/dynamic-checkbox.model';
-import {InterpolationService} from './interpolation.service';
 import {Http} from '@angular/http';
 
 /**
@@ -84,8 +83,7 @@ export class DjangoFormContentComponent implements OnInit {
         this._update_initial_data();
     }
 
-    constructor(private formService: DynamicFormService, private interp: InterpolationService,
-                private http: Http) {
+    constructor(private formService: DynamicFormService, private http: Http) {
     }
 
     ngOnInit() {
@@ -137,7 +135,6 @@ export class DjangoFormContentComponent implements OnInit {
         let min_length = undefined;
         let autocomplete_list = undefined;
         let autocomplete_url = undefined;
-        let autocomplete_formatter = undefined;
 
         const config_is_array = Array.isArray(config);
 
@@ -168,7 +165,6 @@ export class DjangoFormContentComponent implements OnInit {
             min_length = config.min_length;
             autocomplete_list = config.autocomplete_list;
             autocomplete_url = config.autocomplete_url;
-            autocomplete_formatter = config.autocomplete_formatter;
         }
         if (label === undefined) {
             label = '';
@@ -199,9 +195,7 @@ export class DjangoFormContentComponent implements OnInit {
                 });
                 if (autocomplete_list || autocomplete_url) {
                     this.autocompleters.push(
-                        new AutoCompleter(this.interp, this.http,
-                                          autocomplete_list, autocomplete_url,
-                                          autocomplete_formatter, model));
+                        new AutoCompleter(this.http, autocomplete_list, autocomplete_url, model));
                 }
                 return model;
             case 'integer':
@@ -347,11 +341,9 @@ export function external_validator(conf: { id: string, errors: any }): Validator
 }
 
 class AutoCompleter {
-    constructor(private interp: InterpolationService,
-                private http: Http,
+    constructor(private http: Http,
                 private autocompletion_list: any[],
                 private autocompletion_url: string,
-                private autocompletion_formatter: string,
                 public model) {
     }
 
@@ -361,15 +353,12 @@ class AutoCompleter {
         if (this.autocompletion_url) {
             this.http.post(this.autocompletion_url + '?query=' + encodeURIComponent(value), form_value).map(resp => resp.json()).subscribe(
                 resp => {
-                    filtered_list = resp.map(x => this.interp.interpolate(this.autocompletion_formatter, x));
+                    filtered_list = resp.map(x => x.label);
                     this.model.list = filtered_list;
                 }
             );
         } else {
             filtered_list = this.autocompletion_list.filter(x => x.indexOf(value) >= 0);
-            if (this.autocompletion_formatter) {
-                filtered_list = filtered_list.map(x => this.interp.interpolate(this.autocompletion_formatter, x));
-            }
             this.model.list = filtered_list;
         }
     }
