@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, serializers
 
 from api.models import City, TestModel
-from django_angular_dynamic_form.rest import AngularFormMixin, AutoCompleteMixin, autocomplete
+from angular_dynamic_form import AngularFormMixin, AutoCompleteMixin, autocomplete
 
 
 class CitySerializer(serializers.ModelSerializer):
