@@ -135,6 +135,7 @@ export class DjangoFormContentComponent implements OnInit {
         let min_length = undefined;
         let autocomplete_list = undefined;
         let autocomplete_url = undefined;
+        let cls = undefined;
 
         const config_is_array = Array.isArray(config);
 
@@ -165,6 +166,7 @@ export class DjangoFormContentComponent implements OnInit {
             min_length = config.min_length;
             autocomplete_list = config.autocomplete_list;
             autocomplete_url = config.autocomplete_url;
+            cls = config.cls;
         }
         if (label === undefined) {
             label = '';
@@ -192,7 +194,7 @@ export class DjangoFormContentComponent implements OnInit {
                         external_error: '{{external_error}}'
                     },
                     list: autocomplete_list
-                });
+                }, cls);
                 if (autocomplete_list || autocomplete_url) {
                     this.autocompleters.push(
                         new AutoCompleter(this.http, autocomplete_list, autocomplete_url, model));
@@ -220,7 +222,7 @@ export class DjangoFormContentComponent implements OnInit {
                         min: `Value must be in range ${min_value} - ${max_value}`,
                         max: `Value must be in range ${min_value} - ${max_value}`
                     }
-                });
+                }, cls);
             case 'boolean':
                 return new DynamicCheckboxModel({
                     id: id,
@@ -236,7 +238,7 @@ export class DjangoFormContentComponent implements OnInit {
                     errorMessages: {
                         external_error: '{{external_error}}'
                     }
-                });
+                }, cls);
             case 'radio':
                 for (const option of config.choices) {
                     options.push({
@@ -259,7 +261,7 @@ export class DjangoFormContentComponent implements OnInit {
                     errorMessages: {
                         external_error: '{{external_error}}'
                     }
-                });
+                }, cls);
             case 'choice':
                 for (const option of config.choices) {
                     options.push({
@@ -282,17 +284,13 @@ export class DjangoFormContentComponent implements OnInit {
                     errorMessages: {
                         external_error: '{{external_error}}'
                     }
-                }, {
-                    grid: {
-                        container: 'blah'
-                    }
-                });
+                }, cls);
             case 'fieldset':
                 return new DynamicFormGroupModel({
                     id: 'generated_' + (this.last_id++),
                     label: label,
                     group: this._generate_ui_control_array(controls)
-                });
+                }, cls);
             default:
                 throw new Error(`No ui control model for ${type}`);
         }
@@ -329,6 +327,7 @@ export class DjangoFormContentComponent implements OnInit {
 }
 
 export function external_validator(conf: { id: string, errors: any }): ValidatorFn {
+    // noinspection JSUnusedLocalSymbols
     return (control: AbstractControl): { [key: string]: any } => {
         if (conf.id in conf.errors) {
             const ret = {'external_error': {value: conf.errors[conf.id][0]}};

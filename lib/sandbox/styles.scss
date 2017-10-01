@@ -50,3 +50,9 @@ dynamic-material-form-control .md-list-item {
     justify-content: center;
 }
 
+dynamic-material-form-control > div.fieldset > label {
+    font-size: 120%;
+    margin-top: 1em;
+    text-transform: uppercase;
+    color: #3f51b5;
+}
