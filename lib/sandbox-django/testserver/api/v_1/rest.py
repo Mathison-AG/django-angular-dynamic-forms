@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 
 from django.template import Template, Context
@@ -5,7 +6,6 @@ from django.utils.functional import cached_property
 from rest_framework import viewsets, permissions, serializers, renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
 from api.models import City, TestModel
 
@@ -18,13 +18,39 @@ class AngularFormMixin(object):
 
     def get_form_layout(self, fields):
         if self.form_layout:
-            return self.form_layout
+            return self._transform_layout(self.form_layout)
         # no layout, generate from fields
         layout = [{'id': field_name} for field_name in fields]
         for field in layout:
             if self.form_defaults and field['id'] in self.form_defaults:
                 field.update(self.form_defaults[field['id']])
         return layout
+
+    def _transform_layout(self, layout):
+        if isinstance(layout, dict):
+            if layout.get('type', 'string') != 'fieldset':
+                return layout
+            layout['controls'] = self._transform_layout(layout['controls'])
+            return layout
+        if isinstance(layout, list) or isinstance(layout, tuple):
+            if (len(layout) == 2 and
+                isinstance(layout[0], str) and
+                (isinstance(layout[1], list) or isinstance(layout[1], tuple))):
+                # it is a fieldset ...
+                return {
+                    'type'     : 'fieldset',
+                    'label'    : layout[0],
+                    'controls' : self._transform_layout(layout[1])
+                }
+            # otherwise it is a plain list of controls
+            return [
+                self._transform_layout(l) for l in layout
+            ]
+        if isinstance(layout, str):
+            return {
+                'id': layout
+            }
+        raise NotImplementedError('Layout "%s" not implemented' % layout)
 
     def get_form_title(self, has_instance, serializer):
         if self.form_title:
@@ -94,26 +120,28 @@ class AngularFormMixin(object):
         return Response(ret)
 
     def decorate_layout(self, layout, fields_info):
-        # layout is a list
-        ret = []
-        for it in layout:
-            if isinstance(it, dict) and it['id'] in fields_info:
-                md = dict(fields_info[it['id']])
-                md.update(it)
-            elif isinstance(it, str) and it in fields_info:
-                md = fields_info[it]
+        if isinstance(layout, list):
+            ret = []
+            for it in layout:
+                ret.append(self.decorate_layout(it, fields_info))
+            return ret
+        elif isinstance(layout, dict):
+            if layout.get('type', None) == 'fieldset':
+                layout = dict(layout)
+                layout['controls'] = self.decorate_layout(layout['controls'], fields_info)
+                self.decorate_layout_item(layout)
+                return layout
             else:
-                raise NotImplementedError('Fieldsets and other constructs not yet implemented')
-            self.decorate_layout_item(md)
-            ret.append(md)
-        return ret
+                md = dict(fields_info[layout['id']])
+                md.update(layout)
+                self.decorate_layout_item(md)
+                return md
 
     def decorate_layout_item(self, item):
         pass
 
 
 class AutoCompleteMixin(object):
-    namespace = None
     max_returned_items = 10
 
     class __DummyFormatter:
@@ -159,13 +187,13 @@ class AutoCompleteMixin(object):
         return ret
 
     def decorate_layout_item(self, item):
-        name = item['id']
+        name = item.get('id', None)
         if name in self._autocomplete_defs:
-            item['autocomplete_url'] = self.request.build_absolute_uri(
-                reverse('%s:testmodel-autocomplete/(?P<autocomplete-id>.*)' % self.namespace,
-                        kwargs={
-                            'autocomplete_id': name
-                        }))
+            path = self.request.path
+            # must be called from /form/ ...
+            path = re.sub(r'/form/?$', '', path)
+            path = '%s/autocomplete/%s/' % (path, name)
+            item['autocomplete_url'] = self.request.build_absolute_uri(path)
 
     def _autocomplete(self, request, has_instance, **kwargs):
         name = kwargs['autocomplete_id']
@@ -228,7 +256,22 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
     serializer_class = TestModelSerializer
     permission_classes = (permissions.AllowAny,)
 
-    # namespace in urls of this viewset
+    form_layout = [
+        [
+            'general',
+            ['name'],
+        ],
+        'number',
+        [
+            'checkboxes and radio buttons',
+            [
+                'radio',
+                'checkbox'
+            ]
+        ]
+    ]
+
+    # namespace in urls of this viewset - used for autocomplete
     namespace = 'api_v_1'
 
     @autocomplete(field='name', formatter='{{item.name}} [{{item.id}}]')
