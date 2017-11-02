@@ -26,6 +26,10 @@ class AngularFormMixin(object):
 
     def _transform_layout(self, layout):
         if isinstance(layout, dict):
+            layout = layout.copy()
+            for (k, v) in list(layout.items()):
+                if callable(v):
+                    layout[k] = v(self)
             if layout.get('type', 'string') != 'fieldset':
                 return layout
             layout['controls'] = self._transform_layout(layout['controls'])
