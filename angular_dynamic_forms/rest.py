@@ -16,12 +16,20 @@ class AngularFormMixin(object):
 
     def get_form_layout(self, fields):
         if self.form_layout:
+            if callable(self.form_layout):
+                return self._transform_layout(self.form_layout(fields))
             return self._transform_layout(self.form_layout)
+
         # no layout, generate from fields
         layout = [{'id': field_name} for field_name in fields]
+
+        form_defaults = self.form_defaults
+        if callable(form_defaults):
+            form_defaults = form_defaults(fields)
+
         for field in layout:
-            if self.form_defaults and field['id'] in self.form_defaults:
-                field.update(self.form_defaults[field['id']])
+            if form_defaults and field['id'] in form_defaults:
+                field.update(form_defaults[field['id']])
         return layout
 
     def _transform_layout(self, layout):
