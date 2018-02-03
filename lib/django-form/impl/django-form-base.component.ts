@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {Http} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {ErrorService} from '@webui/errors/errors.service';
 
 /**
  * Form component targeted on django rest framework
@@ -17,29 +18,30 @@ export class DjangoFormBaseComponent implements OnInit {
     actions: any;
     initial_data: any;
 
-    @Input()
-    form_title: string;
+    @Input() form_title: string;
 
     /**
      * Returns submitted form data
      *
      * @type {EventEmitter<any>}
      */
-    @Output()
-    submit = new EventEmitter<{data: any, response?: any}>();
+    @Output() submit = new EventEmitter<{ data: any; response?: any }>();
 
     /**
      * Returns cancelled form data
      *
      * @type {EventEmitter<any>}
      */
-    @Output()
-    cancel = new EventEmitter<{data: any}>();
+    @Output() cancel = new EventEmitter<{ data: any }>();
 
     @ViewChild('form') form;
 
     private _config: any;
     private _django_url: string;
+    extra_form_data: any;
+    initial_data_transformation: (any) => any;
+    restrict_to_fields: string[];
+    private initialized = false;
 
     @Input()
     set django_url(_url: string) {
@@ -49,13 +51,14 @@ export class DjangoFormBaseComponent implements OnInit {
     @Input()
     set config(_config: any) {
         this._config = _config;
-        if (_config) {
-            this.form_title = _config.form_title;
+        if (_config && this.initialized) {
+            if (!this.form_title) {
+                this.form_title = _config.form_title;
+            }
             this.actions = DjangoFormBaseComponent._generate_actions(_config.actions);
             this.layout = _config.layout;
         }
     }
-
 
     static _generate_actions(actions) {
         const ret = [];
@@ -83,22 +86,30 @@ export class DjangoFormBaseComponent implements OnInit {
                     }
                 }
                 ret.push({
-                    'id': action_id,
-                    'label': action_label,
-                    'color': action_color,
-                    'cancel': action.cancel
+                    id: action_id,
+                    label: action_label,
+                    color: action_color,
+                    cancel: action.cancel
                 });
             }
         }
         return ret;
     }
 
-    constructor(private http: Http,
-                private snackBar: MatSnackBar) {
+    constructor(private httpClient: HttpClient, private snackBar: MatSnackBar, private error_service: ErrorService) {
     }
 
     ngOnInit(): void {
-        if (this._django_url) {
+        this.initialized = true;
+        if (this._config && this._config.layout) {
+            setTimeout(() => {
+                // reinitialize again ...
+                this.config = this._config;
+                if (this._config.has_initial_data) {
+                    this._load_initial_data();
+                }
+            }, 10);
+        } else if (this._django_url) {
             this._download_django_form().subscribe(config => {
                 this.config = config;
                 if (config.has_initial_data) {
@@ -110,20 +121,18 @@ export class DjangoFormBaseComponent implements OnInit {
 
     private _load_initial_data() {
         this.loading = true;
-        this.http.get(this._django_url)
-            .map(response => response.json())
-            .catch((error) => {
-                // TODO: handle error
-                setTimeout(() => {
-                    this.snackBar.open(error, 'Dismiss', {
-                        duration: 2000,
-                    });
-                });
-                return Observable.throw(error);
+        this.httpClient
+            .get(this._django_url, {withCredentials: true})
+            .catch(error => {
+                return this.error_service.show_communication_error(error);
             })
             .subscribe(response => {
                 this.loading = false;
-                this.initial_data = response;
+                if (this.initial_data_transformation) {
+                    this.initial_data = this.initial_data_transformation(response);
+                } else {
+                    this.initial_data = response;
+                }
             });
     }
 
@@ -133,16 +142,23 @@ export class DjangoFormBaseComponent implements OnInit {
         if (!django_form_url.endsWith('/')) {
             django_form_url += '/';
         }
-        django_form_url += 'form';
-        return this.http.get(django_form_url).map(response => {
-            this.loading = false;
-            return response.json();
-        });
+        django_form_url += 'form/';
+        return this.httpClient.get(django_form_url,
+            {
+                withCredentials: true,
+                params: this.extra_form_data
+            })
+            .catch(error => {
+                return this.error_service.show_communication_error(error);
+            })
+            .map(response => {
+                this.loading = false;
+                return response;
+            });
     }
 
-    protected submitted(button_id, is_cancel) {
+    public submitted(button_id, is_cancel) {
         // clone the value so that button clicks are not remembered
-        console.log('value', this.form.value);
         const value = Object.assign({}, this.form.value);
         this._flatten(null, value, null);
         if (button_id) {
@@ -156,27 +172,31 @@ export class DjangoFormBaseComponent implements OnInit {
     }
 
     private submit_to_django(data) {
+        let extra: any;
+        if (this.extra_form_data instanceof HttpParams) {
+            extra = {};
+            for (const k of this.extra_form_data.keys()) {
+                extra[k] = this.extra_form_data.get(k);
+            }
+        } else {
+            extra = this.extra_form_data;
+        }
         if (this._django_url) {
             let call;
             switch (this._config.method) {
                 case 'post':
-                    call = this.http.post(this._django_url, data);
+                    call = this.httpClient.post(this._django_url, {...extra, ...data}, {withCredentials: true});
                     break;
                 case 'patch':
-                    call = this.http.patch(this._django_url, data);
+                    call = this.httpClient.patch(this._django_url, {...extra, ...data}, {withCredentials: true});
                     break;
                 default:
                     throw new Error(`Unimplemented method ${this._config.method}`);
             }
-            call.map(response => response.json())
-                .catch((error) => {
-                    setTimeout(() => {
-                        this.snackBar.open(error, 'Dismiss', {
-                            duration: 10000,
-                        });
-                    });
-                    this.errors = error.json();
-                    return Observable.throw(error);
+            call
+                .catch(error => {
+                    this.errors = error.error;
+                    return this.error_service.show_communication_error(error);
                 })
                 .subscribe(response => {
                     this.errors = null;
@@ -185,19 +205,16 @@ export class DjangoFormBaseComponent implements OnInit {
                         politeness: 'polite'
                     });
                     this.submit.emit({
-                            response: response,
-                            data: data
-                        }
-                    );
+                        response: response,
+                        data: data
+                    });
                 });
         } else {
             this.submit.emit({
-                    data: data
-                }
-            );
+                data: data
+            });
         }
     }
-
 
     private _flatten(name, current, parent) {
         if (current !== Object(current)) {

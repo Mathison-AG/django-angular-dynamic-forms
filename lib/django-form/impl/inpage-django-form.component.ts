@@ -1,16 +1,16 @@
-import {Component} from '@angular/core';
-import {Http} from '@angular/http';
-import {MatSnackBar} from '@angular/material';
-import {DjangoFormBaseComponent} from './django-form-base.component';
+import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
+import { DjangoFormBaseComponent } from './django-form-base.component';
+import {HttpClient} from '@angular/common/http';
+import {ErrorService} from '@webui/errors/errors.service';
 
 @Component({
-    selector: 'inpage-django-form',
-    templateUrl: './inpage-django-form.component.html',
-    styleUrls: ['./inpage-django-form.component.scss'],
+  selector: 'inpage-django-form',
+  templateUrl: './inpage-django-form.component.html',
+  styleUrls: ['./inpage-django-form.component.scss']
 })
 export class InPageDjangoFormComponent extends DjangoFormBaseComponent {
-
-    constructor(http: Http, snackBar: MatSnackBar) {
-        super(http, snackBar);
-    }
+  constructor(http: HttpClient, snackBar: MatSnackBar, error_service: ErrorService) {
+    super(http, snackBar, error_service);
+  }
 }

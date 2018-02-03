@@ -1,0 +1,19 @@
+:host/deep/ {
+    textarea {
+        height: auto !important;
+    }
+
+    label {
+        font-family: Roboto,"Helvetica Neue",sans-serif;
+        font-size: inherit;
+    }
+
+    label.mat-radio-label {
+        align-items: start;
+        white-space: normal;
+    }
+
+    .mat-radio-button {
+        padding-top: 10px;
+    }
+}
