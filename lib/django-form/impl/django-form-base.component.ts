@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angula
 import {Observable} from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {ErrorService} from '@webui/errors/errors.service';
+import {ErrorService} from './error-service';
 
 /**
  * Form component targeted on django rest framework

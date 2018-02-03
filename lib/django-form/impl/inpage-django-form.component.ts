@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { DjangoFormBaseComponent } from './django-form-base.component';
 import {HttpClient} from '@angular/common/http';
-import {ErrorService} from '@webui/errors/errors.service';
+import {ErrorService} from './error-service';
 
 @Component({
   selector: 'inpage-django-form',

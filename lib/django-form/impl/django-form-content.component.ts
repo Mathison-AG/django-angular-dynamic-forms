@@ -17,9 +17,7 @@ import 'rxjs/add/operator/merge';
 import {isUndefined} from 'util';
 import {HttpClient} from '@angular/common/http';
 
-// a big hack
-import * as $ from 'jquery';
-import {ErrorService} from '@webui/errors/errors.service';
+import {ErrorService} from './error-service';
 
 interface IterPath {
     obj: any;
