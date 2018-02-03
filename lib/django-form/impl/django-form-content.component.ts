@@ -15,7 +15,6 @@ import {
 } from '@ng-dynamic-forms/core';
 import 'rxjs/add/operator/merge';
 import {isUndefined} from 'util';
-import {TranslateService} from '@ngx-translate/core';
 import {HttpClient} from '@angular/common/http';
 
 // a big hack
@@ -98,26 +97,17 @@ export class DjangoFormContentComponent implements OnInit {
             setTimeout(() => {
                 const all_elements = Array.from<any>(deep_iter(_layout)).map(x => x.value);
                 const layout_label_elements = all_elements.filter(x => x.label);
-                const labels_to_translate = [...layout_label_elements.map(x => x.label)];
-                for (const el of all_elements) {
-                    if (el.choices && !el.prohibit_choice_translation) {
-                        labels_to_translate.push(... el.choices.map(x => x.display_name));
-                    }
-                }
-                this.translate.get(labels_to_translate).subscribe(translation => {
-                    layout_label_elements.forEach(x => {
-                        x.label = translation[x.label] || `!${x.label}`;
-                    });
-                    this.form_model = [];
-                    this.autocompleters = [];
-                    this.form_model = this._generate_ui_control_array(_layout, translation);
 
-                    if (this.form_group) {
-                        this.form_group = this.formService.createFormGroup(this.form_model);
-                        this._bind_autocomplete();
-                        this._update_initial_data();
-                    }
-                });
+                this.form_model = [];
+                this.autocompleters = [];
+                this.form_model = this._generate_ui_control_array(_layout);
+
+                if (this.form_group) {
+                    this.form_group = this.formService.createFormGroup(this.form_model);
+                    this._bind_autocomplete();
+                    this._update_initial_data();
+                }
+
                 this.check.detectChanges();
             }, 10);
         }
@@ -158,7 +148,7 @@ export class DjangoFormContentComponent implements OnInit {
     }
 
     constructor(private formService: DynamicFormService, private httpClient: HttpClient,
-                private translate: TranslateService, private error_service: ErrorService,
+                private error_service: ErrorService,
                 private current_element: ElementRef,
                 private check: ChangeDetectorRef) {
     }
@@ -190,10 +180,10 @@ export class DjangoFormContentComponent implements OnInit {
         }
     }
 
-    private _generate_ui_control_array(configs: any[], translations): DynamicFormControlModel[] {
+    private _generate_ui_control_array(configs: any[]): DynamicFormControlModel[] {
         const model: DynamicFormControlModel[] = [];
         for (const config of configs) {
-            const _control = this._generate_ui_control(config, translations);
+            const _control = this._generate_ui_control(config);
             if (_control) {
                 model.push(_control);
             }
@@ -201,7 +191,7 @@ export class DjangoFormContentComponent implements OnInit {
         return model;
     }
 
-    private _generate_ui_control(config: any, translations: any): DynamicFormControlModel {
+    private _generate_ui_control(config: any): DynamicFormControlModel {
         let id: string;
         let type: string;
         let label: string;
@@ -429,9 +419,6 @@ export class DjangoFormContentComponent implements OnInit {
             case 'radio':
                 for (const option of config.choices) {
                     let label = option.display_name;
-                    if (!config.prohibit_choice_translation) {
-                        label = translations[label] || label;
-                    }
                     options.push({
                         label: label,
                         value: option.value
@@ -460,9 +447,6 @@ export class DjangoFormContentComponent implements OnInit {
                 if (config.choices) {
                     for (const option of config.choices) {
                         let label = option.display_name;
-                        if (!config.prohibit_choice_translation) {
-                            label = translations[label] || label;
-                        }
                         options.push({
                             label: label,
                             value: option.value
@@ -493,7 +477,7 @@ export class DjangoFormContentComponent implements OnInit {
                     {
                         id: 'generated_' + this.last_id++,
                         label: label,
-                        group: this._generate_ui_control_array(controls, translations)
+                        group: this._generate_ui_control_array(controls)
                     },
                     cls
                 );
@@ -524,18 +508,7 @@ export class DjangoFormContentComponent implements OnInit {
 
     public get value() {
         if (this.form_group) {
-            const ret = this.form_group.value;
-
-            // big hack for html editor
-            for (let key in this.form_layout) {
-                const lay = this.form_layout[key];
-                if (lay && lay.element && lay.element.control == 'html-editor') {
-                    // ok, there is an html editor there
-                    const new_val = $('#' + key).val();
-                    ret[key] = new_val;
-                }
-            }
-            return ret;
+            return this.form_group.value;
         }
         return true;
     }

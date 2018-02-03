@@ -1,5 +1,5 @@
 <h1 mat-dialog-title *ngIf="form_title">{{ form_title }}</h1>
-<div mat-dialog-content addHtmlEditors htmlEditorsSelector=".html-editor" >
+<div mat-dialog-content >
     <django-form-content [layout]="layout" [initial_data]="initial_data" [errors]="errors"
                          [restrict_to_fields]="restrict_to_fields"
                          (submit)="submitted(undefined, undefined)" #form clearableInputs>
@@ -14,5 +14,5 @@
             [color]="button.color"
             (click)="submitted(button.id, button.cancel)"
             type="button"
-    >{{ button.label | translate }}</button>
+    >{{ button.label }}</button>
 </div>

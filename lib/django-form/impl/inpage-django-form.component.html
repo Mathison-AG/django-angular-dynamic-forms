@@ -1,8 +1,7 @@
 <h1 *ngIf="form_title">{{ form_title }}</h1>
 
 <django-form-content [layout]="layout" [initial_data]="initial_data" [errors]="errors"
-                     (submit)="submitted(undefined, undefined)" #form
-                     addHtmlEditors htmlEditorsSelector=".html-editor" clearableInputs>
+                     (submit)="submitted(undefined, undefined)" #form>
 </django-form-content>
 
 <mat-button-group *ngIf="actions">

@@ -8,14 +8,10 @@ import {MatButtonModule, MatDialogModule, MatProgressBarModule, MatSnackBarModul
 import {DjangoFormContentComponent, external_validator} from './impl/django-form-content.component';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 import {DjangoFormBaseComponent} from './impl/django-form-base.component';
-import {AddHtmlEditorsDirective} from './impl/textarea-html-editor';
-import {ClearableInputDirective} from '@webui/django-form/impl/clearable-input-directive';
-import {GoodiesModule} from '@webui/ui/layout/goodies/goodies.module';
 
 @NgModule({
     declarations: [InPageDjangoFormComponent, DjangoFormContentComponent,
         DialogDjangoFormComponent, DjangoFormBaseComponent,
-        AddHtmlEditorsDirective, ClearableInputDirective
     ],
     imports: [
         CommonModule,
@@ -24,13 +20,11 @@ import {GoodiesModule} from '@webui/ui/layout/goodies/goodies.module';
         ReactiveFormsModule,
         MatProgressBarModule,
         MatButtonModule,
-        GoodiesModule,
         MatSnackBarModule,
         MatDialogModule
     ],
     providers: [{provide: NG_VALIDATORS, useValue: external_validator, multi: true}],
-    exports: [InPageDjangoFormComponent, DialogDjangoFormComponent, DjangoFormBaseComponent, AddHtmlEditorsDirective,
-        ClearableInputDirective],
+    exports: [InPageDjangoFormComponent, DialogDjangoFormComponent, DjangoFormBaseComponent],
     entryComponents: [InPageDjangoFormComponent, DialogDjangoFormComponent, DjangoFormBaseComponent]
 })
 export class DjangoFormModule {

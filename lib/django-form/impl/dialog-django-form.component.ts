@@ -1,9 +1,8 @@
 import {Component, Inject} from '@angular/core';
 import {DjangoFormBaseComponent} from './django-form-base.component';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import {TranslateService} from '@ngx-translate/core';
 import {HttpClient} from '@angular/common/http';
-import {ErrorService} from '@webui/errors/errors.service';
+import {ErrorService} from './error-service';
 
 @Component({
     selector: 'dialog-django-form',
@@ -15,7 +14,6 @@ export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
                 snackBar: MatSnackBar,
                 dialogRef: MatDialogRef<DialogDjangoFormComponent>,
                 @Inject(MAT_DIALOG_DATA) data: any,
-                translate: TranslateService,
                 error_service: ErrorService) {
         super(httpClient, snackBar, error_service);
 
@@ -29,9 +27,7 @@ export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
         });
 
         if (data.form_title) {
-            translate.get(data.form_title).subscribe(translated => {
-                this.form_title = translated || data.form_title;
-            });
+            this.form_title = data.form_title;
         }
 
         this.config = data.config;
