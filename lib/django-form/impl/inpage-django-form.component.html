@@ -4,7 +4,7 @@
                      (submit)="submitted(undefined, undefined)" #form>
 </django-form-content>
 
-<mat-button-group *ngIf="actions">
+<div *ngIf="actions" fxLayout="row">
     <button
             mat-raised-button
             *ngFor="let button of actions"
@@ -14,4 +14,4 @@
             type="button"
             [disabled]="!form.valid && !button.cancel"
     >{{ button.label }}</button>
-</mat-button-group>
+</div>
