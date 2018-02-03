@@ -1,13 +1,13 @@
-<h1 md-dialog-title *ngIf="form_title">{{ form_title }}</h1>
-<div md-dialog-content>
+<h1 mat-dialog-title *ngIf="form_title">{{ form_title }}</h1>
+<div mat-dialog-content>
     <django-form-content [layout]="layout" [initial_data]="initial_data" [errors]="errors"
                                   (submit)="submitted()" #form>
     </django-form-content>
 </div>
 
-<div md-dialog-actions>
+<div mat-dialog-actions>
     <button
-            md-raised-button
+            mat-raised-button
             *ngFor="let button of actions"
             [name]="button.id"
             [color]="button.color"

@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Http} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
-import {MdSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material';
 
 /**
  * Form component targeted on django rest framework
@@ -94,7 +94,7 @@ export class DjangoFormBaseComponent implements OnInit {
     }
 
     constructor(private http: Http,
-                private snackBar: MdSnackBar) {
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit(): void {

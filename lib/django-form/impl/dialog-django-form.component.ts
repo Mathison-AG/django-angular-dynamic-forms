@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import {DjangoFormBaseComponent} from './django-form-base.component';
-import {MD_DIALOG_DATA, MdDialogRef, MdSnackBar} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {Http} from '@angular/http';
 
 @Component({
@@ -10,9 +10,9 @@ import {Http} from '@angular/http';
 })
 export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
 
-    constructor(http: Http, snackBar: MdSnackBar,
-                dialogRef: MdDialogRef<DialogDjangoFormComponent>,
-                @Inject(MD_DIALOG_DATA) data: any) {
+    constructor(http: Http, snackBar: MatSnackBar,
+                dialogRef: MatDialogRef<DialogDjangoFormComponent>,
+                @Inject(MAT_DIALOG_DATA) data: any) {
         super(http, snackBar);
 
         this.submit.subscribe(info => {

@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {Http} from '@angular/http';
-import {MdSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material';
 import {DjangoFormBaseComponent} from './django-form-base.component';
 
 @Component({
@@ -10,7 +10,7 @@ import {DjangoFormBaseComponent} from './django-form-base.component';
 })
 export class InPageDjangoFormComponent extends DjangoFormBaseComponent {
 
-    constructor(http: Http, snackBar: MdSnackBar) {
+    constructor(http: Http, snackBar: MatSnackBar) {
         super(http, snackBar);
     }
 }
