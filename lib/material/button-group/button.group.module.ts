@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MdButtonModule} from '@angular/material';
+import {MatButtonModule} from '@angular/material';
 import {MatButtonGroupComponent} from './button-group.component';
 
 @NgModule({
@@ -9,7 +9,7 @@ import {MatButtonGroupComponent} from './button-group.component';
   ],
   imports: [
     CommonModule,
-    MdButtonModule,
+    MatButtonModule,
   ],
   providers: [
   ],
