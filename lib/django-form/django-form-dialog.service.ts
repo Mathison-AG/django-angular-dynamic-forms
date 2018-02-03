@@ -1,14 +1,14 @@
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
-import {MdDialog} from '@angular/material';
+import {MatDialog} from '@angular/material';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 import {Injectable} from '@angular/core';
 
 @Injectable()
 export class DjangoFormDialogService {
 
-    constructor(private dialog: MdDialog) {
+    constructor(private dialog: MatDialog) {
     }
 
     public open(django_url: string, submit?: (data, response) => void,

@@ -2,8 +2,10 @@
 import re
 from functools import lru_cache
 
+from django.http import HttpResponseNotFound
 from django.template import Template, Context
 from django.utils.functional import cached_property
+from django.utils.translation import gettext
 from rest_framework import renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -14,16 +16,29 @@ class AngularFormMixin(object):
     form_title = None
     form_defaults = None
 
-    def get_form_layout(self, fields):
-        if self.form_layout:
-            if callable(self.form_layout):
-                return self._transform_layout(self.form_layout(fields))
-            return self._transform_layout(self.form_layout)
+    form_layouts  = None
+    form_titles   = None
+    form_defaults_map = None
+
+    def get_form_layout(self, fields, form_name):
+        if form_name:
+            form_layout = self.form_layouts[form_name]
+        else:
+            form_layout = self.form_layout
+
+        if form_layout:
+            if callable(form_layout):
+                return self._transform_layout(form_layout(fields))
+            return self._transform_layout(form_layout)
 
         # no layout, generate from fields
         layout = [{'id': field_name} for field_name in fields]
 
-        form_defaults = self.form_defaults
+        if form_name:
+            form_defaults = self.form_defaults_map.get(form_name, None)
+        else:
+            form_defaults = self.form_defaults
+
         if callable(form_defaults):
             form_defaults = form_defaults(fields)
 
@@ -68,16 +83,20 @@ class AngularFormMixin(object):
             }
         raise NotImplementedError('Layout "%s" not implemented' % layout)
 
-    def get_form_title(self, has_instance, serializer):
-        if self.form_title:
+    def get_form_title(self, has_instance, serializer, form_name):
+        form_title = self.form_title
+        if form_name and self.form_titles:
+            form_title = self.form_titles.get(form_name, None)
+
+        if form_title:
             return self.form_title['edit' if has_instance else 'create']
 
         # noinspection PyProtectedMember
         name = serializer.Meta.model._meta.verbose_name
         if has_instance:
-            name = 'Editing %s' % name
+            name = gettext('Editing %s') % name
         else:
-            name = 'Creating a new %s' % name
+            name = gettext('Creating a new %s') % name
 
         return name
 
@@ -87,11 +106,11 @@ class AngularFormMixin(object):
             return [
                 {
                     'id': 'save',
-                    'label': 'Save'
+                    'label': gettext('Save')
                 },
                 {
                     'id': 'cancel',
-                    'label': 'Cancel',
+                    'label': gettext('Cancel'),
                     'cancel': True
                 },
             ]
@@ -99,11 +118,11 @@ class AngularFormMixin(object):
             return [
                 {
                     'id': 'create',
-                    'label': 'Create'
+                    'label': gettext('Create')
                 },
                 {
                     'id': 'cancel',
-                    'label': 'Cancel',
+                    'label': gettext('Cancel'),
                     'cancel': True
                 },
             ]
@@ -118,7 +137,26 @@ class AngularFormMixin(object):
     def form_list(self, request, *args, **kwargs):
         return self.get_form_metadata(has_instance=False)
 
-    def get_form_metadata(self, has_instance):
+    # noinspection PyUnusedLocal
+    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    def form_with_name(self, request, *args, form_name=None, **kwargs):
+        return self.get_form_metadata(has_instance=True, form_name = form_name or '')
+
+    # noinspection PyUnusedLocal
+    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    def form_list_with_name(self, request, *args, form_name=None, **kwargs):
+        return self.get_form_metadata(has_instance=False, form_name = form_name or '')
+
+    def get_form_metadata(self, has_instance, form_name=''):
+
+        if form_name:
+            if not self.form_layouts:
+                return HttpResponseNotFound('Form layouts not configured. '
+                                            'Please add form_layouts attribute on the viewset class')
+
+            if form_name not in self.form_layouts:
+                return HttpResponseNotFound('Form with name %s not found' % form_name)
+
         ret = {}
 
         # noinspection PyUnresolvedReferences
@@ -128,12 +166,12 @@ class AngularFormMixin(object):
         metadata_class = self.metadata_class()
 
         fields_info = metadata_class.get_serializer_info(serializer=serializer)
-        layout = self.get_form_layout(fields_info)
+        layout = self.get_form_layout(fields_info, form_name)
         layout = self.decorate_layout(layout, fields_info)
 
         ret['layout'] = layout
 
-        ret['form_title'] = self.get_form_title(has_instance, serializer)
+        ret['form_title'] = self.get_form_title(has_instance, serializer, form_name)
 
         ret['actions'] = self.get_actions(has_instance, serializer)
 
