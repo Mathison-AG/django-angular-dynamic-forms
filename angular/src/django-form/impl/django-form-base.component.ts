@@ -22,6 +22,7 @@ export class DjangoFormBaseComponent implements OnInit {
     private url$ = new BehaviorSubject<string>(null);
     public config$: Observable<DjangoFormConfig>;
     private _config$ = new BehaviorSubject<DjangoFormConfig>(null);
+    public errors$ = new BehaviorSubject<any>(null);
 
     @Input()
     public initial_data_transformation: (any) => any = (x) => x;
@@ -196,8 +197,15 @@ export class DjangoFormBaseComponent implements OnInit {
                         throw new Error(`Unimplemented method ${config.method}`);
                 }
                 call.pipe(
-                    catchError(error => this.error_service.show_communication_error(error))
+                    catchError(error => {
+                        if (error.status == 400) {
+                            this.errors$.next(error.error);
+                            return Observable.empty();
+                        }
+                        return this.error_service.show_communication_error(error);
+                    })
                 ).subscribe(response => {
+                    this.errors$.next(null);
                     this.snackBar.open('Saved', 'Dismiss', {
                         duration: 2000,
                         politeness: 'polite'
