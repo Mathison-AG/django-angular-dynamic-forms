@@ -15,13 +15,17 @@ import { CreateViaDialogComponent } from './create-via-dialog/create-via-dialog.
 import {HttpClientModule} from '@angular/common/http';
 import {MatErrorService} from './mat-error.service';
 import {HighlightJsModule, HighlightJsService} from 'angular2-highlight-js';
+import { CodeSampleComponent } from './code-sample/code-sample.component';
+import { CreateInPageComponent } from './create-in-page/create-in-page.component';
 
 
 @NgModule({
     declarations: [
         AppComponent,
         IntroComponent,
-        CreateViaDialogComponent
+        CreateViaDialogComponent,
+        CodeSampleComponent,
+        CreateInPageComponent
     ],
     imports: [
         BrowserAnimationsModule,

@@ -1,8 +1,6 @@
 <ng-container *ngIf="config$">
     <ng-container *ngIf="config$|async; let config">
 
-        <h1 *ngIf="config.form_title">{{ config.form_title }}</h1>
-
         <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="errors$|async"
                              (submit)="submitted(undefined, undefined)" #form>
         </django-form-content>
