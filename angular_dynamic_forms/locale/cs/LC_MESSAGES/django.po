@@ -21,12 +21,12 @@ msgstr ""
 #: rest.py:97
 #, python-format
 msgid "Editing %s"
-msgstr "Upravuji objekt %s"
+msgstr "Upravuji: %s"
 
 #: rest.py:99
 #, python-format
 msgid "Creating a new %s"
-msgstr "Vytvářím objekt %s"
+msgstr "Vytvářím: %s"
 
 #: rest.py:109
 msgid "Save"

@@ -3,62 +3,19 @@ import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, O
 import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
 import {
-    DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE, DYNAMIC_FORM_CONTROL_INPUT_TYPE_FILE,
-    DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
-    DynamicCheckboxModel,
-    DynamicFormControlModel,
-    DynamicFormGroupModel,
-    DynamicFormService,
-    DynamicInputModel,
-    DynamicRadioGroupModel,
+    DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE, DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER, DynamicCheckboxModel,
+    DynamicFormControlModel, DynamicFormGroupModel, DynamicFormService, DynamicInputModel, DynamicRadioGroupModel,
     DynamicSelectModel, DynamicTextAreaModel
 } from '@ng-dynamic-forms/core';
 import 'rxjs/add/operator/merge';
-import {isUndefined} from 'util';
 import {HttpClient} from '@angular/common/http';
 
 import {ErrorService} from './error-service';
+import {
+    CompositeFieldTypes, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig, RadioFieldConfig,
+    SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
+} from './django-form-iface';
 
-interface IterPath {
-    obj: any;
-    field: any;
-    value: any;
-}
-
-function* deep_iter(obj: any, path?: IterPath[]) {
-    if (isUndefined(path)) {
-        path = [];
-    }
-    if (obj) {
-        if (obj instanceof Array) {
-            for (const data in obj) {
-                yield* deep_iter(obj[data], path);
-            }
-        } else {
-            if ((obj as any).type != 'field') {
-                yield {
-                    value: obj,
-                    path: path
-                };
-                if (path.length > 2) {
-                    throw Error(`Too deep path ${path}, object ${JSON.stringify(obj)}`);
-                }
-                for (const key in obj) {
-                    if (key == 'layout') {
-                        continue;
-                    }
-                    const val = obj[key];
-                    if (val !== Object(val)) {
-                        // skip primitives
-                        continue;
-                    }
-                    const lpath = [{obj: obj, field: key, value: val}, ...path];
-                    yield* deep_iter(val, lpath);
-                }
-            }
-        }
-    }
-}
 
 /**
  * Form component targeted on django rest framework
@@ -75,9 +32,6 @@ export class DjangoFormContentComponent implements OnInit {
     form_group: FormGroup;
     private last_id = 0;
 
-    @Input()
-    restrict_to_fields: string[];
-
     /**
      * Returns submitted form data on enter
      *
@@ -89,25 +43,19 @@ export class DjangoFormContentComponent implements OnInit {
     private _initial_data = null;
 
     @Input()
-    set layout(_layout: any) {
+    set layout(_layout: FieldConfig[]) {
         if (_layout) {
-            // do it a bit later to make sure that restrict_to_fields is set as well
-            setTimeout(() => {
-                const all_elements = Array.from<any>(deep_iter(_layout)).map(x => x.value);
-                const layout_label_elements = all_elements.filter(x => x.label);
+            this.form_model = [];
+            this.autocompleters = [];
+            this.form_model = this._generate_ui_control_array(_layout);
 
-                this.form_model = [];
-                this.autocompleters = [];
-                this.form_model = this._generate_ui_control_array(_layout);
+            if (this.form_group) {
+                this.form_group = this.formService.createFormGroup(this.form_model);
+                this._bind_autocomplete();
+                this._update_initial_data();
+            }
 
-                if (this.form_group) {
-                    this.form_group = this.formService.createFormGroup(this.form_model);
-                    this._bind_autocomplete();
-                    this._update_initial_data();
-                }
-
-                this.check.detectChanges();
-            }, 10);
+            this.check.detectChanges();
         }
     }
 
@@ -178,7 +126,7 @@ export class DjangoFormContentComponent implements OnInit {
         }
     }
 
-    private _generate_ui_control_array(configs: any[]): DynamicFormControlModel[] {
+    private _generate_ui_control_array(configs: FieldConfig[]): DynamicFormControlModel[] {
         const model: DynamicFormControlModel[] = [];
         for (const config of configs) {
             const _control = this._generate_ui_control(config);
@@ -189,146 +137,78 @@ export class DjangoFormContentComponent implements OnInit {
         return model;
     }
 
-    private _generate_ui_control(config: any): DynamicFormControlModel {
-        let id: string;
-        let type: string;
-        let label: string;
-        let controls: any[];
-        let required = false;
-        let disabled = false;
-        let min_value = undefined;
-        let max_value = undefined;
-        let max_length = undefined;
-        let min_length = undefined;
-        let autocomplete_list = undefined;
-        let autocomplete_url = undefined;
-        let cls = undefined;
+    private _generate_ui_control(field_config: FieldConfig): DynamicFormControlModel {
 
-        const config_is_array = Array.isArray(config);
+        const id = field_config.id || '___undefined__id__at__config';
 
-        if (config_is_array) {
-            if (config.find(x => Array.isArray(x))) {
-                type = 'fieldset';
-                if (typeof config[0] === 'string') {
-                    label = config[0];
-                    controls = config.slice(1);
-                } else {
-                    controls = config;
-                }
-            } else {
-                id = config[0];
-                label = config[1];
-                type = config[2];
-            }
-        } else {
-            id = config.id;
-            label = config.label;
-            type = config.type;
-            controls = config.controls;
-            required = config.required;
-            disabled = config.read_only;
-            min_value = config.min_value;
-            max_value = config.max_value;
-            max_length = config.max_length;
-            min_length = config.min_length;
-            autocomplete_list = config.autocomplete_list;
-            autocomplete_url = config.autocomplete_url;
-            cls = config.cls;
+        if (field_config.layout) {
+            this.form_layout[id] = field_config.layout;
         }
-        if (!id) {
-            id = '___undefined__id__at__config';
-        }
-        if (this.restrict_to_fields && this.restrict_to_fields.length && this.restrict_to_fields.indexOf(id) < 0) {
-            return null;
-        }
-        if (config.layout) {
-            this.form_layout[id] = config.layout;
-        }
-        if (label === undefined) {
-            label = '';
-        }
-        if (type === undefined) {
-            type = 'string';
-        }
-        const options = [];
+        const label = field_config.label || '';
+        const type = field_config.type || SimpleFieldTypes.STRING;
+
         switch (type) {
-            case 'string':
+            case SimpleFieldTypes.STRING:
                 const model = new DynamicInputModel(
                     {
                         id: id,
                         placeholder: label,
-                        required: required,
-                        disabled: disabled,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
-                                args: {id: id, errors: this._external_errors }
+                                args: {id: id, errors: this._external_errors}
                             },
-                            maxLength: max_length,
-                            minLength: min_length
+                            maxLength: (field_config as StringFieldConfig).max_length,
+                            minLength: (field_config as StringFieldConfig).min_length
                         },
                         errorMessages: {
                             external_error: '{{external_error}}'
                         },
-                        list: autocomplete_list
+                        list: (field_config as StringFieldConfig).autocomplete_list
                     },
-                    cls
+                    field_config.cls
                 );
-                if (autocomplete_list || autocomplete_url) {
-                    this.autocompleters.push(new AutoCompleter(this.httpClient, this.error_service,
-                        autocomplete_list, autocomplete_url, model));
+                if ((field_config as StringFieldConfig).autocomplete_list ||
+                    (field_config as StringFieldConfig).autocomplete_url) {
+                    this.autocompleters.push(
+                        new AutoCompleter(this.httpClient, this.error_service,
+                            (field_config as StringFieldConfig).autocomplete_list,
+                            (field_config as StringFieldConfig).autocomplete_url,
+                            model));
                 }
                 return model;
-            case 'textarea':
+            case SimpleFieldTypes.TEXTAREA:
                 return new DynamicTextAreaModel(
                     {
                         id: id,
                         placeholder: label,
-                        required: required,
-                        disabled: disabled,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         rows: 5,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            maxLength: max_length,
-                            minLength: min_length
+                            maxLength: (field_config as TextAreaFieldConfig).max_length,
+                            minLength: (field_config as TextAreaFieldConfig).min_length
                         },
                         errorMessages: {
                             external_error: '{{external_error}}'
                         },
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'file':
-                return new DynamicInputModel(
-                    {
-                        id: id,
-                        placeholder: label,
-                        required: required,
-                        disabled: disabled,
-                        inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_FILE,
-                        validators: {
-                            external_validator: {
-                                name: external_validator.name,
-                                args: {id: id, errors: this._external_errors}
-                            },
-                        },
-                        errorMessages: {
-                            external_error: '{{external_error}}'
-                        },
-                    },
-                    cls
-                );
-            case 'date':
+            case SimpleFieldTypes.DATE:
                 return new DynamicInputModel(
                     {
                         id: id,
                         placeholder: label,
                         inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE,
-                        required: required,
-                        disabled: disabled,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
@@ -338,70 +218,69 @@ export class DjangoFormContentComponent implements OnInit {
                         errorMessages: {
                             external_error: '{{external_error}}'
                         },
-                        list: autocomplete_list
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'integer':
+            case SimpleFieldTypes.INTEGER:
                 return new DynamicInputModel(
                     {
                         id: id,
                         placeholder: label,
                         inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
-                        required: required,
-                        disabled: disabled,
-                        min: min_value,
-                        max: max_value,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
+                        min: (field_config as IntegerFieldConfig).min_value,
+                        max: (field_config as IntegerFieldConfig).max_value,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            min: min_value,
-                            max: max_value
+                            min: (field_config as IntegerFieldConfig).min_value,
+                            max: (field_config as IntegerFieldConfig).max_value
                         },
                         errorMessages: {
                             external_error: '{{external_error}}',
-                            min: `Value must be in range ${min_value} - ${max_value}`,
-                            max: `Value must be in range ${min_value} - ${max_value}`
+                            min: `Value must be in range ${(field_config as IntegerFieldConfig).min_value} - ${(field_config as IntegerFieldConfig).max_value}`,
+                            max: `Value must be in range ${(field_config as IntegerFieldConfig).min_value} - ${(field_config as IntegerFieldConfig).max_value}`
                         }
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'float':
+            case SimpleFieldTypes.FLOAT:
                 return new DynamicInputModel(
                     {
                         id: id,
                         placeholder: label,
                         inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
-                        required: required,
-                        disabled: disabled,
-                        min: min_value,
-                        max: max_value,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
+                        min: (field_config as FloatFieldConfig).min_value,
+                        max: (field_config as FloatFieldConfig).max_value,
                         step: 0.00000001,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            min: min_value,
-                            max: max_value
+                            min: (field_config as FloatFieldConfig).min_value,
+                            max: (field_config as FloatFieldConfig).max_value
                         },
                         errorMessages: {
                             external_error: '{{external_error}}',
-                            min: `Value must be in range ${min_value} - ${max_value}`,
-                            max: `Value must be in range ${min_value} - ${max_value}`
+                            min: `Value must be in range ${(field_config as FloatFieldConfig).min_value} - ${(field_config as FloatFieldConfig).max_value}`,
+                            max: `Value must be in range ${(field_config as FloatFieldConfig).min_value} - ${(field_config as FloatFieldConfig).max_value}`
                         }
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'boolean':
+            case SimpleFieldTypes.BOOLEAN:
                 return new DynamicCheckboxModel(
                     {
                         id: id,
                         label: label,
-                        required: required,
-                        disabled: disabled,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
@@ -412,23 +291,16 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'radio':
-                for (const option of config.choices) {
-                    let label = option.display_name;
-                    options.push({
-                        label: label,
-                        value: option.value
-                    });
-                }
+            case SimpleFieldTypes.RADIO:
                 return new DynamicRadioGroupModel(
                     {
                         id: id,
                         label: label,
-                        options: options,
-                        required: required,
-                        disabled: disabled,
+                        options: (field_config as RadioFieldConfig).choices,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
@@ -439,25 +311,16 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'choice':
-                if (config.choices) {
-                    for (const option of config.choices) {
-                        let label = option.display_name;
-                        options.push({
-                            label: label,
-                            value: option.value
-                        });
-                    }
-                }
+            case SimpleFieldTypes.SELECT:
                 return new DynamicSelectModel(
                     {
                         id: id,
                         placeholder: label,
-                        options: options,
-                        required: required,
-                        disabled: disabled,
+                        options: (field_config as SelectFieldConfig).choices,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
@@ -468,20 +331,17 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'fieldset':
+            case CompositeFieldTypes.FIELDSET:
                 return new DynamicFormGroupModel(
                     {
                         id: 'generated_' + this.last_id++,
                         label: label,
-                        group: this._generate_ui_control_array(controls)
+                        group: this._generate_ui_control_array((field_config as FieldSetConfig).controls)
                     },
-                    cls
+                    field_config.cls
                 );
-            case 'field':
-                // do not render inline models yet ...
-                return null;
             default:
                 throw new Error(`No ui control model for ${type}`);
         }
@@ -513,13 +373,6 @@ export class DjangoFormContentComponent implements OnInit {
 
     public on_submit_on_enter() {
         this.submit_on_enter.next(this.value);
-    }
-
-    public clear_autocompleters() {
-        // this is a hack - clear button should clear only the autocompleter with the current value
-        for (const autocompleter of this.autocompleters) {
-            autocompleter.change(null, '', '');
-        }
     }
 }
 

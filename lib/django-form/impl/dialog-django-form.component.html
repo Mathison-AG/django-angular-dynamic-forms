@@ -1,18 +1,24 @@
-<h1 mat-dialog-title *ngIf="form_title">{{ form_title }}</h1>
-<div mat-dialog-content >
-    <django-form-content [layout]="layout" [initial_data]="initial_data" [errors]="errors"
-                         [restrict_to_fields]="restrict_to_fields"
-                         (submit)="submitted(undefined, undefined)" #form clearableInputs>
-    </django-form-content>
-</div>
+<ng-container *ngIf="config$|async; let config">
 
-<div mat-dialog-actions>
-    <button
+
+    <h1 mat-dialog-title *ngIf="config.form_title">{{ config.form_title }}</h1>
+    <div mat-dialog-content>
+        <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="config.errors"
+                             [restrict_to_fields]="config.restrict_to_fields"
+                             (submit)="submitted(undefined, undefined)" #form clearableInputs>
+        </django-form-content>
+    </div>
+
+    <div mat-dialog-actions>
+        <button
             mat-raised-button
-            *ngFor="let button of actions"
+            *ngFor="let button of config.actions"
             [name]="button.id"
             [color]="button.color"
             (click)="submitted(button.id, button.cancel)"
             type="button"
-    >{{ button.label }}</button>
-</div>
+        >{{ button.label }}
+        </button>
+    </div>
+
+</ng-container>
