@@ -32,7 +32,7 @@ class AngularFormMixin(object):
             return self._transform_layout(form_layout)
 
         # no layout, generate from fields
-        layout = [{'id': field_name} for field_name in fields]
+        layout = [{'id': field_name} for field_name in fields if not fields[field_name]['read_only']]
 
         if form_name:
             form_defaults = self.form_defaults_map.get(form_name, None)
