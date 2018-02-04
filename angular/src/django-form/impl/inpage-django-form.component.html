@@ -3,7 +3,7 @@
 
         <h1 *ngIf="config.form_title">{{ config.form_title }}</h1>
 
-        <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="config.errors"
+        <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="errors$|async"
                              (submit)="submitted(undefined, undefined)" #form>
         </django-form-content>
 
