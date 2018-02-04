@@ -14,7 +14,7 @@ import {Component} from '@angular/core';
                             <a routerLink="/create-via-dialog">Create a new object via dialog</a>
                         </mat-list-item>
                         <mat-list-item>
-                            <a>Create a new object with in-page form</a>
+                            <a routerLink="/create-in-page">Create a new object via in-page form</a>
                         </mat-list-item>
                         <mat-list-item>
                             <a>Create a new object in-page with dynamic configuration</a>
