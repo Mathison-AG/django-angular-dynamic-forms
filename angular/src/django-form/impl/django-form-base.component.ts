@@ -8,7 +8,7 @@ import {
     catchError, distinctUntilChanged, filter, map, mergeMap, partition, share, shareReplay,
     tap
 } from 'rxjs/operators';
-import {DjangoFormConfig} from './django-form-iface';
+import {DjangoFormConfig} from '../django-form-iface';
 
 /**
  * Form component targeted on django rest framework
@@ -23,6 +23,9 @@ export class DjangoFormBaseComponent implements OnInit {
     public config$: Observable<DjangoFormConfig>;
     private _config$ = new BehaviorSubject<DjangoFormConfig>(null);
     public errors$ = new BehaviorSubject<any>(null);
+
+    @Input()
+    public extra_config: any = {};
 
     @Input()
     public initial_data_transformation: (any) => any = (x) => x;
@@ -104,6 +107,10 @@ export class DjangoFormBaseComponent implements OnInit {
             this.url$.pipe(
                 filter(url => !!url),
                 mergeMap(url => this._download_django_form(url)),
+                // map(x => ({
+                //     ...this.extra_config,
+                //         x
+                // })),
                 shareReplay(1)
             ),
             this._config$.pipe(
@@ -156,6 +163,17 @@ export class DjangoFormBaseComponent implements OnInit {
                         ...config
                     }
                 )),
+                map(config => {
+                    config = {
+                        ...config,
+                        ...this.extra_config
+                    };
+                    if (config.initial_data) {
+                        // initial data already filled, do not fill them again
+                        config.has_initial_data = false;
+                    }
+                    return config;
+                })
             );
     }
 

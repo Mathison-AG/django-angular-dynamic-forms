@@ -1,14 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
+import {DjangoFormConfig} from '../../django-form/django-form-iface';
 
 @Component({
     selector: 'app-create-in-page',
     template: `
-        <h1>Creating a new django object with an in-page form</h1>
+        <h1>Creating a new django object with an in-page form with fields pre-filled</h1>
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form django_url="/api/1.0/cities/" (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
+                <inpage-django-form django_url="/api/1.0/cities/" 
+                                    [extra_config] = 'config'
+                                    (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
 
@@ -21,9 +24,16 @@ import {Subject} from 'rxjs/Subject';
         }
     `]
 })
-export class CreateInPageComponent implements OnInit {
+export class CreateInPageInitialDataComponent implements OnInit {
 
     typescript = `
+
+    config : DjangoFormConfig = {
+        initial_data: {
+            name: 'Prague'
+        }
+    };
+
     submit(data) {
         console.log('Saved, got response', data);
     }
@@ -58,11 +68,18 @@ urlpatterns = [
     template = `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
     <inpage-django-form django_url="/api/1.0/cities/" 
+                        [extra_config] = 'config'
                         (submit)="submit($event)" 
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>
     `;
     response = '';
+
+    config : DjangoFormConfig = {
+        initial_data: {
+            name: 'Prague'
+        }
+    };
 
     constructor() {
     }

@@ -7,6 +7,8 @@ from django.db import models
 
 class City(models.Model):
     name = models.CharField(max_length=100)
+    zipcode = models.CharField(max_length=20)
+    comment = models.TextField(null=True, blank=True)
 
     def get_absolute_url(self):
         return '/api/1.0/cities/%s' % self.id

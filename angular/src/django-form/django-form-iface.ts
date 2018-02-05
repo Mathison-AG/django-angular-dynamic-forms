@@ -85,22 +85,22 @@ export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldCon
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint
-    django_url: string;
+    django_url?: string;
 
     // title of the form (in the target language, will not get translated)
-    form_title: string;
+    form_title?: string;
 
     // true if should fetch the initial data via get to the django_url
-    has_initial_data: boolean;
+    has_initial_data?: boolean;
 
     // either "post" or "patch"
-    method: string;
+    method?: string;
 
     // the initial data, might not be filled
     initial_data?: any;
 
     // layout of the form
-    layout: FieldConfig[];
+    layout?: FieldConfig[];
 }
 
 
@@ -116,9 +116,9 @@ export interface DjangoDialogConfig {
     extra_form_data?: any;
 
     // transformation that is performed on the initial data before they are passed to generated form
-    initial_data_transformation: (any) => any;
+    initial_data_transformation?: (any) => any;
 
     // transformation to the form configuration before the form is generated
-    config_transformation: (DjangoFormConfig) => DjangoFormConfig;
+    config_transformation?: (DjangoFormConfig) => DjangoFormConfig;
 
 }

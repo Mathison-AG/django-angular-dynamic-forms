@@ -4,7 +4,7 @@ import {DjangoFormDialogService} from '../../django-form';
 @Component({
     selector: 'app-create-via-dialog',
     template: `
-        <h1>Creating a new django object via popup dialog</h1>
+        <h1>Creating a new django object via popup dialog with fields pre-filled</h1>
         
         <button mat-raised-button color="primary" (click)="click()">Click to create a new City via dialog</button>
 
@@ -12,15 +12,20 @@ import {DjangoFormDialogService} from '../../django-form';
     `,
     styles: []
 })
-export class CreateViaDialogComponent implements OnInit {
+export class CreateViaDialogInitialDataComponent implements OnInit {
 
     typescript=`
 constructor(private dialog: DjangoFormDialogService) {
 }
 click() {
-    // note: do not forget the trailing '/'
-    this.dialog.open('/api/1.0/cities/').subscribe(result => {
-        console.log(result);
+    this.dialog.open('/api/1.0/cities/', {
+        config: {
+            initial_data: {
+                'name': 'Prague'
+            }
+        }
+    }).subscribe(result => {
+        this.response = result;
     });
 }
 `;
@@ -61,7 +66,13 @@ urlpatterns = [
 
     click() {
 
-        this.dialog.open('/api/1.0/cities/').subscribe(result => {
+        this.dialog.open('/api/1.0/cities/', {
+            config: {
+                initial_data: {
+                    'name': 'Prague'
+                }
+            }
+        }).subscribe(result => {
             this.response = result;
         });
     }

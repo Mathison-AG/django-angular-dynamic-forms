@@ -7,7 +7,7 @@ from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocompl
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
-        fields = ('name', 'id')
+        fields = ('name', 'zipcode', 'comment', 'id')
 
 
 class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):

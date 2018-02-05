@@ -1,0 +1,114 @@
+import {Component, OnInit} from '@angular/core';
+
+@Component({
+    selector: 'app-edit-in-page',
+    template: `
+
+        <h1>Editing django object in page</h1>
+
+        <router-outlet></router-outlet>
+
+        <code-sample [typescript]="typescript" [python]="python" [template]="template"
+                     [response]="response"></code-sample>
+    `,
+    styles: []
+})
+export class EditInPageComponent implements OnInit {
+
+
+    typescript = `
+
+    data = new MatTableDataSource();
+    displayedColumns = ['name', 'zipcode', 'comment', 'actions'];
+
+    constructor(private http: HttpClient, private errors: ErrorService,
+                private dialog: DjangoFormDialogService)
+    {
+    }
+
+    ngOnInit() {
+        this.reload();
+    }
+
+    reload() {
+        this.http.get<any>('/api/1.0/cities/')
+            .catch(err => this.errors.show_communication_error(err))
+            .subscribe(resp=>{
+                this.data = new MatTableDataSource(resp);
+            })
+    }
+
+    edit(id: string) {
+        this.dialog.open(\`/api/1.0/cities/$\{id\}/\`).subscribe(result => {
+            this.reload();
+        });
+    }
+`;
+
+    python = `
+class City(models.Model):
+    name = models.CharField(max_length=100)
+    zipcode = models.CharField(max_length=20)
+    comment = models.TextField(null=True, blank=True)
+    
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('name', 'zipcode', 'comment', 'id')
+
+class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+    permission_classes = (permissions.AllowAny,)
+            
+router = DefaultRouter()
+router.register(r'cities', CityViewSet)
+
+urlpatterns = [
+    url(r'^/api/1.0/', include(router.urls)),
+]
+    `;
+
+    template = `
+
+        <mat-table [dataSource]="data">
+            <ng-container matColumnDef="name">
+                <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{ row.name }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="zipcode">
+                <mat-header-cell *matHeaderCellDef> ZIP code</mat-header-cell>
+                <mat-cell *matCellDef="let row">{{row.zipcode}}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="comment">
+                <mat-header-cell *matHeaderCellDef> Comment</mat-header-cell>
+                <mat-cell *matCellDef="let row">{{row.comment}}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef> Actions</mat-header-cell>
+                <mat-cell *matCellDef="let row"><button mat-button color="primary" (click)="edit(row.id)">
+                    <mat-icon>edit</mat-icon></button></mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>    
+    `;
+
+    response: any;
+
+
+    constructor() {
+    }
+
+    ngOnInit() {
+    }
+
+    finished(data) {
+        this.response = data;
+    }
+
+}

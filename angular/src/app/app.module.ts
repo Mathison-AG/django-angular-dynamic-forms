@@ -5,18 +5,24 @@ import {AppComponent} from './app.component';
 import {DjangoFormModule, ErrorService} from '../django-form';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
-    MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule,
+    MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule, MatTableModule,
     MatTabsModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {AppRoutingModule} from './app-routing.module';
-import { IntroComponent } from './intro/intro.component';
-import { CreateViaDialogComponent } from './create-via-dialog/create-via-dialog.component';
+import {IntroComponent} from './intro/intro.component';
+import {CreateViaDialogComponent} from './create-via-dialog/create-via-dialog.component';
 import {HttpClientModule} from '@angular/common/http';
 import {MatErrorService} from './mat-error.service';
 import {HighlightJsModule, HighlightJsService} from 'angular2-highlight-js';
-import { CodeSampleComponent } from './code-sample/code-sample.component';
-import { CreateInPageComponent } from './create-in-page/create-in-page.component';
+import {CodeSampleComponent} from './code-sample/code-sample.component';
+import {CreateInPageComponent} from './create-in-page/create-in-page.component';
+import {CreateViaDialogInitialDataComponent} from './create-via-dialog-initial-data/create-via-dialog-initial-data.component';
+import { CreateInPageInitialDataComponent } from './create-in-page-initial-data/create-in-page-initial-data.component';
+import { EditViaDialogComponent } from './edit-via-dialog/edit-via-dialog.component';
+import { EditInPageComponent } from './edit-in-page/edit-in-page.component';
+import { TableComponent } from './edit-in-page/table/table.component';
+import { FormComponent } from './edit-in-page/form/form.component';
 
 
 @NgModule({
@@ -25,7 +31,13 @@ import { CreateInPageComponent } from './create-in-page/create-in-page.component
         IntroComponent,
         CreateViaDialogComponent,
         CodeSampleComponent,
-        CreateInPageComponent
+        CreateInPageComponent,
+        CreateViaDialogInitialDataComponent,
+        CreateInPageInitialDataComponent,
+        EditViaDialogComponent,
+        EditInPageComponent,
+        TableComponent,
+        FormComponent
     ],
     imports: [
         BrowserAnimationsModule,
@@ -36,6 +48,7 @@ import { CreateInPageComponent } from './create-in-page/create-in-page.component
         MatListModule,
         MatSnackBarModule,
         MatTabsModule,
+        MatTableModule,
         FlexLayoutModule,
         AppRoutingModule,
         HttpClientModule,

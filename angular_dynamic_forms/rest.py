@@ -1,7 +1,10 @@
 # noinspection PyUnresolvedReferences
+import json
 import re
 from functools import lru_cache
 
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import TextField
 from django.http import HttpResponseNotFound
 from django.template import Template, Context
 from django.utils.functional import cached_property
@@ -32,7 +35,8 @@ class AngularFormMixin(object):
             return self._transform_layout(form_layout)
 
         # no layout, generate from fields
-        layout = [{'id': field_name} for field_name in fields if not fields[field_name]['read_only']]
+        layout = [self._get_field_layout(field_name, fields[field_name])
+                    for field_name in fields if not fields[field_name]['read_only']]
 
         if form_name:
             form_defaults = self.form_defaults_map.get(form_name, None)
@@ -46,6 +50,24 @@ class AngularFormMixin(object):
             if form_defaults and field['id'] in form_defaults:
                 field.update(form_defaults[field['id']])
         return layout
+
+    def _get_field_layout(self, field_name, field):
+        if field['type'] == 'string':
+            # string or textarea?
+            qs = self.get_queryset()
+            model = qs.model
+            if model:
+                try:
+                    field = model._meta.get_field(field_name)
+                    if isinstance(field, TextField):
+                        return {
+                            'id': field_name,
+                            'type': 'textarea'
+                        }
+                except FieldDoesNotExist:
+                    pass
+            pass
+        return {'id': field_name}
 
     def _transform_layout(self, layout):
         if isinstance(layout, dict):
@@ -177,6 +199,8 @@ class AngularFormMixin(object):
 
         ret['method'] = 'patch' if has_instance else 'post'
         ret['has_initial_data'] = has_instance
+
+        # print(json.dumps(ret, indent=4))
 
         return Response(ret)
 

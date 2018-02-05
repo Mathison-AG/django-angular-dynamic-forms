@@ -3,7 +3,7 @@ import {DjangoFormBaseComponent} from './django-form-base.component';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {HttpClient} from '@angular/common/http';
 import {ErrorService} from './error-service';
-import {DjangoDialogConfig} from './django-form-iface';
+import {DjangoDialogConfig} from '../django-form-iface';
 
 @Component({
     selector: 'dialog-django-form',
@@ -42,7 +42,11 @@ export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
         }
 
         if (data.config) {
-            this.config = data.config;
+            if (data.django_url) {
+                this.extra_config = data.config;
+            } else {
+                this.config = data.config;
+            }
         }
 
         if (data.django_url) {

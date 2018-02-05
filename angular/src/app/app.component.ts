@@ -9,6 +9,7 @@ import {Component} from '@angular/core';
             <mat-sidenav #left mode="side" [opened]="true" class="left-sidenav">
                 <div class="left-sidenav-content">
                     <h1>Examples:</h1>
+                    <h2>Creating objects</h2>
                     <mat-list>
                         <mat-list-item>
                             <a routerLink="/create-via-dialog">Create a new object via dialog</a>
@@ -16,9 +17,30 @@ import {Component} from '@angular/core';
                         <mat-list-item>
                             <a routerLink="/create-in-page">Create a new object via in-page form</a>
                         </mat-list-item>
-                        <mat-list-item>
+                        <!-- mat-list-item>
                             <a>Create a new object in-page with dynamic configuration</a>
+                        </mat-list-item -->
+                    </mat-list>
+                    <h2>Creating objects with initial data</h2>
+                    <mat-list>
+                        <mat-list-item>
+                            <a routerLink="/create-via-dialog-initial-data">Create a new object via dialog</a>
                         </mat-list-item>
+                        <mat-list-item>
+                            <a routerLink="/create-in-page-initial-data">Create a new object via in-page form</a>
+                        </mat-list-item>
+                    </mat-list>
+                    <h2>Editing objects</h2>
+                    <mat-list>
+                        <mat-list-item>
+                            <a routerLink="/edit-via-dialog">Editing existing object via dialog</a>
+                        </mat-list-item>
+                        <mat-list-item>
+                            <a routerLink="/edit-in-page">Editing existing object in-page</a>
+                        </mat-list-item>
+                        <!-- mat-list-item>
+                            <a>Create a new object in-page with dynamic configuration</a>
+                        </mat-list-item -->
                     </mat-list>
                 </div>
             </mat-sidenav>
@@ -38,6 +60,16 @@ import {Component} from '@angular/core';
             padding: 20px;
             min-height: 100vh;
             border-left: 1px solid lightgray;
+        }
+        
+        h2 {
+            padding-bottom: 0;
+            margin-bottom: 0;
+            margin-top: 10px;
+        }
+        
+        mat-list {
+            padding-top: 0;
         }
     `]
 })

@@ -14,7 +14,7 @@ import {ErrorService} from './error-service';
 import {
     CompositeFieldTypes, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig, RadioFieldConfig,
     SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
-} from './django-form-iface';
+} from '../django-form-iface';
 
 
 /**
@@ -88,6 +88,7 @@ export class DjangoFormContentComponent implements OnInit {
 
     @Input()
     set initial_data(data: any) {
+        console.log('set initial data', data);
         this._initial_data = data;
         this._update_initial_data();
     }
@@ -103,6 +104,7 @@ export class DjangoFormContentComponent implements OnInit {
         if (!this.form_group) {
             this.form_group = this.formService.createFormGroup(this.form_model);
             this._bind_autocomplete();
+            this._update_initial_data();
         }
         this._trigger_validation();
         this.check.detectChanges();
@@ -344,6 +346,7 @@ export class DjangoFormContentComponent implements OnInit {
     }
 
     private _update_initial_data() {
+        console.log('updating initial data', this._initial_data, this.form_group);
         if (this._initial_data && this.form_group) {
             Object.keys(this.form_group.controls).forEach(name => {
                 if (name in this._initial_data) {

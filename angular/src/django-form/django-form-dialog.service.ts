@@ -5,6 +5,7 @@ import {MatDialog} from '@angular/material';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
+import {DjangoDialogConfig, DjangoFormConfig} from './django-form-iface';
 
 @Injectable()
 export class DjangoFormDialogService {
@@ -12,15 +13,7 @@ export class DjangoFormDialogService {
     }
 
     public open(django_url: string,
-                extra_options?: {
-                    submit?: (data, response) => void,
-                    cancel?: (data) => void,
-                    config?: any;
-                    form_title?: string;
-                    extra_form_data?: any;
-                    fields?: string[],
-                    initial_data_transformation? : (any) => any
-                }): Observable<any> {
+                extra_options?: DjangoDialogConfig): Observable<any> {
 
         if (!extra_options) {
             extra_options = {};
@@ -31,10 +24,9 @@ export class DjangoFormDialogService {
             data: {
                 django_url: django_url,
                 config: extra_options.config,
-                form_title: extra_options.form_title,
                 extra_form_data: extra_options.extra_form_data || {},
-                fields: extra_options.fields || [],
-                initial_data_transformation: extra_options.initial_data_transformation
+                initial_data_transformation: extra_options.initial_data_transformation,
+                config_transformation: extra_options.config_transformation
             }
         });
 
