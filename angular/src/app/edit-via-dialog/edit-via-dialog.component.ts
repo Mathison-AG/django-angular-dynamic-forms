@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatTableDataSource} from '@angular/material';
 import {HttpClient} from '@angular/common/http';
 import {DjangoFormDialogService, ErrorService} from '../../django-form';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({
     selector: 'app-edit-via-dialog',
@@ -11,7 +12,7 @@ import {DjangoFormDialogService, ErrorService} from '../../django-form';
         <p>
             At first run any of the "create" examples to have data in this table.
         </p>
-        
+
         <mat-table [dataSource]="data">
             <ng-container matColumnDef="name">
                 <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
@@ -41,8 +42,7 @@ import {DjangoFormDialogService, ErrorService} from '../../django-form';
             <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>
 
-        <code-sample [typescript]="typescript" [python]="python" [template]="template"
-                     [response]="response"></code-sample>
+        <code-sample [tabs]="tabs"></code-sample>
     `,
     styles: []
 })
@@ -51,8 +51,13 @@ export class EditViaDialogComponent implements OnInit {
     data = new MatTableDataSource();
     displayedColumns = ['name', 'zipcode', 'comment', 'actions'];
 
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
 
-    typescript = `
+    tabs = [
+        {
+            tab: 'typescript',
+            text: `
 
     data = new MatTableDataSource();
     displayedColumns = ['name', 'zipcode', 'comment', 'actions'];
@@ -79,9 +84,11 @@ export class EditViaDialogComponent implements OnInit {
             this.reload();
         });
     }
-`;
-
-    python = `
+`
+        },
+        {
+            tab: 'python',
+            text: `
 class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
@@ -103,9 +110,11 @@ router.register(r'cities', CityViewSet)
 urlpatterns = [
     url(r'^/api/1.0/', include(router.urls)),
 ]
-    `;
-
-    template = `
+    `
+        },
+        {
+            tab: 'template',
+            text: `
         <mat-table [dataSource]="data">
             <ng-container matColumnDef="name">
                 <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
@@ -131,9 +140,13 @@ urlpatterns = [
             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
             <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>    
-    `;
-
-    response: any;
+    `
+        },
+        {
+            tab: 'response',
+            text: ''
+        }
+    ];
 
     constructor(private http: HttpClient, private errors: ErrorService,
                 private dialog: DjangoFormDialogService) {
@@ -154,7 +167,7 @@ urlpatterns = [
     edit(id: string) {
         this.dialog.open(`/api/1.0/cities/${id}/`).subscribe(result => {
             this.reload();
-            this.response = result;
+            this.code.update('response', result);
         });
     }
 

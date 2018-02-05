@@ -1,4 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Optional, ViewChild} from '@angular/core';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
+import {TableComponent as EditInPageTableComponent} from './table/table.component';
+import {FormComponent as EditInPageFormComponent} from './form/form.component';
+import {ErrorService} from '../../django-form';
+import {MatTableDataSource} from '@angular/material';
+import {ActivatedRoute, Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
 
 @Component({
     selector: 'app-edit-in-page',
@@ -8,44 +15,162 @@ import {Component, OnInit} from '@angular/core';
 
         <router-outlet></router-outlet>
 
-        <code-sample [typescript]="typescript" [python]="python" [template]="template"
-                     [response]="response"></code-sample>
+        <code-sample [tabs]="tabs"></code-sample>
     `,
     styles: []
 })
 export class EditInPageComponent implements OnInit {
 
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
 
-    typescript = `
+    tabs = [
+        {
+            tab: 'Router',
+            text: `
+    {
+        path: 'edit-in-page',
+        pathMatch: 'prefix',
+        component: MainComponent,
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                component: TableComponent
+            },
+            {
+                path: ':id',
+                pathMatch: 'full',
+                component: FormComponent
+            },
+        ]
+    },            
+            `
+        },
+        {
+
+            tab: 'MainComponent',
+            text: `
+    finished(data) {
+        this.code.update('response', data);
+    }
+`
+        },
+        {
+
+            tab: 'MainComponent template',
+            text: `
+    <router-outlet></router-outlet>
+`
+        },
+        {
+
+            tab: 'TableComponent',
+            text: `
 
     data = new MatTableDataSource();
     displayedColumns = ['name', 'zipcode', 'comment', 'actions'];
 
     constructor(private http: HttpClient, private errors: ErrorService,
-                private dialog: DjangoFormDialogService)
-    {
+                private router: Router, private route: ActivatedRoute) {
     }
 
     ngOnInit() {
         this.reload();
     }
 
-    reload() {
+    public reload() {
         this.http.get<any>('/api/1.0/cities/')
             .catch(err => this.errors.show_communication_error(err))
-            .subscribe(resp=>{
+            .subscribe(resp => {
                 this.data = new MatTableDataSource(resp);
-            })
+            });
     }
 
     edit(id: string) {
-        this.dialog.open(\`/api/1.0/cities/$\{id\}/\`).subscribe(result => {
-            this.reload();
+        this.router.navigate([id], {
+            relativeTo: this.route
         });
     }
-`;
+`
+        },
+        {
 
-    python = `
+            tab: 'TableComponent template',
+            text: `
+    <mat-table [dataSource]="data">
+        <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{ row.name }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="zipcode">
+            <mat-header-cell *matHeaderCellDef> ZIP code</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{row.zipcode}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="comment">
+            <mat-header-cell *matHeaderCellDef> Comment</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{row.comment}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef> Actions</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+                <button mat-button color="primary" (click)="edit(row.id)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>`
+        },
+        {
+
+            tab: 'FormComponent',
+            text: `
+
+    url: string;
+
+    constructor(private route: ActivatedRoute, private router: Router, @Optional() private parent: EditInPageComponent) {
+    }
+
+    ngOnInit() {
+        this.url = \`/api/1.0/cities/\${this.route.snapshot.params.id}/\`;
+    }
+
+    submit(data) {
+        this.parent.finished(data);
+        this.router.navigate(['..'], {
+            relativeTo: this.route
+        });
+    }
+
+    cancel(data) {
+        this.parent.finished(data);
+        this.router.navigate(['..'], {
+            relativeTo: this.route
+        });
+    }
+`
+        },
+        {
+
+            tab: 'FormComponent template',
+            text: `
+        <div class='bordered' fxFlex="50" fxFlex.sm="100">
+            <inpage-django-form [django_url]="url"
+                                (submit)="submit($event)"
+                                (cancel)="cancel($event)"></inpage-django-form>
+        </div>
+`
+        },
+        {
+
+            tab: 'python',
+            text: `
 class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
@@ -66,39 +191,13 @@ router.register(r'cities', CityViewSet)
 
 urlpatterns = [
     url(r'^/api/1.0/', include(router.urls)),
-]
-    `;
-
-    template = `
-
-        <mat-table [dataSource]="data">
-            <ng-container matColumnDef="name">
-                <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{ row.name }}</mat-cell>
-            </ng-container>
-
-            <ng-container matColumnDef="zipcode">
-                <mat-header-cell *matHeaderCellDef> ZIP code</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{row.zipcode}}</mat-cell>
-            </ng-container>
-
-            <ng-container matColumnDef="comment">
-                <mat-header-cell *matHeaderCellDef> Comment</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{row.comment}}</mat-cell>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef> Actions</mat-header-cell>
-                <mat-cell *matCellDef="let row"><button mat-button color="primary" (click)="edit(row.id)">
-                    <mat-icon>edit</mat-icon></button></mat-cell>
-            </ng-container>
-
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-        </mat-table>    
-    `;
-
-    response: any;
+]`
+        },
+        {
+            tab: 'response',
+            text: ''
+        }
+    ];
 
 
     constructor() {
@@ -108,7 +207,7 @@ urlpatterns = [
     }
 
     finished(data) {
-        this.response = data;
+        this.code.update('response', data);
     }
 
 }

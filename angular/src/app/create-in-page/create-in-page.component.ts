@@ -1,5 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
+import {MatTabGroup} from '@angular/material';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({
     selector: 'app-create-in-page',
@@ -8,11 +10,12 @@ import {Subject} from 'rxjs/Subject';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form django_url="/api/1.0/cities/" (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
+                <inpage-django-form django_url="/api/1.0/cities/" (submit)="submit($event)"
+                                    (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
 
-        <code-sample [typescript]="typescript" [template]="template" [python]="python" [response]="response"></code-sample>
+        <code-sample [tabs]="tabs"></code-sample>
     `,
     styles: [`
         .bordered {
@@ -22,8 +25,13 @@ import {Subject} from 'rxjs/Subject';
     `]
 })
 export class CreateInPageComponent implements OnInit {
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
 
-    typescript = `
+    tabs = [
+        {
+            tab: 'typescript',
+            text: `
     submit(data) {
         console.log('Saved, got response', data);
     }
@@ -31,8 +39,11 @@ export class CreateInPageComponent implements OnInit {
     cancel(data) {
         console.log('cancelled, form data', data);
     }
-    `;
-    python = `
+    `
+        },
+        {
+            tab: 'python',
+            text: `
 class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
@@ -54,15 +65,23 @@ router.register(r'cities', CityViewSet)
 urlpatterns = [
     url(r'^/api/1.0/', include(router.urls)),
 ]
-    `;
-    template = `
+    `
+        },
+        {
+            tab: 'template',
+            text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
     <inpage-django-form django_url="/api/1.0/cities/" 
                         (submit)="submit($event)" 
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>
-    `;
-    response = '';
+    `
+        },
+        {
+            tab: 'response',
+            text: ''
+        }
+    ];
 
     constructor() {
     }
@@ -71,10 +90,10 @@ urlpatterns = [
     }
 
     submit(data) {
-        this.response = data;
+        this.code.update('response', data);
     }
 
     cancel(data) {
-        this.response = data;
+        this.code.update('response', data);
     }
 }

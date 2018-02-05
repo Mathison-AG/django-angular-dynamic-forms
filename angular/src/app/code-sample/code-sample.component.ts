@@ -6,23 +6,11 @@ import {HighlightJsService} from 'angular2-highlight-js';
     selector: 'code-sample',
     template: `
         <mat-tab-group style="margin-top: 50px;" #group (selectedTabChange)="tabChange($event.index)">
-            <mat-tab label="Angular">
+            
+            <mat-tab [label]="tab.tab" *ngFor="let tab of tabs">
                 <div>
-                    <pre class="typescript" [innerHtml]="">{{typescript}}</pre>
+                    <pre [ngClass]="replaceSpaces(tab.tab)" [innerHtml]="">{{tab.text}}</pre>
                 </div>
-            </mat-tab>
-            <mat-tab label="HTML Template">
-                <div>
-                    <pre class="template">{{template}}</pre>
-                </div>
-            </mat-tab>
-            <mat-tab label="Python">
-                <div>
-                    <pre class="python">{{python}}</pre>
-                </div>
-            </mat-tab>
-            <mat-tab label="Console.log(result)" [disabled]="!_response || !_response[0]" highlight-js-content=".highlight">
-                <pre *ngFor="let resp of _response" class="json">{{resp | json}}</pre>
             </mat-tab>
         </mat-tab-group>
     `,
@@ -33,28 +21,8 @@ export class CodeSampleComponent implements AfterViewInit {
     @ViewChild('group')
     group: MatTabGroup;
 
-
     @Input()
-    typescript: string;
-
-    @Input()
-    python: string;
-
-    @Input()
-    template: string;
-
-    _response: string[];
-
-    @Input()
-    set response(value: string) {
-        this._response = [value];
-        if (value) {
-            setTimeout(() => {
-                this.group.selectedIndex = 3;
-                this.tabChange(3);
-            });
-        }
-    }
+    tabs: { tab: string, text: string }[];
 
     constructor(private el: ElementRef, private service: HighlightJsService) {
     }
@@ -64,12 +32,21 @@ export class CodeSampleComponent implements AfterViewInit {
     }
 
     tabChange(index) {
-        const selectors = [
-            '.typescript', '.template', '.python', '.json'
-        ];
-        let el = this.el.nativeElement.querySelector(selectors[index]);
+        let el = this.el.nativeElement.querySelector(`.${this.replaceSpaces(this.tabs[index].tab)}`);
         if (el) {
             this.service.highlight(el);
         }
+    }
+
+    update(tab : string, value: any) {
+        value = JSON.stringify(value, null, 4);
+        const tabIndex = this.tabs.findIndex(x => x.tab==tab);
+        this.tabs[tabIndex] = {tab: tab, text: value};
+        this.tabChange(tabIndex);
+        this.group.selectedIndex = tabIndex;
+    }
+
+    replaceSpaces(x) {
+        return x.replace(' ', '_');
     }
 }

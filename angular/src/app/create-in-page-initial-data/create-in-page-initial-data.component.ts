@@ -1,6 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
 import {DjangoFormConfig} from '../../django-form/django-form-iface';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({
     selector: 'app-create-in-page',
@@ -9,13 +10,13 @@ import {DjangoFormConfig} from '../../django-form/django-form-iface';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form django_url="/api/1.0/cities/" 
-                                    [extra_config] = 'config'
+                <inpage-django-form django_url="/api/1.0/cities/"
+                                    [extra_config]='config'
                                     (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
 
-        <code-sample [typescript]="typescript" [template]="template" [python]="python" [response]="response"></code-sample>
+        <code-sample [tabs]="tabs"></code-sample>
     `,
     styles: [`
         .bordered {
@@ -26,7 +27,13 @@ import {DjangoFormConfig} from '../../django-form/django-form-iface';
 })
 export class CreateInPageInitialDataComponent implements OnInit {
 
-    typescript = `
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
+
+    tabs = [
+        {
+            tab: 'typescript',
+            text: `
 
     config : DjangoFormConfig = {
         initial_data: {
@@ -41,8 +48,11 @@ export class CreateInPageInitialDataComponent implements OnInit {
     cancel(data) {
         console.log('cancelled, form data', data);
     }
-    `;
-    python = `
+    `
+        },
+        {
+            tab: 'python',
+            text: `
 class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
@@ -64,18 +74,26 @@ router.register(r'cities', CityViewSet)
 urlpatterns = [
     url(r'^/api/1.0/', include(router.urls)),
 ]
-    `;
-    template = `
+    `
+        },
+        {
+            tab: 'template',
+            text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
     <inpage-django-form django_url="/api/1.0/cities/" 
                         [extra_config] = 'config'
                         (submit)="submit($event)" 
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>
-    `;
-    response = '';
+    `
+        },
+        {
+            tab: 'response',
+            text: ''
+        }
+    ];
 
-    config : DjangoFormConfig = {
+    config: DjangoFormConfig = {
         initial_data: {
             name: 'Prague'
         }
@@ -88,10 +106,10 @@ urlpatterns = [
     }
 
     submit(data) {
-        this.response = data;
+        this.code.update('response', data);
     }
 
     cancel(data) {
-        this.response = data;
+        this.code.update('response', data);
     }
 }

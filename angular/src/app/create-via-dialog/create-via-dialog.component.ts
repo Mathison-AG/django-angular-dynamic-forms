@@ -1,20 +1,27 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {DjangoFormDialogService} from '../../django-form';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({
     selector: 'app-create-via-dialog',
     template: `
         <h1>Creating a new django object via popup dialog</h1>
-        
+
         <button mat-raised-button color="primary" (click)="click()">Click to create a new City via dialog</button>
 
-        <code-sample [typescript]="typescript" [python]="python" [template]="template" [response]="response"></code-sample>
+        <code-sample [tabs]="tabs"></code-sample>
     `,
     styles: []
 })
 export class CreateViaDialogComponent implements OnInit {
 
-    typescript=`
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
+
+    tabs = [
+        {
+            tab: 'typescript',
+            text: `
 constructor(private dialog: DjangoFormDialogService) {
 }
 click() {
@@ -23,9 +30,11 @@ click() {
         console.log(result);
     });
 }
-`;
-
-    python=`
+`
+        },
+        {
+            tab: 'python',
+            text: `
 class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
@@ -47,11 +56,17 @@ router.register(r'cities', CityViewSet)
 urlpatterns = [
     url(r'^/api/1.0/', include(router.urls)),
 ]
-    `;
-
-    template = `<button mat-raised-button color="primary" (click)="click()">Click to create a new City via dialog</button>`;
-
-    response: any;
+    `
+        },
+        {
+            tab: 'template',
+            text: `<button mat-raised-button color="primary" (click)="click()">Click to create a new City via dialog</button>`
+        },
+        {
+            tab: 'response',
+            text: ''
+        }
+    ];
 
     constructor(private dialog: DjangoFormDialogService) {
     }
@@ -62,7 +77,7 @@ urlpatterns = [
     click() {
 
         this.dialog.open('/api/1.0/cities/').subscribe(result => {
-            this.response = result;
+            this.code.update('response', result);
         });
     }
 }
