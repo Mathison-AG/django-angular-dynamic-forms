@@ -39,14 +39,12 @@ export class DjangoFormBaseComponent implements OnInit {
     /**
      * Returns submitted form data
      *
-     * @type {EventEmitter<any>}
      */
     @Output() submit = new EventEmitter<{ data: any; response?: any }>();
 
     /**
      * Returns cancelled form data
      *
-     * @type {EventEmitter<any>}
      */
     @Output() cancel = new EventEmitter<{ data: any }>();
 

@@ -34,7 +34,6 @@ export class DjangoFormContentComponent implements OnInit {
     /**
      * Returns submitted form data on enter
      *
-     * @type {EventEmitter<any>}
      */
     @Output() submit_on_enter = new EventEmitter();
 
