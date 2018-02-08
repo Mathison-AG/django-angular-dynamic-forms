@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {DjangoFormDialogService} from '../../django-form';
+import {DjangoFormDialogService} from 'django-angular-dynamic-forms';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({

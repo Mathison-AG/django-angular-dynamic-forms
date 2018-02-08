@@ -3,7 +3,6 @@ import {Observable} from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {ErrorService} from './error-service';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {
     catchError, distinctUntilChanged, filter, map, mergeMap, partition, share, shareReplay,
     tap
@@ -13,6 +12,7 @@ import 'rxjs/add/observable/merge';
 import 'rxjs/add/operator/partition';
 import 'rxjs/add/operator/first';
 import {Subject} from 'rxjs/Subject';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {DjangoFormContentComponent} from './django-form-content.component';
 
 /**
@@ -24,9 +24,9 @@ import {DjangoFormContentComponent} from './django-form-content.component';
 })
 export class DjangoFormBaseComponent implements OnInit {
 
-    private url$ = new Subject<string>();
+    private url$ = new BehaviorSubject<string>('');
     public config$: Observable<DjangoFormConfig>;
-    private _config$ = new Subject<DjangoFormConfig>();
+    private _config$ = new BehaviorSubject<DjangoFormConfig>({});
     public errors$ = new Subject<any>();
 
     @ViewChild('form') form: DjangoFormContentComponent;

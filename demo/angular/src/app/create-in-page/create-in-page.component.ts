@@ -1,6 +1,4 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {Subject} from 'rxjs/Subject';
-import {MatTabGroup} from '@angular/material';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({

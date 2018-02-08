@@ -9,7 +9,7 @@
   },
   "angularCompilerOptions": {
     "annotateForClosureCompiler": true,
-    "flatModuleId": "@mesemus/django-angular-dynamic-forms",
+    "flatModuleId": "django-angular-dynamic-forms",
     "flatModuleOutFile": "django-angular-dynamic-forms.js",
     "skipTemplateCodegen": true,
     "strictMetadataEmit": true

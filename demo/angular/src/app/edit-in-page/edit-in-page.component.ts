@@ -1,11 +1,6 @@
-import {Component, OnInit, Optional, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
-import {TableComponent as EditInPageTableComponent} from './table/table.component';
-import {FormComponent as EditInPageFormComponent} from './form/form.component';
-import {ErrorService} from '../../django-form';
-import {MatTableDataSource} from '@angular/material';
-import {ActivatedRoute, Router} from '@angular/router';
-import {HttpClient} from '@angular/common/http';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-edit-in-page',

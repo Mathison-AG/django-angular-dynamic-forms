@@ -23,7 +23,7 @@ let moduleName      = 'django-angular-dynamic-forms',
     fileExtension   = minify ? "min." : "";
 
 const outputFilesDir = path.resolve(`./dist/${target}/${moduleName}`);
-const outputPath = `./dist/@mesemus/${moduleName}/${bundleFolder}/${moduleName}${formatExtension}.${fileExtension}js`;
+const outputPath = `./dist/${moduleName}/${bundleFolder}/${moduleName}${formatExtension}.${fileExtension}js`;
 
 const plugins = [
         alias(rxjsPathMapping),

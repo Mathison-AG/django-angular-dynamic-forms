@@ -1,8 +1,8 @@
 {
-    "name": "@mesemus/django-angular-dynamic-forms",
-    "version": "0.5.0",
+    "name": "django-angular-dynamic-forms",
+    "version": "0.5.1",
     "license": "MIT",
-    "description": "",
+    "description": "In alpha, use at your own risk",
     "main": "./bundles/django-angular-dynamic-forms.umd.js",
     "module": "./esm5/django-angular-dynamic-forms.js",
     "es2015": "./esm2015/django-angular-dynamic-forms.js",

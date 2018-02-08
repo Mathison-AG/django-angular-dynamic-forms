@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {MatSnackBar} from '@angular/material';
-import {ErrorService} from '../django-form';
+import {ErrorService} from 'django-angular-dynamic-forms';
 
 @Injectable()
 export class MatErrorService extends ErrorService {

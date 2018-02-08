@@ -1,8 +1,7 @@
 import {NgModule} from '@angular/core';
 
-
 import {AppComponent} from './app.component';
-import {DjangoFormModule, ErrorService} from '../django-form';
+import {DjangoFormModule, ErrorService} from 'django-angular-dynamic-forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
     MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule, MatTableModule,

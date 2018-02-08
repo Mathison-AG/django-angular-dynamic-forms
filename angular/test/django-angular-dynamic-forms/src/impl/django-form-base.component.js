@@ -27,6 +27,7 @@ require("rxjs/add/observable/merge");
 require("rxjs/add/operator/partition");
 require("rxjs/add/operator/first");
 var Subject_1 = require("rxjs/Subject");
+var BehaviorSubject_1 = require("rxjs/BehaviorSubject");
 var django_form_content_component_1 = require("./django-form-content.component");
 /**
  * Form component targeted on django rest framework
@@ -36,8 +37,8 @@ var DjangoFormBaseComponent = /** @class */ (function () {
         this.httpClient = httpClient;
         this.snackBar = snackBar;
         this.error_service = error_service;
-        this.url$ = new Subject_1.Subject();
-        this._config$ = new Subject_1.Subject();
+        this.url$ = new BehaviorSubject_1.BehaviorSubject('');
+        this._config$ = new BehaviorSubject_1.BehaviorSubject({});
         this.errors$ = new Subject_1.Subject();
         /**
          * Returns submitted form data

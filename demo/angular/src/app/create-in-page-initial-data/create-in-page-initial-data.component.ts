@@ -1,6 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {Subject} from 'rxjs/Subject';
-import {DjangoFormConfig} from '../../django-form/django-form-iface';
+import {DjangoFormConfig} from 'django-angular-dynamic-forms';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
 @Component({
