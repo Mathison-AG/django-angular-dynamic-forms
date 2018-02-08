@@ -14,7 +14,7 @@ import {ErrorService} from './error-service';
 import {
     CompositeFieldTypes, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig, RadioFieldConfig,
     SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
-} from '../django-form-iface';
+} from './django-form-iface';
 
 
 /**

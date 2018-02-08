@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { MatSnackBar } from '@angular/material';
 import { HttpClient } from '@angular/common/http';
 import { ErrorService } from './error-service';
-import { DjangoFormConfig } from '../django-form-iface';
+import { DjangoFormConfig } from './django-form-iface';
 import 'rxjs/add/observable/merge';
 import 'rxjs/add/operator/partition';
 import 'rxjs/add/operator/first';

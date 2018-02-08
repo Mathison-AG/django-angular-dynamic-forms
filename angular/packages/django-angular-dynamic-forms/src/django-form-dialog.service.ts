@@ -5,7 +5,7 @@ import {MatDialog} from '@angular/material';
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {DjangoDialogConfig, DjangoFormConfig} from './django-form-iface';
+import {DjangoDialogConfig, DjangoFormConfig} from './impl/django-form-iface';
 
 @Injectable()
 export class DjangoFormDialogService {

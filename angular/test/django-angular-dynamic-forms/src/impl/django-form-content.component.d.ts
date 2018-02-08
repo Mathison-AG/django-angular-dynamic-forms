@@ -4,7 +4,7 @@ import { DynamicFormControlModel, DynamicFormService } from '@ng-dynamic-forms/c
 import 'rxjs/add/operator/merge';
 import { HttpClient } from '@angular/common/http';
 import { ErrorService } from './error-service';
-import { FieldConfig } from '../django-form-iface';
+import { FieldConfig } from './django-form-iface';
 /**
  * Form component targeted on django rest framework
  */

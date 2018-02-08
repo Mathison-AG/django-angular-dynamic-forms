@@ -3,7 +3,7 @@ import {DjangoFormBaseComponent} from './django-form-base.component';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {HttpClient} from '@angular/common/http';
 import {ErrorService} from './error-service';
-import {DjangoDialogConfig} from '../django-form-iface';
+import {DjangoDialogConfig} from './django-form-iface';
 
 @Component({
     selector: 'dialog-django-form',

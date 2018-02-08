@@ -8,5 +8,6 @@ __export(require("./django-form-dialog.service"));
 __export(require("./impl/inpage-django-form.component"));
 __export(require("./impl/dialog-django-form.component"));
 __export(require("./impl/error-service"));
+__export(require("./impl/django-form-iface"));
 
 //# sourceMappingURL=django-form.js.map

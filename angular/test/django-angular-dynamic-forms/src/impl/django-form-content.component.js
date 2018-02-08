@@ -14,7 +14,7 @@ var core_2 = require("@ng-dynamic-forms/core");
 require("rxjs/add/operator/merge");
 var http_1 = require("@angular/common/http");
 var error_service_1 = require("./error-service");
-var django_form_iface_1 = require("../django-form-iface");
+var django_form_iface_1 = require("./django-form-iface");
 /**
  * Form component targeted on django rest framework
  */

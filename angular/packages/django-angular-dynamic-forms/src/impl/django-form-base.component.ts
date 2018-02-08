@@ -8,7 +8,7 @@ import {
     catchError, distinctUntilChanged, filter, map, mergeMap, partition, share, shareReplay,
     tap
 } from 'rxjs/operators';
-import {DjangoFormConfig} from '../django-form-iface';
+import {DjangoFormConfig} from './django-form-iface';
 import 'rxjs/add/observable/merge';
 import 'rxjs/add/operator/partition';
 import 'rxjs/add/operator/first';
