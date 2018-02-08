@@ -94,6 +94,7 @@ const utils = {
         return {
 
             input: utils.getRollupInputPath(packageJson, target),
+            external: Object.keys(packageJson.peerDependencies),
             output: {
                 file: utils.getRollupOutputPath(packageJson, format, target, minify),
                 format: format,
@@ -104,7 +105,6 @@ const utils = {
                 banner: utils.getBanner(packageJson)
             },
             context: "this",
-            external: Object.keys(globals),
             plugins: utils.getRollupPlugins(minify),
         };
     }
