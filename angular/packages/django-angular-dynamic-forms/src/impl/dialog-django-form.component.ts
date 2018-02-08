@@ -18,11 +18,11 @@ export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
                 error_service: ErrorService) {
         super(httpClient, snackBar, error_service);
 
-        this.submit.subscribe(info => {
+        this.submit.subscribe((info: { data: any; response?: any; cancel: boolean }) => {
             info.cancel = false;
             dialogRef.close(info);
         });
-        this.cancel.subscribe(info => {
+        this.cancel.subscribe((info: { data: any; cancel: boolean }) => {
             info.cancel = true;
             dialogRef.close(info);
         });

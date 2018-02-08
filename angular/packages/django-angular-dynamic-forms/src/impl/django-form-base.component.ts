@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable} from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {ErrorService} from './error-service';
@@ -9,6 +9,11 @@ import {
     tap
 } from 'rxjs/operators';
 import {DjangoFormConfig} from '../django-form-iface';
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/partition';
+import 'rxjs/add/operator/first';
+import {Subject} from 'rxjs/Subject';
+import {DjangoFormContentComponent} from './django-form-content.component';
 
 /**
  * Form component targeted on django rest framework
@@ -19,31 +24,18 @@ import {DjangoFormConfig} from '../django-form-iface';
 })
 export class DjangoFormBaseComponent implements OnInit {
 
-    private url$ = new BehaviorSubject<string>(null);
+    private url$ = new Subject<string>();
     public config$: Observable<DjangoFormConfig>;
-    private _config$ = new BehaviorSubject<DjangoFormConfig>(null);
-    public errors$ = new BehaviorSubject<any>(null);
+    private _config$ = new Subject<DjangoFormConfig>();
+    public errors$ = new Subject<any>();
 
-    @Input()
-    public extra_config: any = {};
-
-    @Input()
-    public initial_data_transformation: (any) => any = (x) => x;
-
-    @Input()
-    public config_transformation: (DjangoFormConfig) => DjangoFormConfig = (x) => x;
-
-    @Input()
-    extra_form_data: any;
-
-    @Input()
-    form_id: string;
+    @ViewChild('form') form: DjangoFormContentComponent;
 
     /**
      * Returns submitted form data
      *
      */
-    @Output() submit = new EventEmitter<{ data: any; response?: any }>();
+    @Output() submit = new EventEmitter<{ data: any; response?: any, cancel: boolean }>();
 
     /**
      * Returns cancelled form data
@@ -51,7 +43,22 @@ export class DjangoFormBaseComponent implements OnInit {
      */
     @Output() cancel = new EventEmitter<{ data: any }>();
 
-    @ViewChild('form') form;
+
+
+    @Input()
+    extra_form_data: any;
+
+    @Input()
+    form_id: string;
+
+    @Input()
+    public extra_config: any = {};
+
+    @Input()
+    public initial_data_transformation: (initial_data: any) => any = (x) => x
+
+    @Input()
+    public config_transformation: (config: DjangoFormConfig) => DjangoFormConfig = (x) => x
 
     @Input()
     set django_url(_url: string) {
@@ -63,42 +70,6 @@ export class DjangoFormBaseComponent implements OnInit {
         this._config$.next(_config);
     }
 
-    static _generate_actions(actions) {
-        const ret = [];
-        if (actions) {
-            for (const action of actions) {
-                let action_id;
-                let action_label;
-                let action_cancel = false;
-                let action_color = 'primary';
-
-                if (Array.isArray(action)) {
-                    action_id = action[0];
-                    action_label = action[1];
-                    if (action_label === undefined) {
-                        action_label = action_id;
-                    }
-                } else if (Object(action) !== action) {
-                    action_id = action_label = action;
-                } else {
-                    action_id = action.id;
-                    action_label = action.label;
-                    action_cancel = action.cancel;
-                    if (action.color) {
-                        action_color = action.color;
-                    }
-                }
-                ret.push({
-                    id: action_id,
-                    label: action_label,
-                    color: action_color,
-                    cancel: action.cancel
-                });
-            }
-        }
-        return ret;
-    }
-
     constructor(private httpClient: HttpClient, private snackBar: MatSnackBar, private error_service: ErrorService) {
     }
 
@@ -107,7 +78,7 @@ export class DjangoFormBaseComponent implements OnInit {
         const _configs = Observable.merge(
             this.url$.pipe(
                 filter(url => !!url),
-                mergeMap(url => this._download_django_form(url)),
+                mergeMap((url: string) => this._download_django_form(url)), // url is never null here
                 // map(x => ({
                 //     ...this.extra_config,
                 //         x
@@ -117,13 +88,13 @@ export class DjangoFormBaseComponent implements OnInit {
             this._config$.pipe(
                 filter(x => !!x)
             )
-        ).partition<DjangoFormConfig>(x => x.has_initial_data);
+        ).partition<DjangoFormConfig>((x: DjangoFormConfig) => !!x.has_initial_data);
 
         this.config$ = Observable.merge(
             // if need initial data, return observable that loads them
             _configs[0].pipe(
-                mergeMap(_config => this.httpClient
-                    .get<any>(_config.django_url,
+                mergeMap((_config: DjangoFormConfig) => this.httpClient
+                    .get<any>(_config.django_url as string,     // never null here
                         {withCredentials: true})
                     .pipe(
                         catchError(error => this.error_service.show_communication_error(error)),
@@ -166,7 +137,7 @@ export class DjangoFormBaseComponent implements OnInit {
                         ...config
                     }
                 )),
-                map(config => {
+                map((config: DjangoFormConfig) => {
                     config = {
                         ...config,
                         ...this.extra_config
@@ -180,7 +151,7 @@ export class DjangoFormBaseComponent implements OnInit {
             );
     }
 
-    public submitted(button_id, is_cancel) {
+    public submitted(button_id: string, is_cancel: boolean) {
         // clone the value so that button clicks are not remembered
         const value = Object.assign({}, this.form.value);
         this._flatten(null, value, null);
@@ -194,7 +165,7 @@ export class DjangoFormBaseComponent implements OnInit {
         }
     }
 
-    private submit_to_django(data) {
+    private submit_to_django(data: any) {
         this.config$.first().subscribe((config: DjangoFormConfig) => {
             let extra: any;
             if (this.extra_form_data instanceof HttpParams) {
@@ -219,7 +190,7 @@ export class DjangoFormBaseComponent implements OnInit {
                 }
                 call.pipe(
                     catchError(error => {
-                        if (error.status == 400) {
+                        if (error.status === 400) {
                             this.errors$.next(error.error);
                             return Observable.empty();
                         }
@@ -233,18 +204,20 @@ export class DjangoFormBaseComponent implements OnInit {
                     });
                     this.submit.emit({
                         response: response,
-                        data: data
+                        data: data,
+                        cancel: false
                     });
                 });
             } else {
                 this.submit.emit({
-                    data: data
+                    data: data,
+                    cancel: false
                 });
             }
         });
     }
 
-    private _flatten(name, current, parent) {
+    private _flatten(name: string|null, current: any, parent: any) {
         if (current !== Object(current)) {
             return;
         }
@@ -258,5 +231,41 @@ export class DjangoFormBaseComponent implements OnInit {
             }
             delete parent[name];
         }
+    }
+
+    protected _generate_actions(actions: any) {
+        const ret = [];
+        if (actions) {
+            for (const action of actions) {
+                let action_id;
+                let action_label;
+                let action_cancel = false;
+                let action_color = 'primary';
+
+                if (Array.isArray(action)) {
+                    action_id = action[0];
+                    action_label = action[1];
+                    if (action_label === undefined) {
+                        action_label = action_id;
+                    }
+                } else if (Object(action) !== action) {
+                    action_id = action_label = action;
+                } else {
+                    action_id = action.id;
+                    action_label = action.label;
+                    action_cancel = action.cancel;
+                    if (action.color) {
+                        action_color = action.color;
+                    }
+                }
+                ret.push({
+                    id: action_id,
+                    label: action_label,
+                    color: action_color,
+                    cancel: action.cancel
+                });
+            }
+        }
+        return ret;
     }
 }

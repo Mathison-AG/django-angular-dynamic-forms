@@ -23,15 +23,15 @@ export interface FieldConfigBase {
     type: FieldTypes;
     required?: boolean;
     read_only?: boolean;
-    layout?: DynamicFormControlLayout
+    layout?: DynamicFormControlLayout;
 }
 
 export interface StringFieldConfig extends FieldConfigBase {
     type: SimpleFieldTypes.STRING;
     max_length?: number;
     min_length?: number;
-    autocomplete_list? : string[];
-    autocomplete_url? : string;
+    autocomplete_list?: string[];
+    autocomplete_url?: string;
 }
 
 export interface TextAreaFieldConfig extends FieldConfigBase {
@@ -107,19 +107,19 @@ export interface DjangoFormConfig {
 export interface DjangoDialogConfig {
 
     // django url, form will be downloaded from the url
-    django_url? : string;
+    django_url?: string;
 
     // config in case django_url is not set
-    config? : DjangoFormConfig;
+    config?: DjangoFormConfig;
 
     // extra data that will be sent in GET/POST requests to django
     extra_form_data?: any;
 
     // transformation that is performed on the initial data before they are passed to generated form
-    initial_data_transformation?: (any) => any;
+    initial_data_transformation?: (initial_data: any) => any;
 
     // transformation to the form configuration before the form is generated
-    config_transformation?: (DjangoFormConfig) => DjangoFormConfig;
+    config_transformation?: (config: DjangoFormConfig) => DjangoFormConfig;
 
     // form name in case there are multiple forms defined on a viewset
     form_id?: string;

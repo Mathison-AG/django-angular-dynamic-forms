@@ -37,8 +37,8 @@ export class DjangoFormContentComponent implements OnInit {
      */
     @Output() submit_on_enter = new EventEmitter();
 
-    private _external_errors = {};
-    private _initial_data = null;
+    private _external_errors: { [s: string]: any; } = {};
+    private _initial_data: any = null;
 
     @Input()
     set layout(_layout: FieldConfig[]) {
@@ -112,9 +112,11 @@ export class DjangoFormContentComponent implements OnInit {
     private _bind_autocomplete() {
         for (const autocompleter of this.autocompleters) {
             const widget = this.form_group.get(this.formService.getPath(autocompleter.model));
-            widget.valueChanges.subscribe(value => {
-                autocompleter.change(widget, value, this.value);
-            });
+            if (widget) {
+                widget.valueChanges.subscribe(value => {
+                    autocompleter.change(widget, value, this.value);
+                });
+            }
         }
     }
 
@@ -122,7 +124,9 @@ export class DjangoFormContentComponent implements OnInit {
         if (this.form_group) {
             Object.keys(this.form_group.controls).forEach(field => {
                 const control = this.form_group.get(field);
-                control.markAsTouched({onlySelf: true});
+                if (control) {
+                    control.markAsTouched({onlySelf: true});
+                }
             });
         }
     }
@@ -146,6 +150,7 @@ export class DjangoFormContentComponent implements OnInit {
 
         switch (type) {
             case SimpleFieldTypes.STRING:
+                const sfc = field_config as StringFieldConfig;
                 const model = new DynamicInputModel(
                     {
                         id: id,
@@ -157,22 +162,22 @@ export class DjangoFormContentComponent implements OnInit {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            maxLength: (field_config as StringFieldConfig).max_length,
-                            minLength: (field_config as StringFieldConfig).min_length
+                            maxLength: sfc.max_length,
+                            minLength: sfc.min_length
                         },
                         errorMessages: {
                             external_error: '{{external_error}}'
                         },
-                        list: (field_config as StringFieldConfig).autocomplete_list
+                        list: sfc.autocomplete_list
                     },
                     field_config.layout
                 );
-                if ((field_config as StringFieldConfig).autocomplete_list ||
-                    (field_config as StringFieldConfig).autocomplete_url) {
+                if (sfc.autocomplete_list ||
+                    sfc.autocomplete_url) {
                     this.autocompleters.push(
                         new AutoCompleter(this.httpClient, this.error_service,
-                            (field_config as StringFieldConfig).autocomplete_list,
-                            (field_config as StringFieldConfig).autocomplete_url,
+                            sfc.autocomplete_list,
+                            sfc.autocomplete_url,
                             model));
                 }
                 return model;
@@ -219,6 +224,7 @@ export class DjangoFormContentComponent implements OnInit {
                     field_config.layout
                 );
             case SimpleFieldTypes.INTEGER:
+                const ifc = (field_config as IntegerFieldConfig);
                 return new DynamicInputModel(
                     {
                         id: id,
@@ -226,25 +232,26 @@ export class DjangoFormContentComponent implements OnInit {
                         inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
                         required: field_config.required,
                         disabled: field_config.read_only,
-                        min: (field_config as IntegerFieldConfig).min_value,
-                        max: (field_config as IntegerFieldConfig).max_value,
+                        min: ifc.min_value,
+                        max: ifc.max_value,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            min: (field_config as IntegerFieldConfig).min_value,
-                            max: (field_config as IntegerFieldConfig).max_value
+                            min: ifc.min_value,
+                            max: ifc.max_value
                         },
                         errorMessages: {
                             external_error: '{{external_error}}',
-                            min: `Value must be in range ${(field_config as IntegerFieldConfig).min_value} - ${(field_config as IntegerFieldConfig).max_value}`,
-                            max: `Value must be in range ${(field_config as IntegerFieldConfig).min_value} - ${(field_config as IntegerFieldConfig).max_value}`
+                            min: `Value must be in range ${ifc.min_value} - ${ifc.max_value}`,
+                            max: `Value must be in range ${ifc.min_value} - ${ifc.max_value}`
                         }
                     },
                     field_config.layout
                 );
             case SimpleFieldTypes.FLOAT:
+                const ffc = (field_config as FloatFieldConfig);
                 return new DynamicInputModel(
                     {
                         id: id,
@@ -252,21 +259,21 @@ export class DjangoFormContentComponent implements OnInit {
                         inputType: DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
                         required: field_config.required,
                         disabled: field_config.read_only,
-                        min: (field_config as FloatFieldConfig).min_value,
-                        max: (field_config as FloatFieldConfig).max_value,
+                        min: ffc.min_value,
+                        max: ffc.max_value,
                         step: 0.00000001,
                         validators: {
                             external_validator: {
                                 name: external_validator.name,
                                 args: {id: id, errors: this._external_errors}
                             },
-                            min: (field_config as FloatFieldConfig).min_value,
-                            max: (field_config as FloatFieldConfig).max_value
+                            min: ffc.min_value,
+                            max: ffc.max_value
                         },
                         errorMessages: {
                             external_error: '{{external_error}}',
-                            min: `Value must be in range ${(field_config as FloatFieldConfig).min_value} - ${(field_config as FloatFieldConfig).max_value}`,
-                            max: `Value must be in range ${(field_config as FloatFieldConfig).min_value} - ${(field_config as FloatFieldConfig).max_value}`
+                            min: `Value must be in range ${ffc.min_value} - ${ffc.max_value}`,
+                            max: `Value must be in range ${ffc.min_value} - ${ffc.max_value}`
                         }
                     },
                     field_config.layout
@@ -348,8 +355,10 @@ export class DjangoFormContentComponent implements OnInit {
         console.log('updating initial data', this._initial_data, this.form_group);
         if (this._initial_data && this.form_group) {
             Object.keys(this.form_group.controls).forEach(name => {
-                if (name in this._initial_data) {
-                    this.form_group.controls[name].setValue(this._initial_data[name]);
+                if (this._initial_data) {
+                    if (name in this._initial_data) {
+                        this.form_group.controls[name].setValue(this._initial_data[name]);
+                    }
                 }
             });
         }
@@ -376,13 +385,13 @@ export class DjangoFormContentComponent implements OnInit {
 
 export function external_validator(conf: { id: string; errors: any }): ValidatorFn {
     // noinspection JSUnusedLocalSymbols
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (_control: AbstractControl): { [key: string]: any } => {
         if (conf.id in conf.errors) {
             const ret = {external_error: {value: conf.errors[conf.id][0]}};
             delete conf.errors[conf.id];
             return ret;
         } else {
-            return null;
+            return {};
         }
     };
 }
@@ -390,12 +399,12 @@ export function external_validator(conf: { id: string; errors: any }): Validator
 class AutoCompleter {
     constructor(private http: HttpClient,
                 private errors: ErrorService,
-                private autocompletion_list: any[],
-                private autocompletion_url: string,
-                public model) {
+                private autocompletion_list: any[]|undefined,
+                private autocompletion_url: string|undefined,
+                public model: any) {
     }
 
-    public change(widget, value, form_value) {
+    public change(_widget: any, value: string, form_value: string) {
         let filtered_list;
         if (this.autocompletion_url) {
             this.http
@@ -404,12 +413,17 @@ class AutoCompleter {
                     return this.errors.show_communication_error(error);
                 })
                 .subscribe(resp => {
+                    resp = resp || [];
                     filtered_list = resp.map(x => x.label);
                     this.model.list = filtered_list;
                 });
         } else {
-            filtered_list = this.autocompletion_list.filter(x => x.indexOf(value) >= 0);
-            this.model.list = filtered_list;
+            if (this.autocompletion_list) {
+                filtered_list = this.autocompletion_list.filter(x => x.indexOf(value) >= 0);
+                this.model.list = filtered_list;
+            } else {
+                this.model.list = [];
+            }
         }
     }
 }
