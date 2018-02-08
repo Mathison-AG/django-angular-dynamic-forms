@@ -9,3 +9,5 @@ package-lock.json
 
 
 django_angular_dynamic_forms\.egg-info/
+
+/dist
