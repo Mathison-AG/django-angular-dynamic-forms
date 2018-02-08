@@ -42,6 +42,18 @@ import {Component} from '@angular/core';
                             <a>Create a new object in-page with dynamic configuration</a>
                         </mat-list-item -->
                     </mat-list>
+                    <h2>Multiple dialogs on the same viewset</h2>
+                    <mat-list>
+                        <mat-list-item>
+                            <a routerLink="/create-via-dialog-multiple-forms">Multiple forms via dialog</a>
+                        </mat-list-item>
+                        <mat-list-item>
+                            <a routerLink="/create-in-page-multiple-forms">Multiple forms via in-page form</a>
+                        </mat-list-item>
+                        <!-- mat-list-item>
+                            <a>Create a new object in-page with dynamic configuration</a>
+                        </mat-list-item -->
+                    </mat-list>
                 </div>
             </mat-sidenav>
             <mat-sidenav-content>

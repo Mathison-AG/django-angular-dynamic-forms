@@ -18,6 +18,11 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     serializer_class = CitySerializer
     permission_classes = (permissions.AllowAny,)
 
+    form_layouts = {
+        'full': ['name', 'zipcode', 'comment'],
+        'simplified': ['name', 'zipcode']
+    }
+
 
 class TestModelSerializer(serializers.ModelSerializer):
     class Meta:

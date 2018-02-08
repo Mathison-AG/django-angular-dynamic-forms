@@ -1,6 +1,6 @@
 {
-    "name": "angular",
-    "version": "0.0.0",
+    "name": "@mesemus/django-angular-dynamic-forms",
+    "version": "0.5.0",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -12,7 +12,7 @@
         "packagr": "ng-packagr -p ng-package.json"
     },
     "private": true,
-    "dependencies": {
+    "peerDependencies": {
         "@angular/animations": "^5.2.0",
         "@angular/cdk": "^5.1.1",
         "@angular/common": "^5.2.0",

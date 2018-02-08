@@ -26,7 +26,8 @@ export class DjangoFormDialogService {
                 config: extra_options.config,
                 extra_form_data: extra_options.extra_form_data || {},
                 initial_data_transformation: extra_options.initial_data_transformation,
-                config_transformation: extra_options.config_transformation
+                config_transformation: extra_options.config_transformation,
+                form_id: extra_options.form_id
             }
         });
 

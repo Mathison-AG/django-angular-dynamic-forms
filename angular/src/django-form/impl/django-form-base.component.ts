@@ -36,6 +36,9 @@ export class DjangoFormBaseComponent implements OnInit {
     @Input()
     extra_form_data: any;
 
+    @Input()
+    form_id: string;
+
     /**
      * Returns submitted form data
      *
@@ -146,7 +149,9 @@ export class DjangoFormBaseComponent implements OnInit {
             django_form_url += '/';
         }
         django_form_url += 'form/';
-        console.log('downloading', django_form_url);
+        if (this.form_id) {
+            django_form_url += this.form_id + '/';
+        }
         return this.httpClient
             .get<DjangoFormConfig>(django_form_url,
                 {

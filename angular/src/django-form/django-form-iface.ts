@@ -121,4 +121,7 @@ export interface DjangoDialogConfig {
     // transformation to the form configuration before the form is generated
     config_transformation?: (DjangoFormConfig) => DjangoFormConfig;
 
+    // form name in case there are multiple forms defined on a viewset
+    form_id?: string;
+
 }

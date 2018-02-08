@@ -9,6 +9,8 @@ import {EditViaDialogComponent} from './edit-via-dialog/edit-via-dialog.componen
 import {EditInPageComponent} from './edit-in-page/edit-in-page.component';
 import {TableComponent as EditInPageTableComponent} from './edit-in-page/table/table.component';
 import {FormComponent as EditInPageFormComponent} from './edit-in-page/form/form.component';
+import {CreateViaDialogMultipleFormsComponent} from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
+import {CreateInPageMultipleFormsComponent} from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
 
 const routes: Routes = [
     {
@@ -27,6 +29,11 @@ const routes: Routes = [
         component: CreateViaDialogInitialDataComponent
     },
     {
+        path: 'create-via-dialog-multiple-forms',
+        pathMatch: 'full',
+        component: CreateViaDialogMultipleFormsComponent
+    },
+    {
         path: 'create-in-page',
         pathMatch: 'full',
         component: CreateInPageComponent
@@ -35,6 +42,11 @@ const routes: Routes = [
         path: 'create-in-page-initial-data',
         pathMatch: 'full',
         component: CreateInPageInitialDataComponent
+    },
+    {
+        path: 'create-in-page-multiple-forms',
+        pathMatch: 'full',
+        component: CreateInPageMultipleFormsComponent
     },
     {
         path: 'edit-via-dialog',

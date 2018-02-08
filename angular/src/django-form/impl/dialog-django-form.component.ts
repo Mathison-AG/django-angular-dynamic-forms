@@ -41,6 +41,10 @@ export class DialogDjangoFormComponent extends DjangoFormBaseComponent {
             this.config_transformation = data.config_transformation;
         }
 
+        if (data.form_id) {
+            this.form_id = data.form_id;
+        }
+
         if (data.config) {
             if (data.django_url) {
                 this.extra_config = data.config;

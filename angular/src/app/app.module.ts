@@ -23,6 +23,8 @@ import { EditViaDialogComponent } from './edit-via-dialog/edit-via-dialog.compon
 import { EditInPageComponent } from './edit-in-page/edit-in-page.component';
 import { TableComponent } from './edit-in-page/table/table.component';
 import { FormComponent } from './edit-in-page/form/form.component';
+import { CreateViaDialogMultipleFormsComponent } from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
+import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
 
 
 @NgModule({
@@ -37,7 +39,9 @@ import { FormComponent } from './edit-in-page/form/form.component';
         EditViaDialogComponent,
         EditInPageComponent,
         TableComponent,
-        FormComponent
+        FormComponent,
+        CreateViaDialogMultipleFormsComponent,
+        CreateInPageMultipleFormsComponent
     ],
     imports: [
         BrowserAnimationsModule,

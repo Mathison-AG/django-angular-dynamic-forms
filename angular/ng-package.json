@@ -1,6 +1,8 @@
 {
   "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+  "name": "@mesemus/django-angular-dynamic-forms",
+  "version": "0.5.0",
   "lib": {
-    "entryFile": "public_api.ts"
+    "entryFile": "index.ts"
   }
 }
