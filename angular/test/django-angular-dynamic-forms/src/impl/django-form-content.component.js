@@ -18,6 +18,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
+var forms_1 = require("@angular/forms");
 var core_2 = require("@ng-dynamic-forms/core");
 require("rxjs/add/operator/merge");
 var http_1 = require("@angular/common/http");
@@ -74,14 +75,14 @@ var DjangoFormContentComponent = /** @class */ (function () {
                         error_model.external_error = error_values[0];
                     }
                     // TODO: change this to support arrays
-                    var error_control = this.form_group.get(error_name);
+                    var error_control = this.getControlByName(error_name);
                     if (error_control) {
                         error_control.markAsDirty();
                         error_control.markAsTouched();
                         error_control.setValue(error_control.value);
                     }
                     else {
-                        console.log("Can not set error of " + error_name + " within", this.form_group);
+                        console.log("Can not set error of " + error_name + " within", this.form_group, error_model);
                     }
                 }
             }
@@ -427,6 +428,32 @@ var DjangoFormContentComponent = /** @class */ (function () {
     });
     DjangoFormContentComponent.prototype.on_submit_on_enter = function () {
         this.submit_on_enter.next(this.value);
+    };
+    DjangoFormContentComponent.prototype.getControlByName = function (name) {
+        function getControl(control, controlName) {
+            var ret;
+            if (control instanceof forms_1.FormGroup) {
+                var formGroup = control;
+                for (var childName in formGroup.controls) {
+                    if (formGroup.controls.hasOwnProperty(childName)) {
+                        var childControl = formGroup.controls[childName];
+                        if (childName === controlName) {
+                            return childControl;
+                        }
+                        else {
+                            ret = getControl(childControl, controlName);
+                            if (ret) {
+                                return ret;
+                            }
+                        }
+                    }
+                }
+            }
+            if (control instanceof forms_1.FormArray) {
+                console.error('Arrays are not yet supported !');
+            }
+        }
+        return getControl(this.form_group, name);
     };
     __decorate([
         core_1.Output(),

@@ -36,7 +36,7 @@ done
     twine upload dist/*tar.gz || exit 1
 ) || exit 1
 
-git commit -am "version $new_version"
+git commit -am "version $new_version: $@"
 git push
 
 git tag $new_version

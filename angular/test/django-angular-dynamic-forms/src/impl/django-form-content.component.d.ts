@@ -38,6 +38,7 @@ export declare class DjangoFormContentComponent implements OnInit {
     readonly valid: boolean;
     readonly value: any;
     on_submit_on_enter(): void;
+    private getControlByName(name);
 }
 export declare function external_validator(conf: {
     id: string;

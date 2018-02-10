@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
-import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
+import {AbstractControl, FormArray, FormGroup, ValidatorFn} from '@angular/forms';
 
 import {
     DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE, DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER, DynamicCheckboxModel,
@@ -73,13 +73,13 @@ export class DjangoFormContentComponent implements OnInit {
                     (error_model as any).external_error = error_values[0];
                 }
                 // TODO: change this to support arrays
-                const error_control = this.form_group.get(error_name);
+                const error_control = this.getControlByName(error_name);
                 if (error_control) {
                     error_control.markAsDirty();
                     error_control.markAsTouched();
                     error_control.setValue(error_control.value);
                 } else {
-                    console.log(`Can not set error of ${error_name} within`, this.form_group);
+                    console.log(`Can not set error of ${error_name} within`, this.form_group, error_model);
                 }
             }
         } else {
@@ -481,6 +481,33 @@ export class DjangoFormContentComponent implements OnInit {
 
     public on_submit_on_enter() {
         this.submit_on_enter.next(this.value);
+    }
+
+    private getControlByName(name: string): AbstractControl|undefined {
+        function getControl(control: AbstractControl, controlName: string): AbstractControl|undefined {
+            let ret: AbstractControl|undefined;
+            if (control instanceof FormGroup) {
+                const formGroup = control as FormGroup;
+                for (const childName in formGroup.controls) {
+                    if (formGroup.controls.hasOwnProperty(childName)) {
+                        const childControl = formGroup.controls[childName];
+                        if (childName === controlName) {
+                            return childControl;
+                        } else {
+                            ret = getControl(childControl, controlName);
+                            if (ret) {
+                                return ret;
+                            }
+                        }
+                    }
+                }
+            }
+            if (control instanceof FormArray) {
+                console.error('Arrays are not yet supported !');
+            }
+        }
+
+        return getControl(this.form_group, name);
     }
 }
 
