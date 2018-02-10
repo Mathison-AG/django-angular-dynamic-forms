@@ -14,6 +14,8 @@ export enum SimpleFieldTypes {
 
 export enum CompositeFieldTypes {
     FIELDSET = 'fieldset',
+    COLUMNS = 'columns',
+    GROUP = 'group'
 }
 
 export type FieldTypes = SimpleFieldTypes | CompositeFieldTypes;
@@ -89,9 +91,20 @@ export interface FieldSetConfig extends FieldConfigBase {
     controls: FieldConfig[];
 }
 
+export interface ColumnsFieldConfig extends FieldConfigBase {
+    type: CompositeFieldTypes.COLUMNS;
+    controls: FieldConfig[];
+}
+
+export interface GroupFieldConfig extends FieldConfigBase {
+    type: CompositeFieldTypes.GROUP;
+    controls: FieldConfig[];
+}
+
 export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig |
     IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig |
-    EmailFieldConfig;
+    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig;
+
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint

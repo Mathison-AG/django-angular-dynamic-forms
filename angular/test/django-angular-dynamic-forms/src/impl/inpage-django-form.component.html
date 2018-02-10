@@ -5,7 +5,7 @@
                              (submit)="submitted(undefined, undefined)" #form>
         </django-form-content>
 
-        <div *ngIf="config.actions" fxLayout="row">
+        <div *ngIf="config.actions" fxLayout="row" class="darf-buttons">
             <button
                 mat-raised-button
                 *ngFor="let button of config.actions"

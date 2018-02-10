@@ -26,7 +26,7 @@ done
     npm run build:packages || exit 1
     cd dist/django-angular-dynamic-forms || exit 1
     npm publish || exit 1
-)
+) || exit 1
 
 (
     rm -rf dist
@@ -34,7 +34,7 @@ done
     python setup.py sdist || exit 1
     pip install twine
     twine upload dist/*tar.gz || exit 1
-)
+) || exit 1
 
 git commit -am "version $new_version"
 git push

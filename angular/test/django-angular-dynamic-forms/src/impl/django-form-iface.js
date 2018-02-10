@@ -15,6 +15,8 @@ var SimpleFieldTypes;
 var CompositeFieldTypes;
 (function (CompositeFieldTypes) {
     CompositeFieldTypes["FIELDSET"] = "fieldset";
+    CompositeFieldTypes["COLUMNS"] = "columns";
+    CompositeFieldTypes["GROUP"] = "group";
 })(CompositeFieldTypes = exports.CompositeFieldTypes || (exports.CompositeFieldTypes = {}));
 
 //# sourceMappingURL=django-form-iface.js.map

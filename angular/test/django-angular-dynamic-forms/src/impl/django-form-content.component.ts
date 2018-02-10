@@ -4,6 +4,7 @@ import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
 import {
     DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE, DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER, DynamicCheckboxModel,
+    DynamicFormControlLayout,
     DynamicFormControlModel, DynamicFormGroupModel, DynamicFormService, DynamicInputModel, DynamicRadioGroupModel,
     DynamicSelectModel, DynamicTextAreaModel
 } from '@ng-dynamic-forms/core';
@@ -12,10 +13,12 @@ import {HttpClient} from '@angular/common/http';
 
 import {ErrorService} from './error-service';
 import {
+    ColumnsFieldConfig,
     CompositeFieldTypes, EmailFieldConfig, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig,
     RadioFieldConfig,
     SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
 } from './django-form-iface';
+import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/misc/dynamic-form-control-layout.model';
 
 
 /**
@@ -88,7 +91,6 @@ export class DjangoFormContentComponent implements OnInit {
 
     @Input()
     set initial_data(data: any) {
-        console.log('set initial data', data);
         this._initial_data = data;
         this._update_initial_data();
     }
@@ -183,8 +185,7 @@ export class DjangoFormContentComponent implements OnInit {
                 }
                 return model;
             }
-            case SimpleFieldTypes.EMAIL:
-            {
+            case SimpleFieldTypes.EMAIL: {
                 const sfc = field_config as EmailFieldConfig;
                 const model = new DynamicInputModel(
                     {
@@ -375,21 +376,84 @@ export class DjangoFormContentComponent implements OnInit {
                     field_config.layout
                 );
             case CompositeFieldTypes.FIELDSET:
+                const fieldset_layout = merge_layouts(field_config.layout, {
+                    grid: {
+                        label: 'darf-fieldset'
+                    }
+                });
                 return new DynamicFormGroupModel(
                     {
                         id: 'generated_' + this.last_id++,
                         label: label,
                         group: this._generate_ui_control_array((field_config as FieldSetConfig).controls)
                     },
-                    field_config.layout
+                    fieldset_layout
                 );
+            case CompositeFieldTypes.GROUP: {
+                const group_layout = merge_layouts(field_config.layout, {
+                    grid: {
+                        label: 'group'
+                    }
+                });
+                return new DynamicFormGroupModel(
+                    {
+                        id: 'generated_' + this.last_id++,
+                        group: this._generate_ui_control_array((field_config as FieldSetConfig).controls)
+                    },
+                    group_layout
+                );
+            }
+            case CompositeFieldTypes.COLUMNS: {
+                const csf = (field_config as ColumnsFieldConfig);
+                const model: DynamicFormControlModel[] = [];
+                for (const config of csf.controls) {
+                    const _control = this._generate_ui_control(
+                        {
+                            ...config,
+                            layout: merge_layouts(config.layout,
+                                {
+                                    grid: {
+                                        host: `darf-column-${csf.controls.length}`
+                                    }
+                                }
+                            )
+                        });
+                    if (_control) {
+                        model.push(_control);
+                    }
+                }
+
+                return new DynamicFormGroupModel(
+                    {
+                        id: 'generated_' + this.last_id++,
+                        group: model
+                    },
+                    merge_layouts(
+                        field_config.layout,
+                        {
+                            grid: {
+                                control: `darf-columns darf-columns-${csf.controls.length}`
+                            },
+                            // element: {
+                            //     container: '---container',
+                            //     control: '---control',
+                            //     errors: '---errors',
+                            //     group: '---group',
+                            //     hint: '---hint',
+                            //     host: '---host',
+                            //     label: '---label',
+                            //     option: '---option'
+                            // }
+                        }
+                    )
+                );
+            }
             default:
                 throw new Error(`No ui control model for ${type}`);
         }
     }
 
     private _update_initial_data() {
-        console.log('updating initial data', this._initial_data, this.form_group);
         if (this._initial_data && this.form_group) {
             Object.keys(this.form_group.controls).forEach(name => {
                 if (this._initial_data) {
@@ -436,8 +500,8 @@ export function external_validator(conf: { id: string; errors: any }): Validator
 class AutoCompleter {
     constructor(private http: HttpClient,
                 private errors: ErrorService,
-                private autocompletion_list: any[]|undefined,
-                private autocompletion_url: string|undefined,
+                private autocompletion_list: any[] | undefined,
+                private autocompletion_url: string | undefined,
                 public model: any) {
     }
 
@@ -463,4 +527,56 @@ class AutoCompleter {
             }
         }
     }
+}
+
+function merge_layouts(layout1_or_undefined: DynamicFormControlLayout | undefined,
+                       layout2_or_undefined: DynamicFormControlLayout | undefined): DynamicFormControlLayout | undefined {
+
+    if (layout1_or_undefined === undefined) {
+        return layout2_or_undefined;
+    }
+    if (layout2_or_undefined === undefined) {
+        return layout1_or_undefined;
+    }
+
+    function merge_classes(clz1_or_undefined: DynamicFormControlLayoutConfig | undefined,
+                           clz2_or_undefined: DynamicFormControlLayoutConfig | undefined) {
+        if (clz1_or_undefined === undefined) {
+            return clz2_or_undefined;
+        }
+        if (clz2_or_undefined === undefined) {
+            return clz1_or_undefined;
+        }
+
+        const clz1 = clz1_or_undefined as DynamicFormControlLayoutConfig;
+        const clz2 = clz2_or_undefined as DynamicFormControlLayoutConfig;
+
+        const classes_ret: DynamicFormControlLayoutConfig = {...clz2};
+
+        for (const arg in clz1) {
+            if (classes_ret[arg]) {
+                classes_ret[arg] = `${classes_ret[arg]} ${clz1[arg]}`;
+            } else {
+                classes_ret[arg] = clz1[arg];
+            }
+        }
+        return classes_ret;
+    }
+
+    const layout1 = layout1_or_undefined as DynamicFormControlLayout;
+    const layout2 = layout2_or_undefined as DynamicFormControlLayout;
+
+    const ret = {
+        ...layout2,
+        ...layout1
+    };
+    const grid = merge_classes(layout1.grid, layout2.grid);
+    const element = merge_classes(layout1.element, layout2.element);
+    if (grid) {
+        ret.grid = grid;
+    }
+    if (element) {
+        ret.element = element;
+    }
+    return ret;
 }

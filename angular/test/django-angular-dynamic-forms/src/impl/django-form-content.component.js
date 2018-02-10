@@ -1,4 +1,12 @@
 "use strict";
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -89,7 +97,6 @@ var DjangoFormContentComponent = /** @class */ (function () {
     });
     Object.defineProperty(DjangoFormContentComponent.prototype, "initial_data", {
         set: function (data) {
-            console.log('set initial data', data);
             this._initial_data = data;
             this._update_initial_data();
         },
@@ -175,34 +182,33 @@ var DjangoFormContentComponent = /** @class */ (function () {
                 }
                 return model;
             }
-            case django_form_iface_1.SimpleFieldTypes.EMAIL:
-                {
-                    var sfc = field_config;
-                    var model = new core_2.DynamicInputModel({
-                        id: id,
-                        placeholder: label,
-                        required: field_config.required,
-                        disabled: field_config.read_only,
-                        inputType: 'email',
-                        validators: {
-                            external_validator: {
-                                name: external_validator.name,
-                                args: { id: id, errors: this._external_errors }
-                            },
-                            maxLength: sfc.max_length,
-                            minLength: sfc.min_length
+            case django_form_iface_1.SimpleFieldTypes.EMAIL: {
+                var sfc = field_config;
+                var model = new core_2.DynamicInputModel({
+                    id: id,
+                    placeholder: label,
+                    required: field_config.required,
+                    disabled: field_config.read_only,
+                    inputType: 'email',
+                    validators: {
+                        external_validator: {
+                            name: external_validator.name,
+                            args: { id: id, errors: this._external_errors }
                         },
-                        errorMessages: {
-                            external_error: '{{external_error}}'
-                        },
-                        list: sfc.autocomplete_list
-                    }, field_config.layout);
-                    if (sfc.autocomplete_list ||
-                        sfc.autocomplete_url) {
-                        this.autocompleters.push(new AutoCompleter(this.httpClient, this.error_service, sfc.autocomplete_list, sfc.autocomplete_url, model));
-                    }
-                    return model;
+                        maxLength: sfc.max_length,
+                        minLength: sfc.min_length
+                    },
+                    errorMessages: {
+                        external_error: '{{external_error}}'
+                    },
+                    list: sfc.autocomplete_list
+                }, field_config.layout);
+                if (sfc.autocomplete_list ||
+                    sfc.autocomplete_url) {
+                    this.autocompleters.push(new AutoCompleter(this.httpClient, this.error_service, sfc.autocomplete_list, sfc.autocomplete_url, model));
                 }
+                return model;
+            }
             case django_form_iface_1.SimpleFieldTypes.TEXTAREA:
                 return new core_2.DynamicTextAreaModel({
                     id: id,
@@ -339,18 +345,56 @@ var DjangoFormContentComponent = /** @class */ (function () {
                     }
                 }, field_config.layout);
             case django_form_iface_1.CompositeFieldTypes.FIELDSET:
+                var fieldset_layout = merge_layouts(field_config.layout, {
+                    grid: {
+                        label: 'darf-fieldset'
+                    }
+                });
                 return new core_2.DynamicFormGroupModel({
                     id: 'generated_' + this.last_id++,
                     label: label,
                     group: this._generate_ui_control_array(field_config.controls)
-                }, field_config.layout);
+                }, fieldset_layout);
+            case django_form_iface_1.CompositeFieldTypes.GROUP: {
+                var group_layout = merge_layouts(field_config.layout, {
+                    grid: {
+                        label: 'group'
+                    }
+                });
+                return new core_2.DynamicFormGroupModel({
+                    id: 'generated_' + this.last_id++,
+                    group: this._generate_ui_control_array(field_config.controls)
+                }, group_layout);
+            }
+            case django_form_iface_1.CompositeFieldTypes.COLUMNS: {
+                var csf = field_config;
+                var model = [];
+                for (var _i = 0, _a = csf.controls; _i < _a.length; _i++) {
+                    var config = _a[_i];
+                    var _control = this._generate_ui_control(__assign({}, config, { layout: merge_layouts(config.layout, {
+                            grid: {
+                                host: "darf-column-" + csf.controls.length
+                            }
+                        }) }));
+                    if (_control) {
+                        model.push(_control);
+                    }
+                }
+                return new core_2.DynamicFormGroupModel({
+                    id: 'generated_' + this.last_id++,
+                    group: model
+                }, merge_layouts(field_config.layout, {
+                    grid: {
+                        control: "darf-columns darf-columns-" + csf.controls.length
+                    },
+                }));
+            }
             default:
                 throw new Error("No ui control model for " + type);
         }
     };
     DjangoFormContentComponent.prototype._update_initial_data = function () {
         var _this = this;
-        console.log('updating initial data', this._initial_data, this.form_group);
         if (this._initial_data && this.form_group) {
             Object.keys(this.form_group.controls).forEach(function (name) {
                 if (_this._initial_data) {
@@ -466,5 +510,45 @@ var AutoCompleter = /** @class */ (function () {
     };
     return AutoCompleter;
 }());
+function merge_layouts(layout1_or_undefined, layout2_or_undefined) {
+    if (layout1_or_undefined === undefined) {
+        return layout2_or_undefined;
+    }
+    if (layout2_or_undefined === undefined) {
+        return layout1_or_undefined;
+    }
+    function merge_classes(clz1_or_undefined, clz2_or_undefined) {
+        if (clz1_or_undefined === undefined) {
+            return clz2_or_undefined;
+        }
+        if (clz2_or_undefined === undefined) {
+            return clz1_or_undefined;
+        }
+        var clz1 = clz1_or_undefined;
+        var clz2 = clz2_or_undefined;
+        var classes_ret = __assign({}, clz2);
+        for (var arg in clz1) {
+            if (classes_ret[arg]) {
+                classes_ret[arg] = classes_ret[arg] + " " + clz1[arg];
+            }
+            else {
+                classes_ret[arg] = clz1[arg];
+            }
+        }
+        return classes_ret;
+    }
+    var layout1 = layout1_or_undefined;
+    var layout2 = layout2_or_undefined;
+    var ret = __assign({}, layout2, layout1);
+    var grid = merge_classes(layout1.grid, layout2.grid);
+    var element = merge_classes(layout1.element, layout2.element);
+    if (grid) {
+        ret.grid = grid;
+    }
+    if (element) {
+        ret.element = element;
+    }
+    return ret;
+}
 
 //# sourceMappingURL=django-form-content.component.js.map

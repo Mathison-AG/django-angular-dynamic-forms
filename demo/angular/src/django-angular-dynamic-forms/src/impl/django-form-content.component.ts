@@ -18,7 +18,6 @@ import {
     RadioFieldConfig,
     SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
 } from './django-form-iface';
-import {isUndefined} from 'util';
 import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/misc/dynamic-form-control-layout.model';
 
 
@@ -378,10 +377,10 @@ export class DjangoFormContentComponent implements OnInit {
                 );
             case CompositeFieldTypes.FIELDSET:
                 const fieldset_layout = merge_layouts(field_config.layout, {
-                        grid: {
-                            label: 'darf-fieldset'
-                        }
-                    });
+                    grid: {
+                        label: 'darf-fieldset'
+                    }
+                });
                 return new DynamicFormGroupModel(
                     {
                         id: 'generated_' + this.last_id++,
@@ -390,13 +389,12 @@ export class DjangoFormContentComponent implements OnInit {
                     },
                     fieldset_layout
                 );
-            case CompositeFieldTypes.GROUP:
-            {
+            case CompositeFieldTypes.GROUP: {
                 const group_layout = merge_layouts(field_config.layout, {
-                        grid: {
-                            label: 'group'
-                        }
-                    });
+                    grid: {
+                        label: 'group'
+                    }
+                });
                 return new DynamicFormGroupModel(
                     {
                         id: 'generated_' + this.last_id++,
@@ -531,40 +529,38 @@ class AutoCompleter {
     }
 }
 
-function merge_layouts(layout1_or_undefined : DynamicFormControlLayout | undefined,
-                       layout2_or_undefined : DynamicFormControlLayout | undefined)
-: DynamicFormControlLayout | undefined {
+function merge_layouts(layout1_or_undefined: DynamicFormControlLayout | undefined,
+                       layout2_or_undefined: DynamicFormControlLayout | undefined): DynamicFormControlLayout | undefined {
 
-    if (isUndefined(layout1_or_undefined)) {
+    if (layout1_or_undefined === undefined) {
         return layout2_or_undefined;
     }
-    if (isUndefined(layout2_or_undefined)) {
+    if (layout2_or_undefined === undefined) {
         return layout1_or_undefined;
     }
 
-    function merge_classes(clz1_or_undefined : DynamicFormControlLayoutConfig | undefined,
-                           clz2_or_undefined : DynamicFormControlLayoutConfig | undefined)
-    {
-        if (isUndefined(clz1_or_undefined)) {
+    function merge_classes(clz1_or_undefined: DynamicFormControlLayoutConfig | undefined,
+                           clz2_or_undefined: DynamicFormControlLayoutConfig | undefined) {
+        if (clz1_or_undefined === undefined) {
             return clz2_or_undefined;
         }
-        if (isUndefined(clz2_or_undefined)) {
+        if (clz2_or_undefined === undefined) {
             return clz1_or_undefined;
         }
 
         const clz1 = clz1_or_undefined as DynamicFormControlLayoutConfig;
         const clz2 = clz2_or_undefined as DynamicFormControlLayoutConfig;
 
-        const ret: DynamicFormControlLayoutConfig = {...clz2} ;
+        const classes_ret: DynamicFormControlLayoutConfig = {...clz2};
 
         for (const arg in clz1) {
-            if (ret[arg]) {
-                ret[arg] = `${ret[arg]} ${clz1[arg]}`;
+            if (classes_ret[arg]) {
+                classes_ret[arg] = `${classes_ret[arg]} ${clz1[arg]}`;
             } else {
-                ret[arg] = clz1[arg];
+                classes_ret[arg] = clz1[arg];
             }
         }
-        return ret;
+        return classes_ret;
     }
 
     const layout1 = layout1_or_undefined as DynamicFormControlLayout;

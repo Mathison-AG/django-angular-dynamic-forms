@@ -1,1 +1,1 @@
-export * from './src/django-form';
+export * from './src';
