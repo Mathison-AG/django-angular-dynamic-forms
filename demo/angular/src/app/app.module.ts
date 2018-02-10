@@ -24,6 +24,7 @@ import { TableComponent } from './edit-in-page/table/table.component';
 import { FormComponent } from './edit-in-page/form/form.component';
 import { CreateViaDialogMultipleFormsComponent } from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
 import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
+import { AllControlsComponent } from './all-controls/all-controls.component';
 
 
 @NgModule({
@@ -40,7 +41,8 @@ import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-fo
         TableComponent,
         FormComponent,
         CreateViaDialogMultipleFormsComponent,
-        CreateInPageMultipleFormsComponent
+        CreateInPageMultipleFormsComponent,
+        AllControlsComponent
     ],
     imports: [
         BrowserAnimationsModule,

@@ -21,7 +21,7 @@ class Address(models.Model):
 
 
 class TestModel(models.Model):
-    name = models.CharField(verbose_name='blah', max_length=10)
+    name = models.CharField(verbose_name='City autocomplete', max_length=10)
     radio = models.CharField(max_length=1, choices=(
         (1, "One"),
         (2, "Two"),
@@ -32,3 +32,7 @@ class TestModel(models.Model):
             MinValueValidator(0)
         ])
     checkbox = models.BooleanField()
+    string = models.CharField(max_length=100)
+    area = models.TextField()
+    email = models.EmailField()
+

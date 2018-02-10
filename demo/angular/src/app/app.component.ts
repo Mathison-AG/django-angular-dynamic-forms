@@ -54,6 +54,12 @@ import {Component} from '@angular/core';
                             <a>Create a new object in-page with dynamic configuration</a>
                         </mat-list-item -->
                     </mat-list>
+                    <h2>Available controls</h2>
+                    <mat-list>
+                        <mat-list-item>
+                            <a routerLink="/all-controls">Edit page with all available controls</a>
+                        </mat-list-item>
+                    </mat-list>
                 </div>
             </mat-sidenav>
             <mat-sidenav-content>

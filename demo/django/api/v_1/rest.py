@@ -27,7 +27,7 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
 class TestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestModel
-        fields = ('name', 'radio', 'number', 'checkbox')
+        exclude = ()
 
 
 class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
@@ -39,18 +39,31 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
     permission_classes = (permissions.AllowAny,)
 
     form_layout = [
-        [
-            'general',
-            ['name'],
-        ],
-        'number',
-        [
-            'checkboxes and radio buttons',
-            [
-                'radio',
-                'checkbox'
+        {
+            'type': 'columns',
+            'columns': [
+                [
+                    AngularFormMixin.fieldset('Core text',
+                                              [
+                                                  'string',
+                                                  'area',
+                                              ]),
+                    AngularFormMixin.fieldset('Checkboxes and Radio Buttons',
+                                              [
+                                                  'radio',
+                                                  'checkbox'
+                                              ])
+                ],
+                [
+                    AngularFormMixin.fieldset('Input fields',
+                                              [
+                                                  'name',
+                                                  'email',
+                                                  'number'
+                                              ])
+                ]
             ]
-        ]
+        }
     ]
 
     @autocomplete(field='name', formatter='{{item.name}} [{{item.id}}]')

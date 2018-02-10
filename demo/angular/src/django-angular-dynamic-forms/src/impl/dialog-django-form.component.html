@@ -1,11 +1,14 @@
 <ng-container *ngIf="config$">
     <ng-container *ngIf="config$|async; let config">
 
-        <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="errors$|async"
-                             (submit)="submitted(undefined, undefined)" #form>
-        </django-form-content>
+        <h1 mat-dialog-title *ngIf="config.form_title">{{ config.form_title }}</h1>
+        <div mat-dialog-content>
+            <django-form-content [layout]="config.layout" [initial_data]="config.initial_data" [errors]="errors$|async"
+                                 (submit)="submitted(undefined, undefined)" #form>
+            </django-form-content>
+        </div>
 
-        <div *ngIf="config.actions" fxLayout="row" class="darf-buttons">
+        <div mat-dialog-actions>
             <button
                 mat-raised-button
                 *ngFor="let button of config.actions"
@@ -13,7 +16,6 @@
                 [color]="button.color"
                 (click)="submitted(button.id, button.cancel)"
                 type="button"
-                [disabled]="!form.valid && !button.cancel"
             >{{ button.label }}
             </button>
         </div>

@@ -1,1 +1,37 @@
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+.darf-columns {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-flow: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.darf-column-1 {
+    flex: 1 1 100%;
+}
+
+.darf-column-2 {
+    flex: 1 1 50%;
+}
+
+.darf-column-3 {
+    flex: 1 1 33%;
+}
+
+.darf-column-4 {
+    flex: 1 1 25%;
+}
+
+label.fieldset {
+    font-variant: small-caps;
+}
+
+.darf-buttons {
+    padding-top: 30px;
+
+    button:not(:first-child) {
+        margin-left: 20px;
+    }
+}

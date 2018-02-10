@@ -29,12 +29,6 @@
                 "dev": "environments/environment.ts",
                 "prod": "environments/environment.prod.ts"
             }
-        },
-        {
-            "name": "django-form",
-            "appRoot": "",
-            "root": "django-form",
-            "test": "../../test.js"
         }
     ],
     "e2e": {
