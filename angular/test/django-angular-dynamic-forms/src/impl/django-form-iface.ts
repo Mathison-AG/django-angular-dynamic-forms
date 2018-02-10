@@ -8,7 +8,8 @@ export enum SimpleFieldTypes {
     FLOAT = 'float',
     BOOLEAN = 'boolean',
     RADIO = 'radio',
-    SELECT = 'select'
+    SELECT = 'select',
+    EMAIL = 'email',
 }
 
 export enum CompositeFieldTypes {
@@ -28,6 +29,14 @@ export interface FieldConfigBase {
 
 export interface StringFieldConfig extends FieldConfigBase {
     type: SimpleFieldTypes.STRING;
+    max_length?: number;
+    min_length?: number;
+    autocomplete_list?: string[];
+    autocomplete_url?: string;
+}
+
+export interface EmailFieldConfig extends FieldConfigBase {
+    type: SimpleFieldTypes.EMAIL;
     max_length?: number;
     min_length?: number;
     autocomplete_list?: string[];
@@ -81,7 +90,8 @@ export interface FieldSetConfig extends FieldConfigBase {
 }
 
 export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig |
-    IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig;
+    IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig |
+    EmailFieldConfig;
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint

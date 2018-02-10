@@ -8,6 +8,7 @@ export declare enum SimpleFieldTypes {
     BOOLEAN = "boolean",
     RADIO = "radio",
     SELECT = "select",
+    EMAIL = "email",
 }
 export declare enum CompositeFieldTypes {
     FIELDSET = "fieldset",
@@ -23,6 +24,13 @@ export interface FieldConfigBase {
 }
 export interface StringFieldConfig extends FieldConfigBase {
     type: SimpleFieldTypes.STRING;
+    max_length?: number;
+    min_length?: number;
+    autocomplete_list?: string[];
+    autocomplete_url?: string;
+}
+export interface EmailFieldConfig extends FieldConfigBase {
+    type: SimpleFieldTypes.EMAIL;
     max_length?: number;
     min_length?: number;
     autocomplete_list?: string[];
@@ -65,7 +73,7 @@ export interface FieldSetConfig extends FieldConfigBase {
     type: CompositeFieldTypes.FIELDSET;
     controls: FieldConfig[];
 }
-export declare type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig | IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig;
+export declare type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig | IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig | EmailFieldConfig;
 export interface DjangoFormConfig {
     django_url?: string;
     form_title?: string;

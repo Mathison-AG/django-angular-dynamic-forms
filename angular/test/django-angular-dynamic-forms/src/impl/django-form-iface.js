@@ -10,6 +10,7 @@ var SimpleFieldTypes;
     SimpleFieldTypes["BOOLEAN"] = "boolean";
     SimpleFieldTypes["RADIO"] = "radio";
     SimpleFieldTypes["SELECT"] = "select";
+    SimpleFieldTypes["EMAIL"] = "email";
 })(SimpleFieldTypes = exports.SimpleFieldTypes || (exports.SimpleFieldTypes = {}));
 var CompositeFieldTypes;
 (function (CompositeFieldTypes) {

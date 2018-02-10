@@ -149,7 +149,7 @@ var DjangoFormContentComponent = /** @class */ (function () {
         var label = field_config.label || '';
         var type = field_config.type || django_form_iface_1.SimpleFieldTypes.STRING;
         switch (type) {
-            case django_form_iface_1.SimpleFieldTypes.STRING:
+            case django_form_iface_1.SimpleFieldTypes.STRING: {
                 var sfc = field_config;
                 var model = new core_2.DynamicInputModel({
                     id: id,
@@ -174,6 +174,35 @@ var DjangoFormContentComponent = /** @class */ (function () {
                     this.autocompleters.push(new AutoCompleter(this.httpClient, this.error_service, sfc.autocomplete_list, sfc.autocomplete_url, model));
                 }
                 return model;
+            }
+            case django_form_iface_1.SimpleFieldTypes.EMAIL:
+                {
+                    var sfc = field_config;
+                    var model = new core_2.DynamicInputModel({
+                        id: id,
+                        placeholder: label,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
+                        inputType: 'email',
+                        validators: {
+                            external_validator: {
+                                name: external_validator.name,
+                                args: { id: id, errors: this._external_errors }
+                            },
+                            maxLength: sfc.max_length,
+                            minLength: sfc.min_length
+                        },
+                        errorMessages: {
+                            external_error: '{{external_error}}'
+                        },
+                        list: sfc.autocomplete_list
+                    }, field_config.layout);
+                    if (sfc.autocomplete_list ||
+                        sfc.autocomplete_url) {
+                        this.autocompleters.push(new AutoCompleter(this.httpClient, this.error_service, sfc.autocomplete_list, sfc.autocomplete_url, model));
+                    }
+                    return model;
+                }
             case django_form_iface_1.SimpleFieldTypes.TEXTAREA:
                 return new core_2.DynamicTextAreaModel({
                     id: id,
