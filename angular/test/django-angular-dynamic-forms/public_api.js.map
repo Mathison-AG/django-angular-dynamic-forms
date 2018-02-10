@@ -1,1 +1,0 @@
-{"version":3,"sources":["django-angular-dynamic-forms/public_api.ts"],"names":[],"mappings":";;;;;AAAA,2BAAsB","file":"public_api.js","sourcesContent":["export * from './src';\n"]}
