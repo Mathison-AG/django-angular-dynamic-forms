@@ -12,7 +12,8 @@ import {HttpClient} from '@angular/common/http';
 
 import {ErrorService} from './error-service';
 import {
-    CompositeFieldTypes, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig, RadioFieldConfig,
+    CompositeFieldTypes, EmailFieldConfig, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig,
+    RadioFieldConfig,
     SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
 } from './django-form-iface';
 
@@ -149,7 +150,7 @@ export class DjangoFormContentComponent implements OnInit {
         const type = field_config.type || SimpleFieldTypes.STRING;
 
         switch (type) {
-            case SimpleFieldTypes.STRING:
+            case SimpleFieldTypes.STRING: {
                 const sfc = field_config as StringFieldConfig;
                 const model = new DynamicInputModel(
                     {
@@ -181,6 +182,42 @@ export class DjangoFormContentComponent implements OnInit {
                             model));
                 }
                 return model;
+            }
+            case SimpleFieldTypes.EMAIL:
+            {
+                const sfc = field_config as EmailFieldConfig;
+                const model = new DynamicInputModel(
+                    {
+                        id: id,
+                        placeholder: label,
+                        required: field_config.required,
+                        disabled: field_config.read_only,
+                        inputType: 'email',
+                        validators: {
+                            external_validator: {
+                                name: external_validator.name,
+                                args: {id: id, errors: this._external_errors}
+                            },
+                            maxLength: sfc.max_length,
+                            minLength: sfc.min_length
+                        },
+                        errorMessages: {
+                            external_error: '{{external_error}}'
+                        },
+                        list: sfc.autocomplete_list
+                    },
+                    field_config.layout
+                );
+                if (sfc.autocomplete_list ||
+                    sfc.autocomplete_url) {
+                    this.autocompleters.push(
+                        new AutoCompleter(this.httpClient, this.error_service,
+                            sfc.autocomplete_list,
+                            sfc.autocomplete_url,
+                            model));
+                }
+                return model;
+            }
             case SimpleFieldTypes.TEXTAREA:
                 return new DynamicTextAreaModel(
                     {
