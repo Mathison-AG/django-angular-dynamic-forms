@@ -1,5 +1,5 @@
-Django Rest Framework meets Angular dynamic forms
-=================================================
+Django Rest Framework meets Angular 5 dynamic forms
+===================================================
 
 This repo provides Django mixins and Angular library for rapid
 development of create/edit dialogs for django rest framework.

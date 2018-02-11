@@ -1,8 +1,8 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.5.20",
+    "version": "0.5.21",
     "license": "MIT",
-    "description": "In alpha, use at your own risk",
+    "description": "Django Rest Framework meets Angular 5 dynamic forms - automatic create and edit dialogs",
     "main": "./bundles/django-angular-dynamic-forms.umd.js",
     "module": "./esm5/django-angular-dynamic-forms.js",
     "es2015": "./esm2015/django-angular-dynamic-forms.js",
