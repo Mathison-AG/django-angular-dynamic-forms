@@ -378,7 +378,7 @@ export class DjangoFormContentComponent implements OnInit {
             case CompositeFieldTypes.FIELDSET:
                 const fieldset_layout = merge_layouts(field_config.layout, {
                     grid: {
-                        label: 'darf-fieldset'
+                        label: 'dadf-fieldset'
                     }
                 });
                 return new DynamicFormGroupModel(
@@ -413,7 +413,7 @@ export class DjangoFormContentComponent implements OnInit {
                             layout: merge_layouts(config.layout,
                                 {
                                     grid: {
-                                        host: `darf-column-${csf.controls.length}`
+                                        host: `dadf-column-${csf.controls.length}`
                                     }
                                 }
                             )
@@ -432,7 +432,7 @@ export class DjangoFormContentComponent implements OnInit {
                         field_config.layout,
                         {
                             grid: {
-                                control: `darf-columns darf-columns-${csf.controls.length}`
+                                control: `dadf-columns dadf-columns-${csf.controls.length}`
                             },
                             // element: {
                             //     container: '---container',

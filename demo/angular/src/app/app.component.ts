@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {environment} from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -8,58 +9,55 @@ import {Component} from '@angular/core';
                                [style.marginTop.px]="0">
             <mat-sidenav #left mode="side" [opened]="true" class="left-sidenav">
                 <div class="left-sidenav-content">
-                    <h1>Examples:</h1>
-                    <h2>Creating objects</h2>
-                    <mat-list>
-                        <mat-list-item>
+                    <h2>Django-angular dialogs</h2>
+                    <p>Rapid form library for Django Rest Framework and Angular 5.</p>
+                    <p>Library version {{version}}.</p>
+                    <mat-accordion>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    Creating objects
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
                             <a routerLink="/create-via-dialog">Create a new object via dialog</a>
-                        </mat-list-item>
-                        <mat-list-item>
                             <a routerLink="/create-in-page">Create a new object via in-page form</a>
-                        </mat-list-item>
-                        <!-- mat-list-item>
-                            <a>Create a new object in-page with dynamic configuration</a>
-                        </mat-list-item -->
-                    </mat-list>
-                    <h2>Creating objects with initial data</h2>
-                    <mat-list>
-                        <mat-list-item>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    Creating objects with initial data
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
                             <a routerLink="/create-via-dialog-initial-data">Create a new object via dialog</a>
-                        </mat-list-item>
-                        <mat-list-item>
                             <a routerLink="/create-in-page-initial-data">Create a new object via in-page form</a>
-                        </mat-list-item>
-                    </mat-list>
-                    <h2>Editing objects</h2>
-                    <mat-list>
-                        <mat-list-item>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    Editing objects
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
                             <a routerLink="/edit-via-dialog">Editing existing object via dialog</a>
-                        </mat-list-item>
-                        <mat-list-item>
                             <a routerLink="/edit-in-page">Editing existing object in-page</a>
-                        </mat-list-item>
-                        <!-- mat-list-item>
-                            <a>Create a new object in-page with dynamic configuration</a>
-                        </mat-list-item -->
-                    </mat-list>
-                    <h2>Multiple dialogs on the same viewset</h2>
-                    <mat-list>
-                        <mat-list-item>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    Multiple dialogs on the same viewset
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
                             <a routerLink="/create-via-dialog-multiple-forms">Multiple forms via dialog</a>
-                        </mat-list-item>
-                        <mat-list-item>
                             <a routerLink="/create-in-page-multiple-forms">Multiple forms via in-page form</a>
-                        </mat-list-item>
-                        <!-- mat-list-item>
-                            <a>Create a new object in-page with dynamic configuration</a>
-                        </mat-list-item -->
-                    </mat-list>
-                    <h2>Available controls</h2>
-                    <mat-list>
-                        <mat-list-item>
-                            <a routerLink="/all-controls">Edit page with all available controls</a>
-                        </mat-list-item>
-                    </mat-list>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    All controls
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <a routerLink="/all-controls">All available controls</a>
+                        </mat-expansion-panel>
+                    </mat-accordion>
                 </div>
             </mat-sidenav>
             <mat-sidenav-content>
@@ -79,18 +77,26 @@ import {Component} from '@angular/core';
             min-height: 100vh;
             border-left: 1px solid lightgray;
         }
-        
+
         h2 {
             padding-bottom: 0;
             margin-bottom: 0;
             margin-top: 10px;
         }
-        
-        mat-list {
-            padding-top: 0;
+
+        mat-accordion {
+            padding-top: 20px;
+            display: block;
+        }
+
+        mat-accordion a {
+            display: block;
+            text-decoration: none;
+            padding-bottom: 10px;
         }
     `]
 })
 export class AppComponent {
     title = 'app';
+    version = environment.version || "unknown";
 }

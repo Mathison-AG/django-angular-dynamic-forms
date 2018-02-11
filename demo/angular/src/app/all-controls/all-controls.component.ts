@@ -110,7 +110,7 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
         {
             tab: 'scss',
             text: `
-.darf-columns {
+.dadf-columns {
     display: flex;
     flex-wrap: nowrap;
     flex-flow: row;
@@ -118,15 +118,15 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
     align-items: flex-start;
 }
 
-.darf-column-2 {
+.dadf-column-2 {
     flex: 1 1 50%;
 }
 
-label.darf-fieldset {
+label.dadf-fieldset {
     font-variant: small-caps;
 }
 
-.darf-buttons {
+.dadf-buttons {
     padding-top: 30px;
 
     button:not(:first-child) {

@@ -4,7 +4,8 @@ import {AppComponent} from './app.component';
 import {DjangoFormModule, ErrorService} from 'django-angular-dynamic-forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
-    MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule, MatTableModule,
+    MatButtonModule, MatExpansionModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule,
+    MatTableModule,
     MatTabsModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -57,7 +58,8 @@ import { AllControlsComponent } from './all-controls/all-controls.component';
         FlexLayoutModule,
         AppRoutingModule,
         HttpClientModule,
-        HighlightJsModule
+        HighlightJsModule,
+        MatExpansionModule
     ],
     providers: [
         {
