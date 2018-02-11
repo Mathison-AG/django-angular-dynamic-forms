@@ -25,7 +25,7 @@ SECRET_KEY = 'ch_ieynn&d3ldff*%*g5(&77vz16_xvq_zqqj9qyi=$@c)gk6t'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mesemus.no-ip.org', '192.168.3.110']
 
 
 # Application definition
