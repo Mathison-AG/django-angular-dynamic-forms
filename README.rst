@@ -9,8 +9,9 @@ On the django side, extend your Viewset to use AngularFormMixin
 and optionally configure the mixin by providing either layout
 information or field defaults (such as css classes).
 
-On angular side, simply use point the library to Viewset URL
-to display either editable dialog or display the form in-page.
+On angular side, simply point the library to Viewset URL
+to display either editable dialog or display the form in-page
+and subscribe to get notification when a resource is created/saved.
 
 Demo and sample source files
 ----------------------------
