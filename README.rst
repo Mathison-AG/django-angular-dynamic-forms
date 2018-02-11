@@ -5,7 +5,7 @@ This repo provides Django mixins and Angular library for rapid
 development of create/edit dialogs for django rest framework.
 It depends on Angular5 together with Material UI.
 
-On the django side, extend your Viewset to use AngularFormMixin
+On django side, extend your ``Viewset`` to use ``AngularFormMixin``
 and optionally configure the mixin by providing either layout
 information or field defaults (such as css classes). See demos
 for details.
@@ -28,7 +28,7 @@ On angular side, use ``DjangoFormDialogService`` to display a dialog:
     }
     createCity() {
         this.dialog.open('/api/1.0/cities/').subscribe(result => {
-            this.code.update('response', result);
+            console.log('City created, result from server is:', result);
         });
     }
 
@@ -55,13 +55,39 @@ Installation
 
 *Django side:*
 
-pip install django-angular-dynamic-forms
+.. code-block:: bash
+    pip install django-angular-dynamic-forms
 
 *Angular side:*
 
-npm install --save django-angular-dynamic-forms
+.. code-block:: bash
+    npm install --save django-angular-dynamic-forms
 
 and add ``DjangoFormModule`` to imports. You will need to provide your own ErrorService for showing
 communication errors back to the user. See the ``demo/angular/src/app/mat-error.service.ts`` for
 an example implementation.
 
+.. code-block:: typescript
+
+    import {DjangoFormModule, ErrorService} from 'django-angular-dynamic-forms';
+
+    @NgModule({
+        declarations: [
+            ...
+        ],
+        imports: [
+            BrowserAnimationsModule,
+            DjangoFormModule,
+            HttpClientModule,
+            ...
+        ],
+        providers: [
+            {
+                provide: ErrorService,
+                useClass: MatErrorService
+            },
+        ],
+        bootstrap: [AppComponent]
+    })
+    export class AppModule {
+    }
