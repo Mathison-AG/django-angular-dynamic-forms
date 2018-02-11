@@ -1,6 +1,6 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.5.12",
+    "version": "0.5.13",
     "license": "MIT",
     "description": "In alpha, use at your own risk",
     "main": "./bundles/django-angular-dynamic-forms.umd.js",
