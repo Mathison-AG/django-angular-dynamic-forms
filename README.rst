@@ -82,6 +82,8 @@ an example implementation.
         ],
         imports: [
             BrowserAnimationsModule,
+            DynamicFormsCoreModule.forRoot(),
+            DynamicFormsMaterialUIModule,
             DjangoFormModule,
             HttpClientModule,
             ...

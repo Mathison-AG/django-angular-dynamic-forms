@@ -26,6 +26,8 @@ import { FormComponent } from './edit-in-page/form/form.component';
 import { CreateViaDialogMultipleFormsComponent } from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
 import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
 import { AllControlsComponent } from './all-controls/all-controls.component';
+import {DynamicFormsCoreModule} from '@ng-dynamic-forms/core';
+import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
 
 
 @NgModule({
@@ -47,6 +49,8 @@ import { AllControlsComponent } from './all-controls/all-controls.component';
     ],
     imports: [
         BrowserAnimationsModule,
+        DynamicFormsCoreModule.forRoot(),
+        DynamicFormsMaterialUIModule,
         DjangoFormModule,
         MatSidenavModule,
         MatIconModule,
