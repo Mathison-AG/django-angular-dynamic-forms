@@ -24,7 +24,7 @@ done
 (
     cd angular
     npm run build:packages || exit 1
-    cp ../README.rst dist/django-angular-dynamic-forms
+    cp ../README.rst dist/django-angular-dynamic-forms/readme.md
     cd dist/django-angular-dynamic-forms || exit 1
     npm publish || exit 1
 ) || exit 1
