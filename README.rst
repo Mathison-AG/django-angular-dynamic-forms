@@ -56,11 +56,13 @@ Installation
 *Django side:*
 
 .. code-block:: bash
+
     pip install django-angular-dynamic-forms
 
 *Angular side:*
 
 .. code-block:: bash
+
     npm install --save django-angular-dynamic-forms
 
 and add ``DjangoFormModule`` to imports. You will need to provide your own ErrorService for showing
