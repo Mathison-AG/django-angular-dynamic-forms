@@ -17,7 +17,7 @@ git log | head -10
 
 version=$(
 git tag | egrep '^[0-9]' \
-    | awk -F. '{ printf "%010d %010d %010d\n", $1, $2, ($3+1) }' \
+    | awk -F. '{ printf "%010d %010d %010d\n", $1, $2, $3 }' \
     | sort -rn \
     | head -n 1 \
     | tr ' ' '\n' \
