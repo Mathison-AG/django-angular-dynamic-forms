@@ -7,11 +7,40 @@ It depends on Angular5 together with Material UI.
 
 On the django side, extend your Viewset to use AngularFormMixin
 and optionally configure the mixin by providing either layout
-information or field defaults (such as css classes).
+information or field defaults (such as css classes). See demos
+for details.
 
-On angular side, simply point the library to Viewset URL
-to display either editable dialog or display the form in-page
-and subscribe to get notification when a resource is created/saved.
+.. code-block:: python
+
+class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    """
+    API for cities
+    """
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+
+
+On angular side, use ``DjangoFormDialogService`` to display a dialog:
+
+.. code-block:: typescript
+
+    constructor(private dialog: DjangoFormDialogService) {
+    }
+    createCity() {
+        this.dialog.open('/api/1.0/cities/').subscribe(result => {
+            this.code.update('response', result);
+        });
+    }
+
+You can also display the form inside your own component via ``<inpage-django-form>`` tag.
+
+.. code-block:: html
+
+<inpage-django-form django_url="/api/1.0/cities/"
+                        (submit)="submit($event)"
+                        (cancel)="cancel($event)"></inpage-django-form>
+
+
 
 Demo and sample source files
 ----------------------------
