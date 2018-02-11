@@ -3,6 +3,12 @@
 mkdir -p /data/web/static
 cp /tmp/index.html /data/web/static/
 
+# Setup
+apk update
+apk upgrade
+apk add --update python3 python3-dev python2 build-base gettext git sed gawk bash
+pip3 install --upgrade pip gunicorn
+
 cd /data
 git clone https://github.com/mesemus/django-angular-dynamic-forms.git
 
