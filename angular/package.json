@@ -1,6 +1,6 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.5.19",
+    "version": "0.5.20",
     "license": "MIT",
     "scripts": {
         "ng": "ng",

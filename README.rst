@@ -63,7 +63,10 @@ Installation
 
 .. code-block:: bash
 
-    npm install --save django-angular-dynamic-forms
+    npm install --save django-angular-dynamic-forms @ng-dynamic-forms/core @ng-dynamic-forms/ui-material
+
+To render forms, this library uses https://github.com/udos86/ng-dynamic-forms - do not forget
+to add it to your package.json.
 
 and add ``DjangoFormModule`` to imports. You will need to provide your own ErrorService for showing
 communication errors back to the user. See the ``demo/angular/src/app/mat-error.service.ts`` for
