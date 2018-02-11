@@ -9,7 +9,7 @@ RUN mkdir -p /data/web
 RUN apk update
 RUN apk upgrade
 RUN apk add --update python3 python3-dev python2 build-base gettext git sed gawk bash
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip gunicorn
 # RUN pip3 install -r requirements.txt
 
 ADD install.sh /tmp/install.sh
