@@ -14,7 +14,6 @@ RUN pip3 install --upgrade pip gunicorn
 
 ADD install.sh /tmp/install.sh
 RUN chmod 755 /tmp/install.sh
-RUN /tmp/install.sh
 
 ADD run.sh /tmp/run.sh
 RUN chmod 755 /tmp/run.sh

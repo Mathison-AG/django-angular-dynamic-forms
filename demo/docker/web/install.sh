@@ -31,6 +31,8 @@ sed -i "s/version: \"\"/version: \"$version\"/" src/environments/environment.pro
 
 ng build --prod --aot
 
-cp -r /data/django-angular-dynamic-forms/demo/angular/dist /data/web/static
+rm -rf /data/web/static
+mkdir -p /data/web/static
+cp -r /data/django-angular-dynamic-forms/demo/angular/dist/* /data/web/static/
 ls -la /data/web/static
 
