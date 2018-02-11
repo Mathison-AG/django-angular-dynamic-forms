@@ -4,6 +4,7 @@ cd /data
 git clone https://github.com/mesemus/django-angular-dynamic-forms.git
 
 cd /data/django-angular-dynamic-forms
+git log | head -10
 
 version=$(
 git tag | egrep '^[0-9]' \
