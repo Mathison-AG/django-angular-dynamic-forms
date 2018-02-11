@@ -12,12 +12,12 @@ for details.
 
 .. code-block:: python
 
-class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
-    """
-    API for cities
-    """
-    queryset = City.objects.all()
-    serializer_class = CitySerializer
+    class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
+        """
+        API for cities
+        """
+        queryset = City.objects.all()
+        serializer_class = CitySerializer
 
 
 On angular side, use ``DjangoFormDialogService`` to display a dialog:
@@ -36,7 +36,7 @@ You can also display the form inside your own component via ``<inpage-django-for
 
 .. code-block:: html
 
-<inpage-django-form django_url="/api/1.0/cities/"
+    <inpage-django-form django_url="/api/1.0/cities/"
                         (submit)="submit($event)"
                         (cancel)="cancel($event)"></inpage-django-form>
 
