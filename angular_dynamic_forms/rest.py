@@ -1,7 +1,10 @@
 # noinspection PyUnresolvedReferences
+import json
 import re
 from functools import lru_cache
 
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import TextField
 from django.http import HttpResponseNotFound
 from django.template import Template, Context
 from django.utils.functional import cached_property
@@ -9,6 +12,24 @@ from django.utils.translation import gettext
 from rest_framework import renderers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
+
+
+class LoggerDecorator:
+    level = 0
+    @classmethod
+    def log(clz):
+        def _decorator(fn):
+            def _decorated(*arg,**kwargs):
+                clz.level += 1
+                try:
+                    print("%s > '%s'(%r,%r)" % (' ' * clz.level, fn.__name__, arg, kwargs))
+                    ret=fn(*arg,**kwargs)
+                    print("%s < %r" % (' ' * clz.level, ret))
+                    return ret
+                finally:
+                    clz.level -= 1
+            return _decorated
+        return _decorator
 
 
 class AngularFormMixin(object):
@@ -20,6 +41,21 @@ class AngularFormMixin(object):
     form_titles   = None
     form_defaults_map = None
 
+    @staticmethod
+    def fieldset(title, controls):
+        return {
+            'type': 'fieldset',
+            'label': title,
+            'controls': controls
+        }
+
+    @staticmethod
+    def columns(*controls):
+        return {
+            'type': 'columns`',
+            'columns': controls
+        }
+
     def get_form_layout(self, fields, form_name):
         if form_name:
             form_layout = self.form_layouts[form_name]
@@ -28,11 +64,12 @@ class AngularFormMixin(object):
 
         if form_layout:
             if callable(form_layout):
-                return self._transform_layout(form_layout(fields))
-            return self._transform_layout(form_layout)
+                return self._transform_layout(form_layout(fields), wrap_array=False)
+            return self._transform_layout(form_layout, wrap_array=False)
 
         # no layout, generate from fields
-        layout = [{'id': field_name} for field_name in fields if not fields[field_name]['read_only']]
+        layout = [self._get_field_layout(field_name, fields[field_name])
+                    for field_name in fields if not fields[field_name]['read_only']]
 
         if form_name:
             form_defaults = self.form_defaults_map.get(form_name, None)
@@ -47,40 +84,53 @@ class AngularFormMixin(object):
                 field.update(form_defaults[field['id']])
         return layout
 
-    def _transform_layout(self, layout):
+    def _get_field_layout(self, field_name, field):
+        return {'id': field_name}
+
+    # @LoggerDecorator.log()
+    def _transform_layout(self, layout, wrap_array=True):
         if isinstance(layout, dict):
             layout = layout.copy()
             for (k, v) in list(layout.items()):
                 if callable(v):
                     layout[k] = v(self)
-            if layout.get('type', 'string') != 'fieldset':
-                return layout
-            layout['controls'] = self._transform_layout(layout['controls'])
-            return layout
-        if isinstance(layout, list) or isinstance(layout, tuple):
-            if (
-                    len(layout) == 2 and isinstance(layout[0], str) and
-                    (isinstance(layout[1], list) or isinstance(layout[1], tuple))):
+            layout_type = layout.get('type', 'string')
 
-                # it is a fieldset ...
+            if layout_type in ('fieldset', 'group'):
+                layout['controls'] = self._transform_layout(layout['controls'], wrap_array=False)
+                return layout
+
+            if layout_type == 'columns':
+                layout['controls'] = self._transform_layout(layout['columns'], wrap_array=False)
+                del layout['columns']
+                return layout
+
+            if layout_type == 'string':
+                # string or textarea?
+                qs = self.get_queryset()
+                model = qs.model
+                if model:
+                    try:
+                        field = model._meta.get_field(layout['id'])
+                        if isinstance(field, TextField):
+                            layout['type'] = 'textarea'
+                    except FieldDoesNotExist:
+                        pass
+            return layout
+
+        if isinstance(layout, list) or isinstance(layout, tuple):
+            # otherwise it is a group of controls
+            if wrap_array:
                 return {
-                    'type'     : 'fieldset',
-                    'label'    : layout[0],
-                    'cls'      : {
-                        'element': {
-                            'container': 'fieldset'
-                        }
-                    },
-                    'controls' : self._transform_layout(layout[1])
+                    'type': 'group',
+                    'controls': [self._transform_layout(l) for l in layout]
                 }
-            # otherwise it is a plain list of controls
-            return [
-                self._transform_layout(l) for l in layout
-            ]
+            else:
+                return [self._transform_layout(l) for l in layout]
         if isinstance(layout, str):
-            return {
+            return self._transform_layout({
                 'id': layout
-            }
+            })
         raise NotImplementedError('Layout "%s" not implemented' % layout)
 
     def get_form_title(self, has_instance, serializer, form_name):
@@ -178,8 +228,11 @@ class AngularFormMixin(object):
         ret['method'] = 'patch' if has_instance else 'post'
         ret['has_initial_data'] = has_instance
 
+        # print(json.dumps(ret, indent=4))
+
         return Response(ret)
 
+    # @LoggerDecorator.log()
     def decorate_layout(self, layout, fields_info):
         if isinstance(layout, list):
             ret = []
@@ -187,7 +240,7 @@ class AngularFormMixin(object):
                 ret.append(self.decorate_layout(it, fields_info))
             return ret
         elif isinstance(layout, dict):
-            if layout.get('type', None) == 'fieldset':
+            if layout.get('type', None) in ('fieldset', 'columns', 'group'):
                 layout = dict(layout)
                 layout['controls'] = self.decorate_layout(layout['controls'], fields_info)
                 self.decorate_layout_item(layout)
@@ -195,6 +248,15 @@ class AngularFormMixin(object):
             else:
                 md = dict(fields_info[layout['id']])
                 md.update(layout)
+                if md['type'] == 'choice':
+                    md['type'] = 'select'
+                if md.get('choices'):
+                    md['choices'] = [
+                        {
+                            'label': x['display_name'],
+                            'value': x['value']
+                        } for x in md['choices']
+                    ]
                 self.decorate_layout_item(md)
                 return md
 

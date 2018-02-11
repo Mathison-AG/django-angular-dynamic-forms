@@ -1,0 +1,37 @@
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+.dadf-columns {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-flow: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.dadf-column-1 {
+    flex: 1 1 100%;
+}
+
+.dadf-column-2 {
+    flex: 1 1 50%;
+}
+
+.dadf-column-3 {
+    flex: 1 1 33%;
+}
+
+.dadf-column-4 {
+    flex: 1 1 25%;
+}
+
+label.dadf-fieldset {
+    font-variant: small-caps;
+}
+
+.dadf-buttons {
+    padding-top: 30px;
+
+    button:not(:first-child) {
+        margin-left: 20px;
+    }
+}

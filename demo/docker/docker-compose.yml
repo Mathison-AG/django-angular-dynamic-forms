@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "12569:12569"
+    volumes:
+      - web-data:/data/web
+    links:
+      - web:web
+
+  web:
+    restart: always
+    build: ./web/
+    expose:
+      - "8000"
+  #  links:
+  #    - postgres:postgres
+  #    - redis:redis
+  #  env_file: env
+    volumes:
+       - web-data:/data/web
+
+volumes:
+  web-data:

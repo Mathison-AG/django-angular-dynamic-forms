@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.json",
+  "files": [
+    "./public_api.ts"
+  ],
+  "compilerOptions": {
+    "target": "es2015",
+    "outDir": "."
+  },
+  "angularCompilerOptions": {
+    "annotateForClosureCompiler": true,
+    "flatModuleId": "django-angular-dynamic-forms",
+    "flatModuleOutFile": "django-angular-dynamic-forms.js",
+    "skipTemplateCodegen": true,
+    "strictMetadataEmit": true
+  }
+}

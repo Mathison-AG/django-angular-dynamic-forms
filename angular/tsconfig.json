@@ -1,19 +1,28 @@
 {
-    "compileOnSave": false,
     "compilerOptions": {
-        "outDir": "./dist/out-tsc",
-        "sourceMap": true,
-        "declaration": false,
-        "moduleResolution": "node",
+        "baseUrl": "./",
+        "paths": {
+            "@mesemus/*": [
+                "./dist/@mesemus/*"
+            ]
+        },
+        "declaration": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "target": "es5",
-        "typeRoots": [
-            "node_modules/@types"
-        ],
         "lib": [
             "es2017",
             "dom"
-        ]
+        ],
+        "module": "es2015",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": false,
+        "removeComments": false,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "target": "es5",
+        "typeRoots": [],
+        "types": []
     }
 }
