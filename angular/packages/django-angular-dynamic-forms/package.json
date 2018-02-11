@@ -1,12 +1,13 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.5.16",
+    "version": "0.5.17",
     "license": "MIT",
     "description": "In alpha, use at your own risk",
     "main": "./bundles/django-angular-dynamic-forms.umd.js",
     "module": "./esm5/django-angular-dynamic-forms.js",
     "es2015": "./esm2015/django-angular-dynamic-forms.js",
     "typings": "./django-angular-dynamic-forms.d.ts",
+    "readme": "README.rst",
     "keywords": [],
     "repository": {
         "type": "git",
