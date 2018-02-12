@@ -156,6 +156,7 @@ class AngularFormMixin(object):
             return [
                 {
                     'id': 'save',
+                    'color': 'primary',
                     'label': gettext('Save')
                 },
                 {
@@ -168,6 +169,7 @@ class AngularFormMixin(object):
             return [
                 {
                     'id': 'create',
+                    'color': 'primary',
                     'label': gettext('Create')
                 },
                 {

@@ -230,6 +230,7 @@ export class DjangoFormBaseComponent implements OnInit {
     }
 
     protected _generate_actions(actions: any) {
+        console.log('actions', actions);
         const ret = [];
         if (actions) {
             for (const action of actions) {
