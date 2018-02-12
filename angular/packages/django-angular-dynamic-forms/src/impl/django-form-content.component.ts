@@ -463,11 +463,10 @@ export class DjangoFormContentComponent implements OnInit {
 
     private _update_initial_data() {
         if (this._initial_data && this.form_group) {
-            Object.keys(this.form_group.controls).forEach(name => {
-                if (this._initial_data) {
-                    if (name in this._initial_data) {
-                        this.form_group.controls[name].setValue(this._initial_data[name]);
-                    }
+            this.iterateControls((name, control) => {
+                console.log(name, control);
+                if (name in this._initial_data) {
+                    control.setValue(this._initial_data[name]);
                 }
             });
         }
@@ -516,6 +515,25 @@ export class DjangoFormContentComponent implements OnInit {
         }
 
         return getControl(this.form_group, name);
+    }
+
+    private iterateControls(visitor: (name: string, control: AbstractControl) => void) {
+        function iter(name: string, control: AbstractControl): void {
+            visitor(name, control);
+            if (control instanceof FormGroup) {
+                const formGroup = control as FormGroup;
+                for (const childName in formGroup.controls) {
+                    if (formGroup.controls.hasOwnProperty(childName)) {
+                        const childControl = formGroup.controls[childName];
+                        iter(childName, childControl);
+                    }
+                }
+            }
+            if (control instanceof FormArray) {
+                console.error('Arrays are not yet supported !');
+            }
+        }
+        return iter('---root---', this.form_group);
     }
 }
 

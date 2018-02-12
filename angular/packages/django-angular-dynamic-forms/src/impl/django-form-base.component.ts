@@ -79,10 +79,6 @@ export class DjangoFormBaseComponent implements OnInit {
             this.url$.pipe(
                 filter(url => !!url),
                 mergeMap((url: string) => this._download_django_form(url)), // url is never null here
-                // map(x => ({
-                //     ...this.extra_config,
-                //         x
-                // })),
                 shareReplay(1)
             ),
             this._config$.pipe(

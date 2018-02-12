@@ -9,6 +9,7 @@ import {DjangoFormContentComponent, external_validator} from './impl/django-form
 import {DialogDjangoFormComponent} from './impl/dialog-django-form.component';
 import {DjangoFormBaseComponent} from './impl/django-form-base.component';
 import {DjangoFormDialogService} from './django-form-dialog.service';
+import {HttpClientModule} from '@angular/common/http';
 
 @NgModule({
     declarations: [InPageDjangoFormComponent, DjangoFormContentComponent,
@@ -22,7 +23,8 @@ import {DjangoFormDialogService} from './django-form-dialog.service';
         MatProgressBarModule,
         MatButtonModule,
         MatSnackBarModule,
-        MatDialogModule
+        MatDialogModule,
+        HttpClientModule,
     ],
     providers: [
         {provide: NG_VALIDATORS, useValue: external_validator, multi: true},
