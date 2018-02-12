@@ -151,6 +151,12 @@ export class DjangoFormContentComponent implements OnInit {
         const label = field_config.label || '';
         const type = field_config.type || SimpleFieldTypes.STRING;
 
+        const extra_layout: DynamicFormControlLayout = {
+            grid: {
+                host: `dadf-field-id-${id} dadf-field-type-${type}`
+            }
+        };
+
         switch (type) {
             case SimpleFieldTypes.STRING: {
                 const sfc = field_config as StringFieldConfig;
@@ -173,7 +179,7 @@ export class DjangoFormContentComponent implements OnInit {
                         },
                         list: sfc.autocomplete_list
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
                 if (sfc.autocomplete_list ||
                     sfc.autocomplete_url) {
@@ -207,7 +213,7 @@ export class DjangoFormContentComponent implements OnInit {
                         },
                         list: sfc.autocomplete_list
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
                 if (sfc.autocomplete_list ||
                     sfc.autocomplete_url) {
@@ -239,7 +245,7 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         },
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.DATE:
                 return new DynamicInputModel(
@@ -259,7 +265,7 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         },
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.INTEGER:
                 const ifc = (field_config as IntegerFieldConfig);
@@ -286,7 +292,7 @@ export class DjangoFormContentComponent implements OnInit {
                             max: `Value must be in range ${ifc.min_value} - ${ifc.max_value}`
                         }
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.FLOAT:
                 const ffc = (field_config as FloatFieldConfig);
@@ -314,7 +320,7 @@ export class DjangoFormContentComponent implements OnInit {
                             max: `Value must be in range ${ffc.min_value} - ${ffc.max_value}`
                         }
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.BOOLEAN:
                 return new DynamicCheckboxModel(
@@ -333,7 +339,7 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.RADIO:
                 return new DynamicRadioGroupModel(
@@ -353,7 +359,7 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
             case SimpleFieldTypes.SELECT:
                 return new DynamicSelectModel(
@@ -373,9 +379,9 @@ export class DjangoFormContentComponent implements OnInit {
                             external_error: '{{external_error}}'
                         }
                     },
-                    field_config.layout
+                    merge_layouts(field_config.layout, extra_layout)
                 );
-            case CompositeFieldTypes.FIELDSET:
+            case CompositeFieldTypes.FIELDSET: {
                 const fieldset_layout = merge_layouts(field_config.layout, {
                     grid: {
                         label: 'dadf-fieldset'
@@ -387,8 +393,9 @@ export class DjangoFormContentComponent implements OnInit {
                         label: label,
                         group: this._generate_ui_control_array((field_config as FieldSetConfig).controls)
                     },
-                    fieldset_layout
+                    merge_layouts(fieldset_layout, extra_layout)
                 );
+            }
             case CompositeFieldTypes.GROUP: {
                 const group_layout = merge_layouts(field_config.layout, {
                     grid: {
@@ -400,7 +407,7 @@ export class DjangoFormContentComponent implements OnInit {
                         id: 'generated_' + this.last_id++,
                         group: this._generate_ui_control_array((field_config as FieldSetConfig).controls)
                     },
-                    group_layout
+                    merge_layouts(group_layout, extra_layout)
                 );
             }
             case CompositeFieldTypes.COLUMNS: {
@@ -429,23 +436,24 @@ export class DjangoFormContentComponent implements OnInit {
                         group: model
                     },
                     merge_layouts(
-                        field_config.layout,
-                        {
-                            grid: {
-                                control: `dadf-columns dadf-columns-${csf.controls.length}`
-                            },
-                            // element: {
-                            //     container: '---container',
-                            //     control: '---control',
-                            //     errors: '---errors',
-                            //     group: '---group',
-                            //     hint: '---hint',
-                            //     host: '---host',
-                            //     label: '---label',
-                            //     option: '---option'
-                            // }
-                        }
-                    )
+                        merge_layouts(
+                            field_config.layout,
+                            {
+                                grid: {
+                                    control: `dadf-columns dadf-columns-${csf.controls.length}`
+                                },
+                                // element: {
+                                //     container: '---container',
+                                //     control: '---control',
+                                //     errors: '---errors',
+                                //     group: '---group',
+                                //     hint: '---hint',
+                                //     host: '---host',
+                                //     label: '---label',
+                                //     option: '---option'
+                                // }
+                            }
+                        ), extra_layout)
                 );
             }
             default:
@@ -483,9 +491,9 @@ export class DjangoFormContentComponent implements OnInit {
         this.submit_on_enter.next(this.value);
     }
 
-    private getControlByName(name: string): AbstractControl|undefined {
-        function getControl(control: AbstractControl, controlName: string): AbstractControl|undefined {
-            let ret: AbstractControl|undefined;
+    private getControlByName(name: string): AbstractControl | undefined {
+        function getControl(control: AbstractControl, controlName: string): AbstractControl | undefined {
+            let ret: AbstractControl | undefined;
             if (control instanceof FormGroup) {
                 const formGroup = control as FormGroup;
                 for (const childName in formGroup.controls) {

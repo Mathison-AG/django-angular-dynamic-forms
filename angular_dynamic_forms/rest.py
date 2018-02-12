@@ -52,7 +52,7 @@ class AngularFormMixin(object):
     @staticmethod
     def columns(*controls):
         return {
-            'type': 'columns`',
+            'type': 'columns',
             'columns': controls
         }
 
