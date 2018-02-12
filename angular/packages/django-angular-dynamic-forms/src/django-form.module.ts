@@ -17,6 +17,8 @@ import {DjangoFormDialogService} from './django-form-dialog.service';
     imports: [
         CommonModule,
         ReactiveFormsModule,
+        DynamicFormsCoreModule,
+        DynamicFormsMaterialUIModule,
         MatProgressBarModule,
         MatButtonModule,
         MatSnackBarModule,
