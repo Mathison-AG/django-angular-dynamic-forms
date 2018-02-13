@@ -14,3 +14,10 @@ django_angular_dynamic_forms\.egg-info/
 
 /angular/test
 /build
+
+demo/angular/src/django-angular-dynamic-forms
+
+
+angular/docs/
+angular/lib-dist/
+

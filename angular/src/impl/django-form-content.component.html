@@ -1,0 +1,9 @@
+<ng-container *ngIf="formGroup">
+    <form [formGroup]="formGroup" (ngSubmit)="onSubmitOnEnter()" (keydown.enter)="onSubmitOnEnter()">
+
+        <dynamic-material-form
+            [group]="formGroup"
+            [model]="formModel"></dynamic-material-form>
+
+    </form>
+</ng-container>
