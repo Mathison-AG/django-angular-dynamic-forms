@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+    },
+    "files": [
+        "index.ts"
+    ],
+    "angularCompilerOptions": {
+        "flatModuleOutFile": "django-angular-dynamic-forms.js",
+        "flatModuleId": "dadf"
+    }
+}
