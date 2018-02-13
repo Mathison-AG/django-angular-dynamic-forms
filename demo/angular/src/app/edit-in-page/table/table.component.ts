@@ -57,7 +57,7 @@ export class TableComponent implements OnInit {
 
     public reload() {
         this.http.get<any>('/api/1.0/cities/')
-            .catch(err => this.errors.show_communication_error(err))
+            .catch(err => this.errors.showCommunicationError(err))
             .subscribe(resp => {
                 this.data = new MatTableDataSource(resp);
             });

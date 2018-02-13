@@ -27,7 +27,7 @@ constructor(private dialog: DjangoFormDialogService) {
 click() {
     this.dialog.open('/api/1.0/cities/', {
         config: {
-            initial_data: {
+            initialData: {
                 'name': 'Prague'
             }
         }
@@ -83,7 +83,7 @@ urlpatterns = [
 
         this.dialog.open('/api/1.0/cities/', {
             config: {
-                initial_data: {
+                initialData: {
                     'name': 'Prague'
                 }
             }

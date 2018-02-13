@@ -25,9 +25,9 @@ export class CreateViaDialogMultipleFormsComponent implements OnInit {
             text: `
 constructor(private dialog: DjangoFormDialogService) {
 }
-click(form_id: string) {
+click(formId: string) {
     this.dialog.open('/api/1.0/cities/', {
-        form_id: form_id
+        formId: formId
     }).subscribe(result => {
         this.code.update('response', result);
     });
@@ -69,10 +69,10 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     ngOnInit() {
     }
 
-    click(form_id: string) {
+    click(formId: string) {
 
         this.dialog.open('/api/1.0/cities/', {
-            form_id: form_id
+            formId: formId
         }).subscribe(result => {
             this.code.update('response', result);
         });

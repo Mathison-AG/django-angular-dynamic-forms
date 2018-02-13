@@ -76,7 +76,7 @@ export class EditInPageComponent implements OnInit {
 
     public reload() {
         this.http.get<any>('/api/1.0/cities/')
-            .catch(err => this.errors.show_communication_error(err))
+            .catch(err => this.errors.showCommunicationError(err))
             .subscribe(resp => {
                 this.data = new MatTableDataSource(resp);
             });
@@ -156,7 +156,7 @@ export class EditInPageComponent implements OnInit {
             tab: 'FormComponent template',
             text: `
         <div class='bordered' fxFlex="50" fxFlex.sm="100">
-            <inpage-django-form [django_url]="url"
+            <inpage-django-form [djangoUrl]="url"
                                 (submit)="submit($event)"
                                 (cancel)="cancel($event)"></inpage-django-form>
         </div>

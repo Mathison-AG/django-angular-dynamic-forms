@@ -23,9 +23,8 @@ done
 
 (
     cd angular
-    npm run build:packages || exit 1
-    pandoc ../README.rst -o dist/django-angular-dynamic-forms/readme.md
-    cd dist/django-angular-dynamic-forms || exit 1
+    yarn build:library || exit 1
+    pandoc ../README.rst -o lib-dist/readme.md
     npm publish || exit 1
 ) || exit 1
 

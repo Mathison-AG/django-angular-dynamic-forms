@@ -8,7 +8,7 @@ import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form django_url="/api/1.0/test/" (submit)="submit($event)"
+                <inpage-django-form djangoUrl="/api/1.0/test/" (submit)="submit($event)"
                                     (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
@@ -101,7 +101,7 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
             tab: 'template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form django_url="/api/1.0/test/" 
+    <inpage-django-form djangoUrl="/api/1.0/test/" 
                         (submit)="submit($event)" 
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>

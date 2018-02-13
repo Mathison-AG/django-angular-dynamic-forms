@@ -84,6 +84,19 @@ class AngularFormMixin(object):
                 field.update(form_defaults[field['id']])
         return layout
 
+    def convert_camel_case(self, x):
+        if isinstance(x, dict):
+            for k, v in list(x.items()):
+                self.convert_camel_case(v)
+                camel_k = camel(k)
+                if camel_k != k:
+                    del x[k]
+                    x[camel_k] = v
+        if isinstance(x, tuple) or isinstance(x, list):
+            for v in x:
+                self.convert_camel_case(v)
+        return x
+
     def _get_field_layout(self, field_name, field):
         return {'id': field_name}
 
@@ -221,14 +234,14 @@ class AngularFormMixin(object):
         layout = self.get_form_layout(fields_info, form_name)
         layout = self.decorate_layout(layout, fields_info)
 
-        ret['layout'] = layout
+        ret['layout'] = self.convert_camel_case(layout)
 
-        ret['form_title'] = self.get_form_title(has_instance, serializer, form_name)
+        ret['formTitle'] = self.get_form_title(has_instance, serializer, form_name)
 
         ret['actions'] = self.get_actions(has_instance, serializer)
 
         ret['method'] = 'patch' if has_instance else 'post'
-        ret['has_initial_data'] = has_instance
+        ret['hasInitialData'] = has_instance
 
         # print(json.dumps(ret, indent=4))
 
@@ -359,3 +372,7 @@ def autocomplete(field, formatter):
         return real_func
 
     return wrapper
+
+def camel(snake_str):
+    first, *others = snake_str.split('_')
+    return ''.join([first.lower(), *map(str.title, others)])
