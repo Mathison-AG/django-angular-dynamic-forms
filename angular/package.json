@@ -1,6 +1,6 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.5.29",
+    "version": "0.5.30",
     "license": "MIT",
     "description": "Django Rest Framework meets Angular 5 material.io dynamic forms - automatic create and edit dialogs",
     "main": "./lib-dist/index.js",
@@ -27,7 +27,6 @@
         "postversion": "git push && git push --tags",
         "prebuild": "rimraf dist tmp lib-dist",
         "prebuild:watch": "rimraf dist tmp lib-dist",
-        "prepublishOnly": "npm run ci",
         "preversion": "npm run ci",
         "test": "karma start",
         "test:watch": "karma start --auto-watch --no-single-run",

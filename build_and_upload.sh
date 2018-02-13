@@ -23,8 +23,10 @@ done
 
 (
     cd angular
+    yarn preversion || exit 1
     yarn build:library || exit 1
     pandoc ../README.rst -o lib-dist/readme.md
+    cd lib-dist || exit 1
     npm publish || exit 1
 ) || exit 1
 
