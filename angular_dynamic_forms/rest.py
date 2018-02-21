@@ -2,6 +2,7 @@
 import inspect
 import re
 from functools import lru_cache
+from urllib.parse import urlsplit
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import TextField
@@ -386,7 +387,7 @@ class AutoCompleteMixin(object):
             # must be called from /form/ ...
             path = re.sub(r'/form/?$', '', path)
             path = '%s/autocomplete/%s/' % (path, name)
-            item['autocomplete_url'] = request.build_absolute_uri(path)
+            item['autocomplete_url'] = urlsplit(request.build_absolute_uri(path)).path
 
     # noinspection PyUnusedLocal
     def _autocomplete(self, request, has_instance, **kwargs):
@@ -473,7 +474,8 @@ class ForeignFieldAutoCompleteMixin(object):
             # must be called from /form/ ...
             path = re.sub(r'/form/?$', '', path)
             path = '%s/foreign-autocomplete/%s/' % (path, item_id)
-            item['autocomplete_url'] = request.build_absolute_uri(path)
+            item['autocomplete_url'] = urlsplit(request.build_absolute_uri(path)).path
+            print(item['autocomplete_url'])
 
     # noinspection PyUnusedLocal
     def _foreign_autocomplete(self, request, has_instance, **kwargs):
