@@ -129,9 +129,11 @@
   dependencies:
     tslib "^1.7.1"
 
-"@angular/flex-layout@^2.0.0-rc.1":
-  version "2.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@angular/flex-layout/-/flex-layout-2.0.0-rc.1.tgz#96fa7f85b2c4bacf2784913a2d607e2ed23dc7f1"
+"@angular/flex-layout@2.0.0-beta.12":
+  version "2.0.0-beta.12"
+  resolved "https://registry.yarnpkg.com/@angular/flex-layout/-/flex-layout-2.0.0-beta.12.tgz#80970dc1d60f27fa41537659926f3238f759f343"
+  dependencies:
+    tslib "^1.7.1"
 
 "@angular/forms@^5.2.0":
   version "5.2.4"
@@ -2007,10 +2009,6 @@ dir-glob@^2.0.0:
   dependencies:
     arrify "^1.0.1"
     path-type "^3.0.0"
-
-django-angular-dynamic-forms@^0.5.33:
-  version "0.5.33"
-  resolved "https://registry.yarnpkg.com/django-angular-dynamic-forms/-/django-angular-dynamic-forms-0.5.33.tgz#c5c40bf94dce90ab3611fbad9887b3a748d51a64"
 
 dns-equal@^1.0.0:
   version "1.0.0"

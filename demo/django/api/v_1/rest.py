@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, serializers
 
-from api.models import City, TestModel
+from angular_dynamic_forms.rest import foreign_field_autocomplete, ForeignFieldAutoCompleteMixin
+from api.models import City, TestModel, Address
 from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete
 
 
@@ -71,16 +72,29 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
         return City.objects.filter(name__istartswith=search).order_by('name')
 
 
-class TestModel2ViewSet(AngularFormMixin, viewsets.ModelViewSet):
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        exclude = ()
+
+
+class AddressViewSet(AutoCompleteMixin, ForeignFieldAutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     """
     Second API for TestModel
     """
-    queryset = TestModel.objects.all()
-    serializer_class = TestModelSerializer
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializer
     permission_classes = (permissions.AllowAny,)
     form_defaults = {
-        'radio': {'type': 'radio'},
-        'name': {
-            'autocomplete_list': [chr(x) for x in range(40, 256)]
+        'city': {
+            'formatter': '{{name}}'
         }
     }
+
+    @foreign_field_autocomplete(field='city', serializer=CitySerializer)
+    def city_autocomplete(self, request):
+        query = request.GET.get('query')
+        qs = City.objects.all().order_by('name')
+        if query:
+            qs = qs.filter(name__icontains=query)
+        return qs

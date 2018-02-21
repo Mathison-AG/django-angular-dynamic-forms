@@ -10,6 +10,7 @@ export enum SimpleFieldTypes {
     RADIO = 'radio',
     SELECT = 'select',
     EMAIL = 'email',
+    FIELD = 'field',
 }
 
 export enum CompositeFieldTypes {
@@ -86,6 +87,11 @@ export interface SelectFieldConfig extends FieldConfigBase {
     choices: FieldChoice[];
 }
 
+export interface ForeignFieldConfig extends FieldConfigBase {
+    type: SimpleFieldTypes.FIELD;
+    formatter: string;
+}
+
 export interface FieldSetConfig extends FieldConfigBase {
     type: CompositeFieldTypes.FIELDSET;
     controls: FieldConfig[];
@@ -103,7 +109,7 @@ export interface GroupFieldConfig extends FieldConfigBase {
 
 export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig |
     IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig |
-    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig;
+    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig | ForeignFieldConfig;
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint

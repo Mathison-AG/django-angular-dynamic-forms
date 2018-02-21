@@ -12,6 +12,7 @@ import {FormComponent as EditInPageFormComponent} from './edit-in-page/form/form
 import {CreateViaDialogMultipleFormsComponent} from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
 import {CreateInPageMultipleFormsComponent} from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
 import {AllControlsComponent} from './all-controls/all-controls.component';
+import {ForeignComponent} from './foreign/foreign.component';
 
 const routes: Routes = [
     {
@@ -58,6 +59,11 @@ const routes: Routes = [
         path: 'all-controls',
         pathMatch: 'full',
         component: AllControlsComponent
+    },
+    {
+        path: 'foreign',
+        pathMatch: 'full',
+        component: ForeignComponent
     },
     {
         path: 'edit-in-page',

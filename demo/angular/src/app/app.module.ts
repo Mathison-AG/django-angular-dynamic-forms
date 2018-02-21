@@ -1,10 +1,11 @@
 import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
-import {DjangoFormModule, ErrorService} from 'django-angular-dynamic-forms';
+import {DjangoFormModule, ErrorService, FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER} from 'django-angular-dynamic-forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
-    MatButtonModule, MatExpansionModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule,
+    MatButtonModule, MatExpansionModule, MatIconModule, MatInputModule, MatListModule, MatSidenavModule,
+    MatSnackBarModule,
     MatTableModule,
     MatTabsModule
 } from '@angular/material';
@@ -28,6 +29,9 @@ import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-fo
 import { AllControlsComponent } from './all-controls/all-controls.component';
 import {DynamicFormsCoreModule} from '@ng-dynamic-forms/core';
 import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
+import { ForeignComponent } from './foreign/foreign.component';
+import { SampleForeignSelectorComponent } from './foreign/sample-foreign-selector.component';
+import {ReactiveFormsModule} from '@angular/forms';
 
 
 @NgModule({
@@ -45,7 +49,9 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
         FormComponent,
         CreateViaDialogMultipleFormsComponent,
         CreateInPageMultipleFormsComponent,
-        AllControlsComponent
+        AllControlsComponent,
+        ForeignComponent,
+        SampleForeignSelectorComponent
     ],
     imports: [
         BrowserAnimationsModule,
@@ -63,14 +69,23 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
         AppRoutingModule,
         HttpClientModule,
         HighlightJsModule,
-        MatExpansionModule
+        MatExpansionModule,
+        MatInputModule,
+        ReactiveFormsModule
     ],
     providers: [
         {
             provide: ErrorService,
             useClass: MatErrorService
         },
-        HighlightJsService
+        HighlightJsService,
+        {
+            provide: FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
+            useValue: SampleForeignSelectorComponent
+        }
+    ],
+    entryComponents: [
+        SampleForeignSelectorComponent
     ],
     bootstrap: [AppComponent]
 })

@@ -13,7 +13,7 @@ import {HttpClientModule} from '@angular/common/http';
 
 @NgModule({
     declarations: [InPageDjangoFormComponent, DjangoFormContentComponent,
-        DialogDjangoFormComponent, DjangoFormBaseComponent,
+        DialogDjangoFormComponent, DjangoFormBaseComponent
     ],
     imports: [
         CommonModule,

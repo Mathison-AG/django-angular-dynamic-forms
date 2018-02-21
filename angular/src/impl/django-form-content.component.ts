@@ -1,12 +1,37 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
-
-import {AbstractControl, FormArray, FormGroup, ValidatorFn} from '@angular/forms';
+import {
+    ChangeDetectorRef,
+    Component, ComponentRef,
+    ContentChild,
+    ElementRef,
+    EventEmitter, Inject,
+    Input, NgZone,
+    OnDestroy,
+    OnInit, Optional,
+    Output,
+    TemplateRef, Type
+} from '@angular/core';
 
 import {
-    DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE, DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER, DynamicCheckboxModel,
+    AbstractControl,
+    FormArray,
+    FormControlDirective,
+    FormControlName,
+    FormGroup,
+    ValidatorFn
+} from '@angular/forms';
+
+import {
+    DYNAMIC_FORM_CONTROL_INPUT_TYPE_DATE,
+    DYNAMIC_FORM_CONTROL_INPUT_TYPE_NUMBER,
+    DynamicCheckboxModel,
     DynamicFormControlLayout,
-    DynamicFormControlModel, DynamicFormGroupModel, DynamicFormService, DynamicInputModel, DynamicRadioGroupModel,
-    DynamicSelectModel, DynamicTextAreaModel
+    DynamicFormControlModel,
+    DynamicFormGroupModel,
+    DynamicFormService,
+    DynamicInputModel,
+    DynamicRadioGroupModel,
+    DynamicSelectModel,
+    DynamicTextAreaModel
 } from '@ng-dynamic-forms/core';
 import 'rxjs/add/operator/merge';
 import {HttpClient} from '@angular/common/http';
@@ -14,11 +39,27 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorService} from './error-service';
 import {
     ColumnsFieldConfig,
-    CompositeFieldTypes, EmailFieldConfig, FieldConfig, FieldSetConfig, FloatFieldConfig, IntegerFieldConfig,
+    CompositeFieldTypes,
+    EmailFieldConfig,
+    FieldChoice,
+    FieldConfig,
+    FieldSetConfig,
+    FloatFieldConfig,
+    IntegerFieldConfig,
     RadioFieldConfig,
-    SelectFieldConfig, SimpleFieldTypes, StringFieldConfig, TextAreaFieldConfig
+    SelectFieldConfig,
+    SimpleFieldTypes,
+    StringFieldConfig,
+    TextAreaFieldConfig
 } from './django-form-iface';
 import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/misc/dynamic-form-control-layout.model';
+import {
+    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER, FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
+    ForeignFieldLookupComponent, ForeignFieldLookupFactory, ForeignFieldLookupResult
+} from '../foreign';
+import {ComponentPortal} from '@angular/cdk/portal';
+import {Overlay} from '@angular/cdk/overlay';
+import {MatDialog} from '@angular/material';
 
 /**
  * Form component targeted on django rest framework
@@ -28,7 +69,7 @@ import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/m
     templateUrl: './django-form-content.component.html',
     styleUrls: ['./django-form-content.component.scss']
 })
-export class DjangoFormContentComponent implements OnInit {
+export class DjangoFormContentComponent implements OnInit, OnDestroy {
     public formModel: DynamicFormControlModel[] = [];
     public formGroup: FormGroup;
 
@@ -39,23 +80,29 @@ export class DjangoFormContentComponent implements OnInit {
     @Output()
     public submitOnEnter = new EventEmitter();
 
+    @ContentChild(TemplateRef)
+    private templateRef: TemplateRef<any>;
+
     private autocompleters: AutoCompleter[] = [];
     private lastId = 0;
 
     private _externalErrors: { [s: string]: any; } = {};
     private _initialData: any = null;
 
+    private foreigns: any[] = [];
+    private foreignDefinitions: { [s: string]: any; } = {};
+
     @Input()
     public set layout(_layout: FieldConfig[]) {
         if (_layout) {
             this.formModel = [];
             this.autocompleters = [];
+            this.foreignDefinitions = {};
             this.formModel = this._generateUIControlArray(_layout);
 
             if (this.formGroup) {
-                this.formGroup = this.formService.createFormGroup(this.formModel);
-                this._bindAutocomplete();
-                this._updateInitialData();
+                this._unbindForeignKey();
+                this._initializeGroup();
             }
 
             this.check.detectChanges();
@@ -96,22 +143,32 @@ export class DjangoFormContentComponent implements OnInit {
         this._updateInitialData();
     }
 
-    constructor(private formService: DynamicFormService, private httpClient: HttpClient,
+    constructor(private formService: DynamicFormService,
+                private httpClient: HttpClient,
                 private errorService: ErrorService,
                 private currentElement: ElementRef,
-                private check: ChangeDetectorRef) {
+                private check: ChangeDetectorRef,
+                private zone: NgZone,
+                @Optional() @Inject(FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER)
+                private foreignFieldLookupComponent: Type<ForeignFieldLookupComponent>,
+                @Optional() @Inject(FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER)
+                private foreignFieldLookupFactory: ForeignFieldLookupFactory,
+                private dialog: MatDialog) {
     }
 
     public ngOnInit() {
         // create an empty form group, will be filled later
         if (!this.formGroup) {
-            this.formGroup = this.formService.createFormGroup(this.formModel);
-            this._bindAutocomplete();
-            this._updateInitialData();
+            this._initializeGroup();
         }
         this._triggerValidation();
         this.check.detectChanges();
     }
+
+    public ngOnDestroy() {
+        this._unbindForeignKey();
+    }
+
     public get valid() {
         if (this.formGroup) {
             return this.formGroup.valid;
@@ -130,6 +187,13 @@ export class DjangoFormContentComponent implements OnInit {
         this.submitOnEnter.next(this.value);
     }
 
+    private _initializeGroup() {
+        this.formGroup = this.formService.createFormGroup(this.formModel);
+        this._bindAutocomplete();
+        this._bindForeignKey();
+        this._updateInitialData();
+    }
+
     private _bindAutocomplete() {
         for (const autocompleter of this.autocompleters) {
             const widget = this.formGroup.get(this.formService.getPath(autocompleter.model));
@@ -139,6 +203,104 @@ export class DjangoFormContentComponent implements OnInit {
                 });
             }
         }
+    }
+
+    private _bindForeignKey() {
+        setTimeout(() => {
+            // do it after angular tick when components are ready
+            // TODO: hack that needs to be removed when ng-dynamic-forms implement custom dynamic components
+            // - see https://github.com/udos86/ng-dynamic-forms/issues/660
+            this.iterateControls((name, control) => {
+                const valueAccessor = (control as any).valueAccessor;
+                if (valueAccessor) {
+                    if (valueAccessor.controlType === 'mat-select') {
+                        const formModel = this.formService.findById(name, this.formModel);
+                        if (!formModel) {
+                            return;
+                        }
+                        if (!(formModel instanceof DynamicSelectModel)) {
+                            return;
+                        }
+                        if (!this.foreignDefinitions[name]) {
+                            return;
+                        }
+                        this._installForeignHandler(name, control, valueAccessor, formModel);
+                    }
+                }
+            });
+        });
+    }
+
+    private _installForeignHandler(name: string, control: AbstractControl, valueAccessor: any,
+                                   formModel: DynamicSelectModel<string>) {
+        const def = this.foreignDefinitions[name];
+        if (this.foreigns.indexOf(control) < 0) {
+            this.foreigns.push(control);
+            const native = valueAccessor._elementRef.nativeElement;
+            native.addEventListener('click', (event) => {
+                this._runForeignKeySelection(name, def, formModel, native);
+            });
+        }
+    }
+
+    private _runForeignKeySelection(name: string, def: any, formModel: DynamicSelectModel<string>, native: any) {
+        this.zone.run(() => {
+            let component: Type<ForeignFieldLookupComponent>;
+            if (this.foreignFieldLookupComponent) {
+                component = this.foreignFieldLookupComponent;
+            } else if (this.foreignFieldLookupFactory) {
+                component = this.foreignFieldLookupFactory.getComponent(def);
+            } else {
+                this.errorService.showError(
+                    'Please define provider for field lookup, see the demo or ' +
+                    'foreign.ts for details');
+                return;
+            }
+            const value = Array.isArray(formModel.value) ? formModel.value : [formModel.value];
+            const dialogRef = this.dialog.open(component, {
+                width: '50vw',
+                height: '50vh',
+                data: {
+                    initialValue: value.filter((x) => !!x).map(
+                        (val) => ({
+                            key: val,
+                            formatted_value: formModel.options.find((x) => x.value === val) || ''
+                        })),
+                    config: def
+                }
+            });
+            dialogRef.afterClosed().subscribe((result: ForeignFieldLookupResult[]|undefined) => {
+                // material select shows the list options when clicked. As I was not successful at preventing this
+                // click on their backdrop as a workaround
+                // TODO: this will not work in a dialog, need a better solution here ...
+                for (const el of native.ownerDocument.getElementsByClassName('cdk-overlay-backdrop')) {
+                    el.click();
+                }
+                if (result === undefined) {
+                    // do nothing for undefined result
+                    return;
+                }
+                if (!result.length) {
+                    // deselect value
+                    formModel.options = [];
+                    formModel.select();
+                    return;
+                }
+                formModel.options = result.map((r) => ({
+                    label: r.formatted_value,
+                    value: r.key
+                }));
+                formModel.select(...result.map((_, index) => index));
+            });
+        });
+    }
+
+    private _unbindForeignKey() {
+        this.foreigns.forEach((control) => {
+            const valueAccessor = (control as any).valueAccessor;
+            valueAccessor._elementRef.nativeElement.removeAllListeners();
+        });
+        this.foreigns = [];
     }
 
     private _triggerValidation() {
@@ -399,6 +561,27 @@ export class DjangoFormContentComponent implements OnInit {
                     },
                     mergeLayouts(fieldConfig.layout, extraLayout)
                 );
+            case SimpleFieldTypes.FIELD:
+                this.foreignDefinitions[id] = fieldConfig;
+                return new DynamicSelectModel(
+                    {
+                        id,
+                        placeholder: label,
+                        // options: (fieldConfig as SelectFieldConfig).choices,
+                        required: fieldConfig.required,
+                        disabled: fieldConfig.readOnly,
+                        validators: {
+                            externalValidator: {
+                                name: externalValidator.name,
+                                args: {id, errors: this._externalErrors}
+                            }
+                        },
+                        errorMessages: {
+                            externalError: '{{externalError}}'
+                        }
+                    },
+                    mergeLayouts(fieldConfig.layout, extraLayout)
+                );
             case CompositeFieldTypes.FIELDSET: {
                 const fieldsetLayout = mergeLayouts(fieldConfig.layout, {
                     grid: {
@@ -482,7 +665,6 @@ export class DjangoFormContentComponent implements OnInit {
     private _updateInitialData() {
         if (this._initialData && this.formGroup) {
             this.iterateControls((name, control) => {
-                console.log(name, control);
                 if (name in this._initialData) {
                     control.setValue(this._initialData[name]);
                 }
@@ -533,6 +715,7 @@ export class DjangoFormContentComponent implements OnInit {
                 console.error('Arrays are not yet supported !');
             }
         }
+
         return iter('---root---', this.formGroup);
     }
 }
@@ -633,3 +816,22 @@ function mergeLayouts(layout1OrUndefined: DynamicFormControlLayout | undefined,
     }
     return ret;
 }
+
+/**
+ *
+ * TODO: NASTY HACK TO ADD VALUE ACCESSOR ON THE COMPONENT TO ADD EVENT TO SELECTs
+ *
+ * @type {(changes: SimpleChanges) => void}
+ */
+const originFormControlNgOnChanges = FormControlDirective.prototype.ngOnChanges;
+FormControlDirective.prototype.ngOnChanges = function () {
+    this.form.nativeElement = this.valueAccessor._element.nativeElement;
+    return originFormControlNgOnChanges.apply(this, arguments);
+};
+
+const originFormControlNameNgOnChanges = FormControlName.prototype.ngOnChanges;
+FormControlName.prototype.ngOnChanges = function () {
+    const result = originFormControlNameNgOnChanges.apply(this, arguments);
+    this.control.valueAccessor = this.valueAccessor;
+    return result;
+};
