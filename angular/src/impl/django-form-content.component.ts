@@ -239,7 +239,7 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
             const native = valueAccessor._elementRef.nativeElement;
             // bind mousedown on the wrapper so that label is also active
             native.parentElement.addEventListener('mousedown', (event) => {
-                this._runForeignKeySelection(name, def, formModel, native);
+                this._runForeignKeySelection(name, def, formModel);
             });
         }
     }
@@ -248,6 +248,7 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
         this.zone.run(() => {
 
             let component: Type<ForeignFieldLookupComponent>;
+            console.log('factory is', this.foreignFieldLookupFactory);
             if (this.foreignFieldLookupFactory) {
                 component = this.foreignFieldLookupFactory.getComponent(def);
             }
@@ -282,7 +283,7 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
                 if (!result.length) {
                     // deselect value
                     formModel.options = [];
-                    formModel.select();
+                    // formModel.select();
                     return;
                 }
                 formModel.options = result.map((r) => ({

@@ -72,7 +72,7 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
     def name_autocomplete(self, search):
         return City.objects.filter(name__istartswith=search).order_by('name')
 
-    @foreign_field_autocomplete(field='foreign_key', serializer=CitySerializer)
+    @foreign_field_autocomplete(field='foreign_key', serializer=CitySerializer, pagination=True)
     def city_autocomplete(self, request):
         query = request.GET.get('query')
         qs = City.objects.all().order_by('name')

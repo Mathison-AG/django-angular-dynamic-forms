@@ -36,6 +36,11 @@ export interface ForeignFieldLookupConfig {
      * true if multiple values are allowed, false otherwise
      */
     multiple: boolean;
+
+    /**
+     * autocomplete url if set by the backend
+     */
+    autocompleteUrl?: string;
 }
 
 export interface ForeignFieldLookupComponentData {

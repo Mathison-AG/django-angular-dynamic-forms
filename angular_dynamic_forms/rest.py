@@ -5,7 +5,7 @@ from functools import lru_cache
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import TextField
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, HttpResponseNotAllowed
 from django.template import Template, Context
 from django.utils.translation import gettext
 from rest_framework import renderers
@@ -426,9 +426,10 @@ class ForeignFieldAutoCompleteMixin(object):
     max_returned_items = 10
 
     class __AutoCompleteRec:
-        def __init__(self, search_method, serializer):
+        def __init__(self, search_method, serializer, pagination):
             self.search_method = search_method
             self.serializer = serializer
+            self.pagination = pagination
 
     # noinspection PyUnusedLocal
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='foreign-autocomplete/(?P<autocomplete_id>.*)',
@@ -453,7 +454,8 @@ class ForeignFieldAutoCompleteMixin(object):
                 continue
             # noinspection PyUnresolvedReferences,PyProtectedMember
             ret[method._foreign_autocomplete_field] = \
-                ForeignFieldAutoCompleteMixin.__AutoCompleteRec(method, method._foreign_autocomplete_serializer)
+                ForeignFieldAutoCompleteMixin.__AutoCompleteRec(method, method._foreign_autocomplete_serializer,
+                                                                method._foreign_autocomplete_pagination)
         self._foreign_autocomplete_definitions_cache = ret
         return ret
 
@@ -480,15 +482,35 @@ class ForeignFieldAutoCompleteMixin(object):
         if item_id not in foreign_autocomplete_definitions:
             return HttpResponseNotFound()
         filter_method = foreign_autocomplete_definitions[item_id].search_method
-        qs = filter_method(request)[:self.max_returned_items]
+        qs = filter_method(request)
+        paginated = foreign_autocomplete_definitions[item_id].pagination
+        total = 0
+        if paginated:
+            pageIndex = int(request.GET.get('pageIndex', 0))
+            pageSize = int(request.GET.get('pageSize', 0))
+            if pageSize > self.max_returned_items:
+                return HttpResponseNotAllowed('pageSize too big')
+            total = qs.count()
+            if pageSize:
+                qs = qs[pageIndex * pageSize : (pageIndex + 1) * pageSize]
+        else:
+            qs = qs[:self.max_returned_items]
+
         serializer = foreign_autocomplete_definitions[item_id].serializer(many=True, instance=qs)
-        return Response(serializer.data)
+        if paginated:
+            return Response({
+                'length' : total,
+                'items'  : serializer.data
+            })
+        else:
+            return Response(serializer.data)
 
 
-def foreign_field_autocomplete(field, serializer):
+def foreign_field_autocomplete(field, serializer, pagination=False):
     def wrapper(real_func):
         real_func._foreign_autocomplete_field = field
         real_func._foreign_autocomplete_serializer = serializer
+        real_func._foreign_autocomplete_pagination = pagination
         return real_func
 
     return wrapper
