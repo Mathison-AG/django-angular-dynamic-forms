@@ -237,25 +237,30 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
         if (this.foreigns.indexOf(control) < 0) {
             this.foreigns.push(control);
             const native = valueAccessor._elementRef.nativeElement;
-            native.addEventListener('click', (event) => {
+            // bind mousedown on the wrapper so that label is also active
+            native.parentElement.addEventListener('mousedown', (event) => {
                 this._runForeignKeySelection(name, def, formModel, native);
             });
         }
     }
 
-    private _runForeignKeySelection(name: string, def: any, formModel: DynamicSelectModel<string>, native: any) {
+    private _runForeignKeySelection(name: string, def: any, formModel: DynamicSelectModel<string>) {
         this.zone.run(() => {
+
             let component: Type<ForeignFieldLookupComponent>;
-            if (this.foreignFieldLookupComponent) {
-                component = this.foreignFieldLookupComponent;
-            } else if (this.foreignFieldLookupFactory) {
+            if (this.foreignFieldLookupFactory) {
                 component = this.foreignFieldLookupFactory.getComponent(def);
-            } else {
+            }
+            if (!component && this.foreignFieldLookupComponent) {
+                component = this.foreignFieldLookupComponent;
+            }
+            if (!component) {
                 this.errorService.showError(
                     'Please define provider for field lookup, see the demo or ' +
                     'foreign.ts for details');
                 return;
             }
+
             const value = Array.isArray(formModel.value) ? formModel.value : [formModel.value];
             const dialogRef = this.dialog.open(component, {
                 width: '50vw',
@@ -270,12 +275,6 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
                 }
             });
             dialogRef.afterClosed().subscribe((result: ForeignFieldLookupResult[]|undefined) => {
-                // material select shows the list options when clicked. As I was not successful at preventing this
-                // click on their backdrop as a workaround
-                // TODO: this will not work in a dialog, need a better solution here ...
-                for (const el of native.ownerDocument.getElementsByClassName('cdk-overlay-backdrop')) {
-                    el.click();
-                }
                 if (result === undefined) {
                     // do nothing for undefined result
                     return;

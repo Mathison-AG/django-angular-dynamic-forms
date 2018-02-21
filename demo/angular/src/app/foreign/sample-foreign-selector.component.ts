@@ -15,7 +15,8 @@ import {HttpClient} from '@angular/common/http';
 @Component({
     selector: 'app-sample-foreign-selector',
     template: `
-        Use the filter to write a few letters of the city name or <button mat-button (click)="clear()">clear</button> the previous value:
+        Write a few letters of the city name and then select the city. 
+        You can also <button mat-button (click)="clear()">clear</button> the previous value:
         <form [formGroup]="form">
             <mat-input-container>
                 <input formControlName="query" matInput placeholder="City name filter">

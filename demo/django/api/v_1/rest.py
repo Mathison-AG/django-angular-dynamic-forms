@@ -31,7 +31,7 @@ class TestModelSerializer(serializers.ModelSerializer):
         exclude = ()
 
 
-class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
+class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     """
     API for TestModel
     """
@@ -60,7 +60,8 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
                                               [
                                                   'name',
                                                   'email',
-                                                  'number'
+                                                  'number',
+                                                  'foreign_key'
                                               ])
                 ]
             ]
@@ -70,6 +71,14 @@ class TestModelViewSet(AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSe
     @autocomplete(field='name', formatter='{{item.name}} [{{item.id}}]')
     def name_autocomplete(self, search):
         return City.objects.filter(name__istartswith=search).order_by('name')
+
+    @foreign_field_autocomplete(field='foreign_key', serializer=CitySerializer)
+    def city_autocomplete(self, request):
+        query = request.GET.get('query')
+        qs = City.objects.all().order_by('name')
+        if query:
+            qs = qs.filter(name__icontains=query)
+        return qs
 
 
 class AddressSerializer(serializers.ModelSerializer):
