@@ -8,7 +8,7 @@ import {FormBuilder, FormGroup} from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
 import {debounceTime, distinctUntilChanged, mergeMap} from 'rxjs/operators';
 import {map} from 'rxjs/operators';
-import 'rxjs/observable/merge';
+import {merge} from 'rxjs/observable/merge';
 import {of as observableOf} from 'rxjs/observable/of';
 import {HttpClient} from '@angular/common/http';
 
@@ -57,9 +57,9 @@ export class SampleForeignSelectorComponent implements OnInit, ForeignFieldLooku
                 http: HttpClient) {
 
         this.form = formBuilder.group({query: []});
-        this.cities$ = Observable.merge(
+        this.cities$ = merge(
             this.form.valueChanges.pipe(
-                map((val) => val.query),
+                map((val) => val.query as string),
                 debounceTime(500),
             ),
             observableOf('')

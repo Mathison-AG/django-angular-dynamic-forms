@@ -11,7 +11,7 @@ import {FormBuilder, FormGroup} from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
 import {debounceTime, distinctUntilChanged, mergeMap, tap} from 'rxjs/operators';
 import {map} from 'rxjs/operators';
-import 'rxjs/observable/merge';
+import {merge} from 'rxjs/observable/merge';
 import {of as observableOf} from 'rxjs/observable/of';
 import {combineLatest} from 'rxjs/observable/combineLatest';
 import {HttpClient} from '@angular/common/http';
@@ -92,15 +92,15 @@ export class ForeignSelectorComponent implements OnInit, ForeignFieldLookupCompo
 
         console.log(this.paginator, this.sort);
 
-        const filter$ = Observable.merge(
+        const filter$ = merge(
             this.form.valueChanges.pipe(
-                map((val) => val.query),
+                map((val) => val.query as string),
                 debounceTime(500),
             ),
             observableOf('')
         );
 
-        const paginator$ = Observable.merge(
+        const paginator$ = merge(
             this.paginator.page,
             // default
             observableOf({
@@ -108,7 +108,7 @@ export class ForeignSelectorComponent implements OnInit, ForeignFieldLookupCompo
                 pageSize: 5
             })) as Observable<PageEvent>;
 
-        const sort$ = Observable.merge(
+        const sort$ = merge(
             this.sort.sortChange,
             // default
             observableOf({
