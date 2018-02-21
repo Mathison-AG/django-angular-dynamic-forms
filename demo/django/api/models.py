@@ -35,4 +35,5 @@ class TestModel(models.Model):
     string = models.CharField(max_length=100)
     area = models.TextField()
     email = models.EmailField()
+    foreign_key = models.ForeignKey(City, null=True, blank=True, on_delete=models.CASCADE)
 

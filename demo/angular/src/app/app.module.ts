@@ -1,10 +1,15 @@
 import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
-import {DjangoFormModule, ErrorService} from 'django-angular-dynamic-forms';
+import {
+    DjangoFormModule, ErrorService, FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
+    FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER
+} from 'django-angular-dynamic-forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
-    MatButtonModule, MatExpansionModule, MatIconModule, MatListModule, MatSidenavModule, MatSnackBarModule,
+    MatButtonModule, MatExpansionModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule,
+    MatSidenavModule,
+    MatSnackBarModule, MatSortModule,
     MatTableModule,
     MatTabsModule
 } from '@angular/material';
@@ -18,16 +23,21 @@ import {HighlightJsModule, HighlightJsService} from 'angular2-highlight-js';
 import {CodeSampleComponent} from './code-sample/code-sample.component';
 import {CreateInPageComponent} from './create-in-page/create-in-page.component';
 import {CreateViaDialogInitialDataComponent} from './create-via-dialog-initial-data/create-via-dialog-initial-data.component';
-import { CreateInPageInitialDataComponent } from './create-in-page-initial-data/create-in-page-initial-data.component';
-import { EditViaDialogComponent } from './edit-via-dialog/edit-via-dialog.component';
-import { EditInPageComponent } from './edit-in-page/edit-in-page.component';
-import { TableComponent } from './edit-in-page/table/table.component';
-import { FormComponent } from './edit-in-page/form/form.component';
-import { CreateViaDialogMultipleFormsComponent } from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
-import { CreateInPageMultipleFormsComponent } from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
-import { AllControlsComponent } from './all-controls/all-controls.component';
+import {CreateInPageInitialDataComponent} from './create-in-page-initial-data/create-in-page-initial-data.component';
+import {EditViaDialogComponent} from './edit-via-dialog/edit-via-dialog.component';
+import {EditInPageComponent} from './edit-in-page/edit-in-page.component';
+import {TableComponent} from './edit-in-page/table/table.component';
+import {FormComponent} from './edit-in-page/form/form.component';
+import {CreateViaDialogMultipleFormsComponent} from './create-via-dialog-multiple-forms/create-via-dialog-multiple-forms.component';
+import {CreateInPageMultipleFormsComponent} from './create-in-page-multiple-forms/create-in-page-multiple-forms.component';
+import {AllControlsComponent} from './all-controls/all-controls.component';
 import {DynamicFormsCoreModule} from '@ng-dynamic-forms/core';
 import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
+import {ForeignComponent} from './foreign/foreign.component';
+import {SampleForeignSelectorComponent} from './foreign/sample-foreign-selector.component';
+import {ReactiveFormsModule} from '@angular/forms';
+import {ForeignSelectorFactoryService} from './all-controls/foreign-selector-factory.service';
+import {ForeignSelectorComponent} from './all-controls/foreign-selector.component';
 
 
 @NgModule({
@@ -45,7 +55,10 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
         FormComponent,
         CreateViaDialogMultipleFormsComponent,
         CreateInPageMultipleFormsComponent,
-        AllControlsComponent
+        AllControlsComponent,
+        ForeignComponent,
+        SampleForeignSelectorComponent,
+        ForeignSelectorComponent
     ],
     imports: [
         BrowserAnimationsModule,
@@ -63,14 +76,30 @@ import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
         AppRoutingModule,
         HttpClientModule,
         HighlightJsModule,
-        MatExpansionModule
+        MatExpansionModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatPaginatorModule,
+        MatSortModule
     ],
     providers: [
         {
             provide: ErrorService,
             useClass: MatErrorService
         },
-        HighlightJsService
+        HighlightJsService,
+        {
+            provide: FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
+            useValue: SampleForeignSelectorComponent
+        },
+        {
+            provide: FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
+            useClass: ForeignSelectorFactoryService
+        }
+    ],
+    entryComponents: [
+        SampleForeignSelectorComponent,
+        ForeignSelectorComponent
     ],
     bootstrap: [AppComponent]
 })

@@ -52,6 +52,14 @@ import {environment} from '../environments/environment';
                         <mat-expansion-panel>
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
+                                    Foreign keys
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <a routerLink="/foreign">Foreign Key</a>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
                                     All controls and layout
                                 </mat-panel-title>
                             </mat-expansion-panel-header>

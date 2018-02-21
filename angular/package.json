@@ -39,7 +39,7 @@
         "@angular/core": "^5.2.0",
         "@angular/flex-layout": "^2.0.0-beta.12",
         "@angular/forms": "^5.2.0",
-        "@angular/material": "^5.1.1",
+        "@angular/material": "^5.2.2",
         "@ng-dynamic-forms/core": "^5.4.4",
         "@ng-dynamic-forms/ui-material": "^5.4.4",
         "core-js": "^2.4.1",
