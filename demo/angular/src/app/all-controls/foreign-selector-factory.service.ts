@@ -1,5 +1,5 @@
 import {Injectable, Type} from '@angular/core';
-import {ForeignFieldLookupFactory, ForeignFieldLookupComponent} from 'django-angular-dynamic-forms/foreign';
+import {ForeignFieldLookupFactory, ForeignFieldLookupComponent} from 'django-angular-dynamic-forms';
 import {ForeignSelectorComponent} from './foreign-selector.component';
 
 @Injectable()
