@@ -104,7 +104,7 @@ export interface ForeignFieldLookupFactory {
      * }
      *
      * @param lookupConfig
-     * @returns {Type<any>}
+     * @returns the class of the component that will be used to render selector
      */
     getComponent(lookupConfig: any): Type<ForeignFieldLookupComponent>;
 }

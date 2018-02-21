@@ -821,16 +821,15 @@ function mergeLayouts(layout1OrUndefined: DynamicFormControlLayout | undefined,
  *
  * TODO: NASTY HACK TO ADD VALUE ACCESSOR ON THE COMPONENT TO ADD EVENT TO SELECTs
  *
- * @type {(changes: SimpleChanges) => void}
  */
 const originFormControlNgOnChanges = FormControlDirective.prototype.ngOnChanges;
-FormControlDirective.prototype.ngOnChanges = function () {
+FormControlDirective.prototype.ngOnChanges = function() {
     this.form.nativeElement = this.valueAccessor._element.nativeElement;
     return originFormControlNgOnChanges.apply(this, arguments);
 };
 
 const originFormControlNameNgOnChanges = FormControlName.prototype.ngOnChanges;
-FormControlName.prototype.ngOnChanges = function () {
+FormControlName.prototype.ngOnChanges = function() {
     const result = originFormControlNameNgOnChanges.apply(this, arguments);
     this.control.valueAccessor = this.valueAccessor;
     return result;
