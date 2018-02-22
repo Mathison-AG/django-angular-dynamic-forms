@@ -31,6 +31,7 @@ echo "Got version $version"
 cd /data/django-angular-dynamic-forms/demo/django
 python3 setup.py install
 python3 manage.py migrate
+python3 manage.py demo_initial_data
 
 cd /data/django-angular-dynamic-forms/demo/angular
 npm install -g @angular/cli --unsafe

@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, serializers
 
-from angular_dynamic_forms.rest import foreign_field_autocomplete, ForeignFieldAutoCompleteMixin
-from api.models import City, TestModel, Address
-from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete
+from api.models import City, TestModel, Address, Tag
+from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete, \
+    foreign_field_autocomplete, ForeignFieldAutoCompleteMixin
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -31,6 +31,12 @@ class TestModelSerializer(serializers.ModelSerializer):
         exclude = ()
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        exclude = ()
+
+
 class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     """
     API for TestModel
@@ -40,32 +46,30 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
     permission_classes = (permissions.AllowAny,)
 
     form_layout = [
-        {
-            'type': 'columns',
-            'columns': [
-                [
-                    AngularFormMixin.fieldset('Core text',
-                                              [
-                                                  'string',
-                                                  'area',
-                                              ]),
-                    AngularFormMixin.fieldset('Checkboxes and Radio Buttons',
-                                              [
-                                                  'radio',
-                                                  'checkbox'
-                                              ])
-                ],
-                [
-                    AngularFormMixin.fieldset('Input fields',
-                                              [
-                                                  'name',
-                                                  'email',
-                                                  'number',
-                                                  'foreign_key'
-                                              ])
-                ]
+        AngularFormMixin.columns(
+            [
+                AngularFormMixin.fieldset('Core text',
+                                          [
+                                              'string',
+                                              'area',
+                                          ]),
+                AngularFormMixin.fieldset('Checkboxes and Radio Buttons',
+                                          [
+                                              'radio',
+                                              'checkbox'
+                                          ])
+            ],
+            [
+                AngularFormMixin.fieldset('Input fields',
+                                          [
+                                              'name',
+                                              'email',
+                                              'number',
+                                              'foreign_key',
+                                              'tags'
+                                          ])
             ]
-        }
+        )
     ]
 
     @autocomplete(field='name', formatter='{{item.name}} [{{item.id}}]')
@@ -79,6 +83,11 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
         if query:
             qs = qs.filter(name__icontains=query)
         return qs
+
+    @foreign_field_autocomplete(field='tags', serializer=TagSerializer)
+    def tags_autocomplete(self, request):
+        # sample implementation, just return all tags
+        return Tag.objects.order_by('name')
 
 
 class AddressSerializer(serializers.ModelSerializer):

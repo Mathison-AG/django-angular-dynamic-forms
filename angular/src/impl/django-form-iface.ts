@@ -90,6 +90,7 @@ export interface SelectFieldConfig extends FieldConfigBase {
 export interface ForeignFieldConfig extends FieldConfigBase {
     type: SimpleFieldTypes.FIELD;
     formatter: string;
+    multiple?: boolean;
 }
 
 export interface FieldSetConfig extends FieldConfigBase {

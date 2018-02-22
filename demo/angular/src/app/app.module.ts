@@ -8,7 +8,7 @@ import {
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
     MatButtonModule, MatExpansionModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule,
-    MatSidenavModule,
+    MatSidenavModule, MatSliderModule, MatSlideToggleModule,
     MatSnackBarModule, MatSortModule,
     MatTableModule,
     MatTabsModule
@@ -35,9 +35,10 @@ import {DynamicFormsCoreModule} from '@ng-dynamic-forms/core';
 import {DynamicFormsMaterialUIModule} from '@ng-dynamic-forms/ui-material';
 import {ForeignComponent} from './foreign/foreign.component';
 import {SampleForeignSelectorComponent} from './foreign/sample-foreign-selector.component';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ForeignSelectorFactoryService} from './all-controls/foreign-selector-factory.service';
 import {ForeignSelectorComponent} from './all-controls/foreign-selector.component';
+import {TagSelectorComponent} from './all-controls/tag-selector.component';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import {ForeignSelectorComponent} from './all-controls/foreign-selector.componen
         AllControlsComponent,
         ForeignComponent,
         SampleForeignSelectorComponent,
-        ForeignSelectorComponent
+        ForeignSelectorComponent,
+        TagSelectorComponent
     ],
     imports: [
         BrowserAnimationsModule,
@@ -80,7 +82,10 @@ import {ForeignSelectorComponent} from './all-controls/foreign-selector.componen
         MatInputModule,
         ReactiveFormsModule,
         MatPaginatorModule,
-        MatSortModule
+        MatSortModule,
+        MatSliderModule,
+        MatSlideToggleModule,
+        FormsModule
     ],
     providers: [
         {
@@ -99,7 +104,8 @@ import {ForeignSelectorComponent} from './all-controls/foreign-selector.componen
     ],
     entryComponents: [
         SampleForeignSelectorComponent,
-        ForeignSelectorComponent
+        ForeignSelectorComponent,
+        TagSelectorComponent
     ],
     bootstrap: [AppComponent]
 })

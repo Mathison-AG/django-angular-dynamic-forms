@@ -1,4 +1,4 @@
-import {Component, Inject, Injectable, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, Inject, Injectable, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
 import {
     MAT_DIALOG_DATA, MatDialogRef, MatPaginator, MatSort, MatTableDataSource, PageEvent,
@@ -13,6 +13,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {of as observableOf} from 'rxjs/observable/of';
 import {combineLatest} from 'rxjs/observable/combineLatest';
 import {ForeignSelectorFactoryService} from './foreign-selector-factory.service';
+import {TagSelectorComponent} from './tag-selector.component';
 
 @Component({
     selector: 'app-create-in-page',
@@ -55,6 +56,9 @@ export class AllControlsComponent implements OnInit {
         {
             tab: 'Python',
             text: `
+class Tag(models.Model):
+    name = models.CharField(max_length=20)
+
 class TestModel(models.Model):
     name = models.CharField(verbose_name='City autocomplete', max_length=10)
     radio = models.CharField(max_length=1, choices=(
@@ -71,6 +75,7 @@ class TestModel(models.Model):
     area = models.TextField()
     email = models.EmailField()
     foreign_key = models.ForeignKey(City, null=True, blank=True, on_delete=models.CASCADE)
+    tags = models.ManyToManyField(Tag, related_name='+', blank=True, verbose_name='Tags (many to many field)')
 
 
 class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
@@ -82,32 +87,30 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
     permission_classes = (permissions.AllowAny,)
 
     form_layout = [
-        {
-            'type': 'columns',
-            'columns': [
-                [
-                    AngularFormMixin.fieldset('Core text',
-                                              [
-                                                  'string',
-                                                  'area',
-                                              ]),
-                    AngularFormMixin.fieldset('Checkboxes and Radio Buttons',
-                                              [
-                                                  'radio',
-                                                  'checkbox'
-                                              ])
-                ],
-                [
-                    AngularFormMixin.fieldset('Input fields',
-                                              [
-                                                  'name',
-                                                  'email',
-                                                  'number',
-                                                  'foreign_key'
-                                              ])
-                ]
+        AngularFormMixin.columns(
+            [
+                AngularFormMixin.fieldset('Core text',
+                                          [
+                                              'string',
+                                              'area',
+                                          ]),
+                AngularFormMixin.fieldset('Checkboxes and Radio Buttons',
+                                          [
+                                              'radio',
+                                              'checkbox'
+                                          ])
+            ],
+            [
+                AngularFormMixin.fieldset('Input fields',
+                                          [
+                                              'name',
+                                              'email',
+                                              'number',
+                                              'foreign_key',
+                                              'm2m'
+                                          ])
             ]
-        }
+        )
     ]
     form_defaults = {
         'foreign_key': {
@@ -127,6 +130,12 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
             qs = qs.filter(name__icontains=query)
         # TODO: handle sortBy and sortDirection GET parameters here
         return qs
+
+    @foreign_field_autocomplete(field='tags', serializer=TagSerializer)
+    def tags_autocomplete(self, request):
+        # sample implementation, just return all tags. In a real-world example some filtering should
+        # be here
+        return Tag.objects.order_by('name')
     `
         },
         {
@@ -302,6 +311,51 @@ export class ForeignSelectorComponent implements ForeignFieldLookupComponent, Af
     <mat-paginator [pageSizeOptions]="[5, 10]" [length]="itemCount"></mat-paginator>`
         },
         {
+            tab: 'TagSelectorComponent',
+            text: `
+@Component({
+    template:
+            \`
+        <p>Toggle the tags and click "Save" to remember your selection:</p>
+
+        <div *ngFor="let tag of tags">
+            <mat-slide-toggle [(ngModel)]="tag.selected">{{tag.name}}</mat-slide-toggle>
+        </div>
+
+        <button mat-button (click)="save()">Save</button>
+    \`,
+})
+export class TagSelectorComponent implements ForeignFieldLookupComponent, AfterViewInit {
+
+    public tags: any[] = [];
+
+    constructor(public dialogRef: MatDialogRef<ForeignFieldLookupComponent>,
+                @Inject(MAT_DIALOG_DATA) public data: ForeignFieldLookupComponentData,
+                private http: HttpClient) {
+    }
+
+    ngAfterViewInit(): void {
+        this.http.get<any>(this.data.config.autocompleteUrl).subscribe((tags) => {
+            this.tags = tags.map((tag) => ({
+                ...tag,
+                selected: this.data.initialValue.some((t) => tag.id === t.key)
+            }));
+        });
+    }
+
+    save() {
+        const result = this.tags
+            .filter((tag) => tag.selected)
+            .map((tag) => ({
+                formatted_value: tag.name,
+                key: tag.id
+            }));
+        this.dialogRef.close(result);
+    }
+}
+`
+        },
+        {
             tab: 'ForeignSelectorFactoryService',
             text: `
 /**
@@ -312,16 +366,17 @@ export class ForeignSelectorComponent implements ForeignFieldLookupComponent, Af
  */
 @Injectable()
 export class ForeignSelectorFactoryService implements ForeignFieldLookupFactory {
-
     constructor() {
     }
-
     public getComponent(lookupConfig: any): Type<ForeignFieldLookupComponent> {
         console.log('something extra:', lookupConfig.something_extra);
         if (lookupConfig.id === 'foreign_key') {
             return ForeignSelectorComponent;
         }
-        // if undefined is returned, the framework will try to get FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER. 
+        if (lookupConfig.id === 'tags') {
+            return TagSelectorComponent;
+        }
+        // if undefined is returned, the framework will try to get FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER.
         // If that is not registered, an error will be thrown.
         return undefined;
     }

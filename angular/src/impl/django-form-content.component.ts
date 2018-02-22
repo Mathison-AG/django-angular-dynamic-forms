@@ -44,7 +44,7 @@ import {
     FieldChoice,
     FieldConfig,
     FieldSetConfig,
-    FloatFieldConfig,
+    FloatFieldConfig, ForeignFieldConfig,
     IntegerFieldConfig,
     RadioFieldConfig,
     SelectFieldConfig,
@@ -570,6 +570,7 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
                         // options: (fieldConfig as SelectFieldConfig).choices,
                         required: fieldConfig.required,
                         disabled: fieldConfig.readOnly,
+                        multiple: (fieldConfig as ForeignFieldConfig).multiple || false,
                         validators: {
                             externalValidator: {
                                 name: externalValidator.name,
