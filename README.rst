@@ -49,7 +49,7 @@ See demos at http://mesemus.no-ip.org:12569
 
 .. image:: https://raw.githubusercontent.com/mesemus/django-angular-dynamic-forms/develop/docs/demo.png
 
-With a bit of work on your side, foreign keys are supported as well (see the demos for details)
+With a bit of work on your side, foreign keys and many-to-many relationships are supported as well (see the demos for details)
 
 .. image:: https://raw.githubusercontent.com/mesemus/django-angular-dynamic-forms/develop/docs/foreign_key.png
 
