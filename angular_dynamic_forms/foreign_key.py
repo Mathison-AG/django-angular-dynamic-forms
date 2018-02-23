@@ -66,8 +66,8 @@ class ForeignFieldAutoCompleteMixin(object):
 
             path = request.path
 
-            # must be called from /form/ ...
-            path = re.sub(r'/form/?$', '', path)
+            # must be called from /form/ or /form/<formid>/
+            path = re.sub(r'/form(/[^/]+)?/?$', '', path)
             path = '%s/foreign-autocomplete/%s/' % (path, item_id)
             item['autocomplete_url'] = urlsplit(request.build_absolute_uri(path)).path
 

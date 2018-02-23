@@ -62,7 +62,7 @@ class AutoCompleteMixin(object):
             path = request.path
 
             # must be called from /form/ ...
-            path = re.sub(r'/form/?$', '', path)
+            path = re.sub(r'/form(/[^/]+)?/?$', '', path)
             path = '%s/autocomplete/%s/' % (path, name)
             item['autocomplete_url'] = urlsplit(request.build_absolute_uri(path)).path
 
