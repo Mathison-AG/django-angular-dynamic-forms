@@ -128,29 +128,29 @@ class AngularFormMixin(object):
     def _get_form_layout(self, fields, form_name):
         if form_name:
             form_layout = self.form_layouts[form_name]
-        else:
-            form_layout = self.form_layout
-
-        if form_layout:
-            if callable(form_layout):
-                return self._transform_layout(form_layout(fields), wrap_array=False)
-            return self._transform_layout(form_layout, wrap_array=False)
-
-        # no layout, generate from fields
-        layout = [self._get_field_layout(field_name, fields[field_name])
-                    for field_name in fields if not fields[field_name]['read_only']]
-
-        if form_name:
             form_defaults = self.form_defaults_map.get(form_name, None)
         else:
+            form_layout = self.form_layout
             form_defaults = self.form_defaults
+
+        if not form_defaults:
+            form_defaults = {}
 
         if callable(form_defaults):
             form_defaults = form_defaults(fields)
 
-        for field in layout:
-            if form_defaults and field['id'] in form_defaults:
-                field.update(form_defaults[field['id']])
+        if form_layout:
+            if callable(form_layout):
+                layout = form_layout(fields)
+            else:
+                layout = form_layout
+        else:
+            # no layout, generate from fields
+            layout = [self._get_field_layout(field_name, fields[field_name])
+                        for field_name in fields if not fields[field_name]['read_only']]
+
+        layout = self._transform_layout(layout, form_defaults, wrap_array=False)
+
         return layout
 
     def _convert_camel_case(self, x):
@@ -170,20 +170,26 @@ class AngularFormMixin(object):
         return {'id': field_name}
 
     # @LoggerDecorator.log()
-    def _transform_layout(self, layout, wrap_array=True):
+    def _transform_layout(self, layout, form_defaults, wrap_array=True):
+
         if isinstance(layout, dict):
             layout = layout.copy()
+
+            if 'id' in layout and layout['id'] in form_defaults:
+                layout.update(form_defaults[layout['id']])
+
             for (k, v) in list(layout.items()):
                 if callable(v):
                     layout[k] = v(self)
+
             layout_type = layout.get('type', 'string')
 
             if layout_type in ('fieldset', 'group'):
-                layout['controls'] = self._transform_layout(layout['controls'], wrap_array=False)
+                layout['controls'] = self._transform_layout(layout['controls'], form_defaults, wrap_array=False)
                 return layout
 
             if layout_type == 'columns':
-                layout['controls'] = self._transform_layout(layout['columns'], wrap_array=False)
+                layout['controls'] = self._transform_layout(layout['columns'], form_defaults, wrap_array=False)
                 del layout['columns']
                 return layout
 
@@ -205,14 +211,16 @@ class AngularFormMixin(object):
             if wrap_array:
                 return {
                     'type': 'group',
-                    'controls': [self._transform_layout(l) for l in layout]
+                    'controls': [self._transform_layout(l, form_defaults) for l in layout]
                 }
             else:
-                return [self._transform_layout(l) for l in layout]
+                return [self._transform_layout(l, form_defaults) for l in layout]
+
         if isinstance(layout, str):
             return self._transform_layout({
                 'id': layout
-            })
+            }, form_defaults)
+
         raise NotImplementedError('Layout "%s" not implemented' % layout)
 
     def _get_form_title(self, has_instance, serializer, form_name):
