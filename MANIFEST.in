@@ -1,2 +1,3 @@
 include README.md
 include LICENSE
+recursive-include angular_dynamic_forms/locale *.po *.mo

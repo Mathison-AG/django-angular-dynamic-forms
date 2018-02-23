@@ -1,5 +1,14 @@
 #!/bin/sh
 
+mkdir -p /data/web/static
+cp /tmp/index.html /data/web/static/
+
+# Setup
+apk update
+apk upgrade
+apk add --update python3 python3-dev python2 build-base gettext git sed gawk bash
+pip3 install --upgrade pip gunicorn
+
 cd /data
 git clone https://github.com/mesemus/django-angular-dynamic-forms.git
 
@@ -8,7 +17,7 @@ git log | head -10
 
 version=$(
 git tag | egrep '^[0-9]' \
-    | awk -F. '{ printf "%010d %010d %010d\n", $1, $2, ($3+1) }' \
+    | awk -F. '{ printf "%010d %010d %010d\n", $1, $2, $3 }' \
     | sort -rn \
     | head -n 1 \
     | tr ' ' '\n' \
@@ -22,6 +31,7 @@ echo "Got version $version"
 cd /data/django-angular-dynamic-forms/demo/django
 python3 setup.py install
 python3 manage.py migrate
+python3 manage.py demo_initial_data
 
 cd /data/django-angular-dynamic-forms/demo/angular
 npm install -g @angular/cli --unsafe
@@ -31,6 +41,8 @@ sed -i "s/version: \"\"/version: \"$version\"/" src/environments/environment.pro
 
 ng build --prod --aot
 
-cp -r /data/django-angular-dynamic-forms/demo/angular/dist /data/web/static
+rm -rf /data/web/static
+mkdir -p /data/web/static
+cp -r /data/django-angular-dynamic-forms/demo/angular/dist/* /data/web/static/
 ls -la /data/web/static
 

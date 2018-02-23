@@ -1,0 +1,24 @@
+<ng-container *ngIf="config$">
+    <ng-container *ngIf="config$|async; let config">
+
+        <h1 mat-dialog-title *ngIf="config.formTitle">{{ config.formTitle }}</h1>
+        <div mat-dialog-content>
+            <django-form-content [layout]="config.layout" [initialData]="config.initialData" [errors]="errors$|async"
+                                 (submit)="submitted(undefined, undefined)" #form>
+            </django-form-content>
+        </div>
+
+        <div mat-dialog-actions>
+            <button
+                mat-raised-button
+                *ngFor="let button of config.actions"
+                [name]="button.id"
+                [color]="button.color"
+                (click)="submitted(button.id, button.cancel)"
+                type="button"
+            >{{ button.label }}
+            </button>
+        </div>
+
+    </ng-container>
+</ng-container>

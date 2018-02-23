@@ -52,10 +52,19 @@ import {environment} from '../environments/environment';
                         <mat-expansion-panel>
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
-                                    All controls
+                                    Foreign keys and many-to-many
                                 </mat-panel-title>
                             </mat-expansion-panel-header>
-                            <a routerLink="/all-controls">All available controls</a>
+                            <a routerLink="/foreign">Foreign Key</a>
+                            <a routerLink="/all-controls">m2m in All available controls and layout demo</a>
+                        </mat-expansion-panel>
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    All controls and layout
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <a routerLink="/all-controls">All available controls and layout</a>
                         </mat-expansion-panel>
                     </mat-accordion>
                 </div>
@@ -93,6 +102,7 @@ import {environment} from '../environments/environment';
             display: block;
             text-decoration: none;
             padding-bottom: 10px;
+            margin-left: 20px;
         }
     `]
 })

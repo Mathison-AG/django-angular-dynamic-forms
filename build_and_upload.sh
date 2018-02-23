@@ -13,7 +13,7 @@ git tag | egrep '^[0-9]' \
 
 echo "Making to version $new_version"
 
-find . -name "package.json" | grep -v "node_modules" | grep -v "dist" | while read PJ; do
+(find . -name "package.json"; find . -name "package-dist.json") | grep -v "node_modules" | grep -v "dist/" | while read PJ; do
     sed -i "s/\"version\": \"[0-9.]*\",$/\"version\": \"$new_version\",/" ${PJ}
 done
 
@@ -23,8 +23,10 @@ done
 
 (
     cd angular
-    npm run build:packages || exit 1
-    cd dist/django-angular-dynamic-forms || exit 1
+    yarn preversion || exit 1
+    yarn build || exit 1
+    pandoc ../README.rst -o lib-dist/readme.md
+    cd dist || exit 1
     npm publish || exit 1
 ) || exit 1
 

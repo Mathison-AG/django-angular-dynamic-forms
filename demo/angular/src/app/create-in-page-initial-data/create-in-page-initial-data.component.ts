@@ -9,8 +9,8 @@ import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form django_url="/api/1.0/cities/"
-                                    [extra_config]='config'
+                <inpage-django-form djangoUrl="/api/1.0/cities/"
+                                    [extraConfig]='config'
                                     (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
@@ -35,7 +35,7 @@ export class CreateInPageInitialDataComponent implements OnInit {
             text: `
 
     config : DjangoFormConfig = {
-        initial_data: {
+        initialData: {
             name: 'Prague'
         }
     };
@@ -79,8 +79,8 @@ urlpatterns = [
             tab: 'template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form django_url="/api/1.0/cities/" 
-                        [extra_config] = 'config'
+    <inpage-django-form djangoUrl="/api/1.0/cities/" 
+                        [extraConfig] = 'config'
                         (submit)="submit($event)" 
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>
@@ -93,7 +93,7 @@ urlpatterns = [
     ];
 
     config: DjangoFormConfig = {
-        initial_data: {
+        initialData: {
             name: 'Prague'
         }
     };

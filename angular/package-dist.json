@@ -1,0 +1,34 @@
+{
+    "name": "django-angular-dynamic-forms",
+    "version": "0.6.4",
+    "license": "MIT",
+    "description": "Django Rest Framework meets Angular 5 material.io dynamic forms - automatic create and edit dialogs",
+    "typings": "./django-angular-dynamic-forms.d.ts",
+    "main": "./bundles/django-angular-dynamic-forms.umd.js",
+    "module": "./esm5/django-angular-dynamic-forms.js",
+    "es2015": "./esm2015/django-angular-dynamic-forms.js",
+    "readme": "README.rst",
+    "keywords": [],
+    "scripts": {
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mesemus/django-angular-dynamic-forms.git"
+    },
+    "author": {
+        "name": "Mirek Simek",
+        "email": "miroslav.simek+github@gmail.com",
+        "url": "https://github.com/mesemus/django-angular-dynamic-forms"
+    },
+    "peerDependencies": {
+        "@angular/common": "^5.2.0",
+        "@angular/core": "^5.2.0",
+        "@angular/flex-layout": "^2.0.0-beta.12",
+        "@angular/forms": "^5.2.0",
+        "@angular/material": "^5.1.1",
+        "@ng-dynamic-forms/core": "^5.4.4",
+        "@ng-dynamic-forms/ui-material": "^5.4.4",
+        "core-js": "^2.4.1",
+        "rxjs": "^5.5.6"
+    }
+}

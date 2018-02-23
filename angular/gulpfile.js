@@ -1,176 +1,63 @@
-const gulp        = require("gulp"),
-      runSequence = require("run-sequence"),
-      pkg         = require("./package.json");
-
-const TASK_BUNDLE              = require("./build/gulp/bundle"),
-      TASK_CLEAN               = require("./build/gulp/clean"),
-      TASK_COPY                = require("./build/gulp/copy"),
-      TASK_NGC                 = require("./build/gulp/ngc"),
-      TASK_INLINE_NG_TEMPLATES = require("./build/gulp/inline-ng-templates"),
-      TASK_PREPROCESS          = require("./build/gulp/preprocess"),
-      TASK_TRANSPILE           = require("./build/gulp/transpile"),
-      TASK_TSLINT              = require("./build/gulp/tslint"),
-      TASK_TYPEDOC             = require("./build/gulp/typedoc"),
-      TASK_VERSION             = require("./build/gulp/version");
-
-const SRC_PATH       = "./packages",
-      DIST_BASE_PATH = "./dist",
-      DIST_PATH      = `${DIST_BASE_PATH}`,
-      NPM_BASE_PATH  = "./node_modules",
-      NPM_PATH       = `${NPM_BASE_PATH}`,
-      TEST_PATH      = "./test",
-      PACKAGES_NAMES = [
-          "django-angular-dynamic-forms",
-      ];
-
+const gulp = require('gulp');
+const sass = require('node-sass');
+const inlineTemplates = require('gulp-inline-ng2-template');
+const exec = require('child_process').exec;
 
 /**
- * Tasks for building single packages
+ * Inline templates configuration.
+ * @see  https://github.com/ludohenin/gulp-inline-ng2-template
  */
-PACKAGES_NAMES.forEach(packageName => {
-
-    const PACKAGE_SRC_PATH        = `${SRC_PATH}/${packageName}`,
-          PACKAGE_TMP_ES5_PATH    = `${DIST_BASE_PATH}/es5/${packageName}`,
-          PACKAGE_TMP_ES2015_PATH = `${DIST_BASE_PATH}/es2015/${packageName}`,
-          PACKAGE_DIST_PATH       = `${DIST_PATH}/${packageName}`;
-
-    const TASK_NAME_LINT                = `lint:${packageName}`,
-          TASK_NAME_CLEAN               = `clean:${packageName}`,
-          TASK_NAME_COPY_ES5            = `copy-es5:${packageName}`,
-          TASK_NAME_COPY_ES2015         = `copy-es2015:${packageName}`,
-          TASK_NAME_INLINE_NG_TEMPLATES = `inline-ng-templates:${packageName}`,
-          TASK_NAME_COMPILE_ES5         = `compile-es5:${packageName}`,
-          TASK_NAME_COMPILE_ES2015      = `compile-es2015:${packageName}`,
-          TASK_NAME_PREPROCESS          = `preprocess:${packageName}`,
-          TASK_NAME_COPY                = `copy:${packageName}`,
-          TASK_NAME_BUNDLE              = `bundle:${packageName}`,
-          TASK_NAME_DOC                 = `doc:${packageName}`,
-          TASK_NAME_BUILD               = `build:${packageName}`;
-
-    gulp.task(TASK_NAME_LINT,
-        TASK_TSLINT([`${PACKAGE_SRC_PATH}/**/*.ts`], "./tslint.json"));
-
-    gulp.task(TASK_NAME_CLEAN,
-        TASK_CLEAN([`${PACKAGE_DIST_PATH}/**/*`]));
-
-    gulp.task(TASK_NAME_COPY_ES5,
-        TASK_COPY([`${PACKAGE_SRC_PATH}/**/*`], PACKAGE_TMP_ES5_PATH));
-
-    gulp.task(TASK_NAME_COPY_ES2015,
-        TASK_COPY([`${PACKAGE_SRC_PATH}/**/*`], PACKAGE_TMP_ES2015_PATH));
-
-    gulp.task(TASK_NAME_INLINE_NG_TEMPLATES,
-        TASK_INLINE_NG_TEMPLATES([`${PACKAGE_TMP_ES5_PATH}/**/*.ts`, `${PACKAGE_TMP_ES2015_PATH}/**/*.ts`]));
-
-    gulp.task(TASK_NAME_COMPILE_ES5,
-        TASK_NGC(`${PACKAGE_TMP_ES5_PATH}/tsconfig.fesm5.json`));
-
-    gulp.task(TASK_NAME_COMPILE_ES2015,
-        TASK_NGC(`${PACKAGE_TMP_ES2015_PATH}/tsconfig.fesm2015.json`));
-
-    gulp.task(TASK_NAME_PREPROCESS,
-        TASK_PREPROCESS([`${PACKAGE_TMP_ES5_PATH}/**/*.js`, `${PACKAGE_TMP_ES2015_PATH}/**/*.js`]));
-
-    gulp.task(TASK_NAME_COPY,
-        TASK_COPY([`${PACKAGE_TMP_ES2015_PATH}/package.json`, `${PACKAGE_TMP_ES2015_PATH}/README.md`, `${PACKAGE_TMP_ES2015_PATH}/**/*.@(d.ts|metadata.json)`], PACKAGE_DIST_PATH));
-
-    gulp.task(TASK_NAME_BUNDLE,
-        TASK_BUNDLE(`${PACKAGE_SRC_PATH}/rollup.config.js`));
-
-    gulp.task(TASK_NAME_DOC,
-        TASK_TYPEDOC([`${PACKAGE_SRC_PATH}/src/**/!(*.spec).ts`], {
-            exclude: `**/*+(${packageName}|module).ts`,
-            excludeExternals: true,
-            experimentalDecorators: true,
-            externalPattern: `${PACKAGE_DIST_PATH}/**/*.*`,
-            ignoreCompilerErrors: true,
-            includeDeclarations: true,
-            module: "commonjs",
-            name: `${packageName}`,
-            out: `docs/${packageName}`,
-            readme: "none",
-            target: "es6",
-            theme: "minimal"
-        })
-    );
-
-    gulp.task(TASK_NAME_BUILD, done => {
-        runSequence(
-            TASK_NAME_LINT,
-            TASK_NAME_CLEAN,
-            TASK_NAME_COPY_ES5,
-            TASK_NAME_COPY_ES2015,
-            TASK_NAME_INLINE_NG_TEMPLATES,
-            TASK_NAME_COMPILE_ES5,
-            TASK_NAME_COMPILE_ES2015,
-            TASK_NAME_PREPROCESS,
-            TASK_NAME_COPY,
-            TASK_NAME_BUNDLE,
-            done
-        );
-    });
-});
-
-
-gulp.task("build:packages", done => {
-    runSequence(...PACKAGES_NAMES.map(packageName => `build:${packageName}`), done)
-});
-
-gulp.task("doc:packages", done => {
-    runSequence(...PACKAGES_NAMES.map(packageName => `doc:${packageName}`), done)
-});
-
+const INLINE_TEMPLATES = {
+  SRC: './src/**/*.ts',
+  DIST: './tmp/src-inlined',
+  CONFIG: {
+    base: '/src',
+    target: 'es6',
+    useRelativePaths: true,
+    styleProcessor: compileSass
+  }
+};
 
 /**
- * Tasks for building unit tests
+ * Inline external HTML and SCSS templates into Angular component files.
+ * @see: https://github.com/ludohenin/gulp-inline-ng2-template
  */
-gulp.task("clean:tests",
-    TASK_CLEAN([`${TEST_PATH}/**/*`]));
-
-gulp.task("copy:tests",
-    TASK_COPY([`${SRC_PATH}/**/*.{html,ts}`], TEST_PATH));
-
-gulp.task("transpile:tests",
-    TASK_TRANSPILE([`${TEST_PATH}/**/*.ts`], TEST_PATH, "./tsconfig.tests.json", "commonjs"));
-
-gulp.task("build:tests", done => {
-    runSequence("clean:tests", "copy:tests", "transpile:tests", done);
+gulp.task('inline-templates', () => {
+  return gulp.src(INLINE_TEMPLATES.SRC)
+    .pipe(inlineTemplates(INLINE_TEMPLATES.CONFIG))
+    .pipe(gulp.dest(INLINE_TEMPLATES.DIST));
 });
-
-
-gulp.task("build", done => {
-    runSequence("build:packages", "build:tests", done);
-});
-
 
 /**
- * Tasks for incrementing version number
+ * Build ESM by running npm task.
+ * This is a temporary solution until ngc is supported --watch mode.
+ * @see: https://github.com/angular/angular/issues/12867
  */
-gulp.task("version:major",
-    TASK_VERSION(pkg, ["./package.json", "./package-lock.json", `${SRC_PATH}/**/package.json`], "MAJOR", SRC_PATH));
-
-gulp.task("version:minor",
-    TASK_VERSION(pkg, ["./package.json", "./package-lock.json", `${SRC_PATH}/**/package.json`], "MINOR", SRC_PATH));
-
-gulp.task("version:patch",
-    TASK_VERSION(pkg, ["./package.json", "./package-lock.json", `${SRC_PATH}/**/package.json`], "PATCH", SRC_PATH));
-
+gulp.task('build:esm', ['inline-templates'], (callback) => {
+  exec('npm run ngcompile', function (error, stdout, stderr) {
+    console.log(stdout, stderr);
+    callback(error)
+  });
+});
 
 /**
- * Miscellaneous Tasks
+ * Implements ESM build watch mode.
+ * This is a temporary solution until ngc is supported --watch mode.
+ * @see: https://github.com/angular/angular/issues/12867
  */
-gulp.task("lint:packages",
-    TASK_TSLINT([`${SRC_PATH}/**/*.ts`], "./tslint.json"));
-
-gulp.task("clean:dist",
-    TASK_CLEAN([`${DIST_BASE_PATH}/**/*`]));
-
-gulp.task("clean:npm-dist",
-    TASK_CLEAN([`${NPM_PATH}/**/*`]));
-
-gulp.task("copy:npm-dist",
-    TASK_COPY([`${DIST_BASE_PATH}/**/*.*`], NPM_BASE_PATH));
-
-gulp.task("watch:packages", () => {
-    gulp.watch([`${SRC_PATH}/**/*.*`], ["build:packages"]);
+gulp.task('build:esm:watch', ['build:esm'], () => {
+  gulp.watch('src/**/*', ['build:esm']);
 });
+
+/**
+ * Compile SASS to CSS.
+ * @see https://github.com/ludohenin/gulp-inline-ng2-template
+ * @see https://github.com/sass/node-sass
+ */
+function compileSass(path, ext, file, callback) {
+  let compiledCss = sass.renderSync({
+    file: path,
+    outputStyle: 'compressed',
+  });
+  callback(null, compiledCss.css);
+}

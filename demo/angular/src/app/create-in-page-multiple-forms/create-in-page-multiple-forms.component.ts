@@ -9,13 +9,13 @@ import {CodeSampleComponent} from '../code-sample/code-sample.component';
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
                 <h2>Simplified form</h2>
-                <inpage-django-form django_url="/api/1.0/cities/" form_id="simplified" (submit)="submit($event)"
+                <inpage-django-form djangoUrl="/api/1.0/cities/" formId="simplified" (submit)="submit($event)"
                                     (cancel)="cancel($event)"></inpage-django-form>
             </div>
 
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
                 <h2>Full form</h2>
-                <inpage-django-form django_url="/api/1.0/cities/" form_id="full" (submit)="submit($event)"
+                <inpage-django-form djangoUrl="/api/1.0/cities/" formId="full" (submit)="submit($event)"
                                     (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
@@ -64,9 +64,9 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
             tab: 'template',
             text: `
 
-    <inpage-django-form django_url="/api/1.0/cities/" form_id="simplified" (submit)="submit($event)"
+    <inpage-django-form djangoUrl="/api/1.0/cities/" formId="simplified" (submit)="submit($event)"
                         (cancel)="cancel($event)"></inpage-django-form>
-    <inpage-django-form django_url="/api/1.0/cities/" form_id="full" (submit)="submit($event)"
+    <inpage-django-form djangoUrl="/api/1.0/cities/" formId="full" (submit)="submit($event)"
                         (cancel)="cancel($event)"></inpage-django-form>
     `
         },

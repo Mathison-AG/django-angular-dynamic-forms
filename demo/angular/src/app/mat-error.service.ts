@@ -9,7 +9,7 @@ export class MatErrorService extends ErrorService {
       super();
   }
 
-      show_error(message, options?: {
+      showError(message, options?: {
         duration?: number
     }) {
         this.service.open(message, 'Zavřít', {
