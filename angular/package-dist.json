@@ -1,6 +1,6 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.6.7",
+    "version": "0.6.8",
     "license": "MIT",
     "description": "Django Rest Framework meets Angular 5 material.io dynamic forms - automatic create and edit dialogs",
     "typings": "./django-angular-dynamic-forms.d.ts",

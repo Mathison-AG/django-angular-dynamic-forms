@@ -46,7 +46,7 @@ import {TagSelectorComponent} from './all-controls/tag-selector.component';
 
 
 @Injectable()
-export class SimpleForeignFieldFormatter extends ForeignFieldFormatter {
+export class SimpleForeignFieldFormatter implements ForeignFieldFormatter {
 
     public format(config: ForeignFieldLookupConfig, value: any) {
         if (value.name) {

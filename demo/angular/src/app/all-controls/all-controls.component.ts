@@ -397,7 +397,7 @@ export class ForeignSelectorFactoryService implements ForeignFieldLookupFactory 
             tab: 'app-module',
             text: `
 @Injectable()
-export class SimpleForeignFieldFormatter extends ForeignFieldFormatter {
+export class SimpleForeignFieldFormatter implements ForeignFieldFormatter {
     public format(config: ForeignFieldLookupConfig, value: any) {
         if (value.name) {
             return value.name;

@@ -95,12 +95,23 @@ export interface ForeignFieldLookupFactory {
     getComponent(lookupConfig: any): Type<ForeignFieldLookupComponent>;
 }
 
-@Injectable()
-export class ForeignFieldFormatter {
+/**
+ * Django rest framework might serialize the foreign key in a several different ways. This editor expects
+ * the serialized value be a json object with an 'id' field and any number of other fields of any type.
+ *
+ * To convert the object representation of the foreign key into a displayed text value, ForeignFieldFormatter is used.
+ */
+export interface ForeignFieldFormatter {
 
-    public format(config: ForeignFieldLookupConfig, value: any) {
-        return 'Implement the formatter !';
-    }
+    /**
+     * Receives a form field configuration and value as object and returns displayable string value
+     *
+     * @param config - form field configuration. Extendable, use 'form_defaults' on viewset
+     *                                            to add information there
+     * @param value         - object value of the foreign key
+     * @returns     the formatted value
+     */
+    format(config: ForeignFieldLookupConfig, value: any): string;
 }
 
 export const FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER = new InjectionToken('ForeignFieldLookup');
