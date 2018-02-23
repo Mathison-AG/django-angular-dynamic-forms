@@ -148,13 +148,7 @@ export class ForeignSelectorComponent implements OnInit, ForeignFieldLookupCompo
     }
 
     select(city: any) {
-        const result: ForeignFieldLookupResult[] = [
-            {
-                formatted_value: city.name,
-                key: city.id
-            }
-        ];
-        this.dialogRef.close(result);
+        this.dialogRef.close([city]);
     }
 
     clear() {

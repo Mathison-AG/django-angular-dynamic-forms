@@ -2,35 +2,18 @@
  * This module provides interfaces for implementing dialogs for filling foreign key fields.
  */
 
-import {InjectionToken, Type} from '@angular/core';
+import {Injectable, InjectionToken, Type} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 
 /**
  * An interface that represents a result of foreign field lookup (i.e. the result of foreign key dialog)
  */
-export interface ForeignFieldLookupResult {
-    /**
-     * The value from drf serializer formatted through the formatter
-     */
-    formatted_value: any;
-
-    /**
-     * The primary key of the value to be used for the foreign field.
-     * Only primitive values are allowed, no composite keys.
-     */
-    key: string|number;
-}
+export type ForeignFieldLookupResult = any;
 
 /**
  * The configuration of the lookup component
  */
 export interface ForeignFieldLookupConfig {
-    /**
-     * handlebars formatter string that will be given the json of the foreign key target. Will be used by the caller
-     * to create a text representation of the value. Provider of the lookup component might use it so that user
-     * sees the same representation both in the lookup dialog and in the caller form.
-     */
-    formatter?: string;      // handlebars-style formatter string
 
     /**
      * true if multiple values are allowed, false otherwise
@@ -51,7 +34,7 @@ export interface ForeignFieldLookupComponentData {
     config: ForeignFieldLookupConfig;
 
     /**
-     * initial value of the component
+     * initial value of the component - an array of json objects
      */
     initialValue: ForeignFieldLookupResult[];
 
@@ -62,6 +45,9 @@ export interface ForeignFieldLookupComponentData {
  * in a plain component and register the class of the component as ``FOREIGN_FIELD_LOOKUP_PROVIDER``. The component
  * will be loaded via MatDialog - inject the dialogRef and dialog data and use the data to set up the component
  * and its initial value.
+ *
+ * When closing, the component should return an array of ForeignFieldLookupResult - that is any objects
+ * that have 'id' field.
  *
  * Example:
  *
@@ -109,5 +95,14 @@ export interface ForeignFieldLookupFactory {
     getComponent(lookupConfig: any): Type<ForeignFieldLookupComponent>;
 }
 
+@Injectable()
+export class ForeignFieldFormatter {
+
+    public format(config: ForeignFieldLookupConfig, value: any) {
+        return 'Implement the formatter !';
+    }
+}
+
 export const FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER = new InjectionToken('ForeignFieldLookup');
 export const FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER = new InjectionToken('ForeignFieldLookupFactory');
+export const FOREIGN_FIELD_FORMATTER_PROVIDER = new InjectionToken('ForeignFieldFormatterProvider');

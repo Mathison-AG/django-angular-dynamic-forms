@@ -1,14 +1,6 @@
-import {Component, NgModule, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {debounceTime, distinctUntilChanged, map, mergeMap} from 'rxjs/operators';
-import {FormBuilder, FormGroup} from '@angular/forms';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs/Observable';
-import {of as observableOf} from 'rxjs/observable/of';
 import {SampleForeignSelectorComponent} from './sample-foreign-selector.component';
-import {HighlightJsService} from 'angular2-highlight-js';
-import {MatErrorService} from '../mat-error.service';
 
 @Component({
     selector: 'app-create-in-page',
@@ -53,18 +45,32 @@ export class ForeignComponent implements OnInit {
             tab: 'Page Template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form djangoUrl="/api/1.0/addresses/" 
-                        (submit)="submit($event)" 
+    <inpage-django-form djangoUrl="/api/1.0/addresses/"
+                        (submit)="submit($event)"
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>`
         },
         {
             tab: 'Python',
             text: `
+...
+
+class CitySerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('name', 'zipcode', 'comment', 'id')
+
 class Address(models.Model):
     street = models.CharField(max_length=100, null=True, blank=True)
     number = models.CharField(max_length=100, null=True, blank=True)
     city = models.ForeignKey(City, null=True, blank=True, on_delete=models.SET_NULL)
+
+class AddressSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    city = CitySerializer()
+
+    class Meta:
+        model = Address
+        exclude = ()
 
 class AddressViewSet(ForeignFieldAutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     queryset = Address.objects.all()
@@ -117,13 +123,7 @@ export class SampleForeignSelectorComponent implements ForeignFieldLookupCompone
     }
 
     select(city: any) {
-        const result: ForeignFieldLookupResult[] = [
-            {
-                formatted_value: city.name,
-                key: city.id
-            }
-        ];
-        this.dialogRef.close(result);
+        this.dialogRef.close([city]);
     }
 
     clear() {
@@ -134,7 +134,7 @@ export class SampleForeignSelectorComponent implements ForeignFieldLookupCompone
         {
             tab: 'SampleForeignSelectorComponent.html',
             text: `
-Write a few letters of the city name and then select the city. 
+Write a few letters of the city name and then select the city.
 You can also <button mat-button (click)="clear()">clear</button> the previous value:
 <form [formGroup]="form">
     <mat-input-container>

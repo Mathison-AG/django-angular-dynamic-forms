@@ -8,12 +8,14 @@ from rest_framework import renderers, serializers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
+from rest_framework.serializers import ListSerializer
 
 
 class M2MEnabledMetadata(SimpleMetadata):
     def get_field_info(self, field):
         ret = super().get_field_info(field)
-        if isinstance(field, serializers.ManyRelatedField):
+        print('field', field)
+        if isinstance(field, serializers.ManyRelatedField) or isinstance(field, ListSerializer):
             ret['multiple'] = True
         return ret
 
@@ -71,6 +73,10 @@ class ForeignFieldAutoCompleteMixin(object):
             path = '%s/foreign-autocomplete/%s/' % (path, item_id)
             item['autocomplete_url'] = urlsplit(request.build_absolute_uri(path)).path
 
+            # convert nested object (there was serializer for that) into a field
+            if item.get('type') == 'nested object':
+                item['type'] = 'field'
+
     # noinspection PyUnusedLocal
     def _foreign_autocomplete(self, request, has_instance, **kwargs):
         item_id = kwargs['autocomplete_id']
@@ -110,3 +116,18 @@ def foreign_field_autocomplete(field, serializer, pagination=False):
         return real_func
 
     return wrapper
+
+
+class ForeignSerializerMixin:
+
+    def to_internal_value(self, data):
+        if self.parent:
+            return self.Meta.model.objects.get(pk=data['id'])
+        return super().to_internal_value(data)
+
+    def update(self, instance, validated_data):
+        if not self.parent:
+            for k, v in list(validated_data.items()):
+                if isinstance(v, list):
+                    validated_data[k] = set(v)
+        return super().update(instance, validated_data)

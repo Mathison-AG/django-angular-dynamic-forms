@@ -79,13 +79,7 @@ export class SampleForeignSelectorComponent implements OnInit, ForeignFieldLooku
     }
 
     select(city: any) {
-        const result: ForeignFieldLookupResult[] = [
-            {
-                formatted_value: city.name,
-                key: city.id
-            }
-        ];
-        this.dialogRef.close(result);
+        this.dialogRef.close([city]);
     }
 
     clear() {

@@ -1,11 +1,12 @@
 from rest_framework import viewsets, permissions, serializers
 
+from angular_dynamic_forms.foreign_key import ForeignSerializerMixin
 from api.models import City, TestModel, Address, Tag
 from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete, \
     foreign_field_autocomplete, ForeignFieldAutoCompleteMixin
 
 
-class CitySerializer(serializers.ModelSerializer):
+class CitySerializer(ForeignSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = City
         fields = ('name', 'zipcode', 'comment', 'id')
@@ -25,15 +26,18 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     }
 
 
-class TestModelSerializer(serializers.ModelSerializer):
+class TagSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
     class Meta:
-        model = TestModel
+        model = Tag
         exclude = ()
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TestModelSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+    foreign_key = CitySerializer()
+
     class Meta:
-        model = Tag
+        model = TestModel
         exclude = ()
 
 
@@ -90,7 +94,9 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
         return Tag.objects.order_by('name')
 
 
-class AddressSerializer(serializers.ModelSerializer):
+class AddressSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    city = CitySerializer()
+
     class Meta:
         model = Address
         exclude = ()
@@ -103,11 +109,6 @@ class AddressViewSet(AutoCompleteMixin, ForeignFieldAutoCompleteMixin, AngularFo
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
     permission_classes = (permissions.AllowAny,)
-    form_defaults = {
-        'city': {
-            'formatter': '{{name}}'
-        }
-    }
 
     @foreign_field_autocomplete(field='city', serializer=CitySerializer)
     def city_autocomplete(self, request):

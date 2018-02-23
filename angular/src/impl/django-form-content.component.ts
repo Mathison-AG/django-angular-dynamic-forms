@@ -54,8 +54,9 @@ import {
 } from './django-form-iface';
 import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/misc/dynamic-form-control-layout.model';
 import {
-    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER, FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
-    ForeignFieldLookupComponent, ForeignFieldLookupFactory, ForeignFieldLookupResult
+    FOREIGN_FIELD_FORMATTER_PROVIDER,
+    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER, FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER, ForeignFieldFormatter,
+    ForeignFieldLookupComponent, ForeignFieldLookupConfig, ForeignFieldLookupFactory, ForeignFieldLookupResult
 } from '../foreign';
 import {ComponentPortal} from '@angular/cdk/portal';
 import {Overlay} from '@angular/cdk/overlay';
@@ -153,6 +154,8 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
                 private foreignFieldLookupComponent: Type<ForeignFieldLookupComponent>,
                 @Optional() @Inject(FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER)
                 private foreignFieldLookupFactory: ForeignFieldLookupFactory,
+                @Optional() @Inject(FOREIGN_FIELD_FORMATTER_PROVIDER)
+                private foreignFieldFormatter: ForeignFieldFormatter,
                 private dialog: MatDialog) {
     }
 
@@ -248,7 +251,6 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
         this.zone.run(() => {
 
             let component: Type<ForeignFieldLookupComponent>;
-            console.log('factory is', this.foreignFieldLookupFactory);
             if (this.foreignFieldLookupFactory) {
                 component = this.foreignFieldLookupFactory.getComponent(def);
             }
@@ -267,32 +269,34 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
                 width: '50vw',
                 height: '50vh',
                 data: {
-                    initialValue: value.filter((x) => !!x).map(
-                        (val) => ({
-                            key: val,
-                            formatted_value: formModel.options.find((x) => x.value === val) || ''
-                        })),
+                    initialValue: value.filter((x) => !!x),
                     config: def
                 }
             });
-            dialogRef.afterClosed().subscribe((result: ForeignFieldLookupResult[]|undefined) => {
-                if (result === undefined) {
-                    // do nothing for undefined result
-                    return;
-                }
-                if (!result.length) {
-                    // deselect value
-                    formModel.options = [];
-                    // formModel.select();
-                    return;
-                }
-                formModel.options = result.map((r) => ({
-                    label: r.formatted_value,
-                    value: r.key
-                }));
-                formModel.select(...result.map((_, index) => index));
+            dialogRef.afterClosed().subscribe((result: ForeignFieldLookupResult[] | undefined) => {
+                this._setForeignSelectValue(def, formModel, result);
             });
         });
+    }
+
+    private _setForeignSelectValue(def: ForeignFieldLookupConfig, formModel: DynamicSelectModel<string>,
+                                   result: ForeignFieldLookupResult[] | undefined) {
+        result = this._transformForeignValue(def, result);
+        if (result === undefined) {
+            // do nothing for undefined result
+            return;
+        }
+        if (!result.length) {
+            // deselect value
+            formModel.options = [];
+            // formModel.select();
+            return;
+        }
+        formModel.options = result.map((r) => ({
+            label: r.label,
+            value: r.value
+        }));
+        formModel.select(...result.map((_, index) => index));
     }
 
     private _unbindForeignKey() {
@@ -667,10 +671,45 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
         if (this._initialData && this.formGroup) {
             this.iterateControls((name, control) => {
                 if (name in this._initialData) {
-                    control.setValue(this._initialData[name]);
+                    const initial = this._initialData[name];
+                    if (!initial) {
+                        return;
+                    }
+                    if (name in this.foreignDefinitions) {
+                        const def = this.foreignDefinitions[name];
+                        this._setForeignSelectValue(
+                            def,
+                            this.formService.findById(name, this.formModel) as DynamicSelectModel<string>,
+                            initial);
+                    } else {
+                        control.setValue(initial);
+                    }
                 }
             });
         }
+    }
+
+    private _transformForeignValue(def: ForeignFieldLookupConfig, initial: any):
+        Array<{label: string, value: any}>|undefined  {
+
+        if (initial === undefined) {
+            return undefined;
+        }
+        if (!Array.isArray(initial)) {
+            initial = [initial];
+        }
+        return initial.map((val) => {
+            let formattedValue;
+            if (this.foreignFieldFormatter) {
+                formattedValue = this.foreignFieldFormatter.format(def, val);
+            } else {
+                formattedValue = `${val.id} - please register FOREIGN_FIELD_FORMATTER_PROVIDER`;
+            }
+            return {
+                value: val,
+                label: formattedValue
+            };
+        });
     }
 
     private getControlByName(name: string): AbstractControl | undefined {

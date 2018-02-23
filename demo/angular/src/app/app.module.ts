@@ -1,9 +1,13 @@
-import {NgModule} from '@angular/core';
+import {Injectable, NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {
-    DjangoFormModule, ErrorService, FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
-    FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER
+    DjangoFormModule, ErrorService,
+    ForeignFieldFormatter,
+    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
+    FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
+    FOREIGN_FIELD_FORMATTER_PROVIDER,
+    ForeignFieldLookupConfig
 } from 'django-angular-dynamic-forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
@@ -39,6 +43,18 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ForeignSelectorFactoryService} from './all-controls/foreign-selector-factory.service';
 import {ForeignSelectorComponent} from './all-controls/foreign-selector.component';
 import {TagSelectorComponent} from './all-controls/tag-selector.component';
+
+
+@Injectable()
+export class SimpleForeignFieldFormatter extends ForeignFieldFormatter {
+
+    public format(config: ForeignFieldLookupConfig, value: any) {
+        if (value.name) {
+            return value.name;
+        }
+        return JSON.stringify(value);
+    }
+}
 
 
 @NgModule({
@@ -100,6 +116,10 @@ import {TagSelectorComponent} from './all-controls/tag-selector.component';
         {
             provide: FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
             useClass: ForeignSelectorFactoryService
+        },
+        {
+            provide: FOREIGN_FIELD_FORMATTER_PROVIDER,
+            useClass: SimpleForeignFieldFormatter
         }
     ],
     entryComponents: [

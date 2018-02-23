@@ -14,6 +14,11 @@ import {of as observableOf} from 'rxjs/observable/of';
 import {combineLatest} from 'rxjs/observable/combineLatest';
 import {ForeignSelectorFactoryService} from './foreign-selector-factory.service';
 import {TagSelectorComponent} from './tag-selector.component';
+import {
+    FOREIGN_FIELD_FORMATTER_PROVIDER, ForeignFieldFormatter,
+    ForeignFieldLookupConfig
+} from 'django-angular-dynamic-forms';
+import {SimpleForeignFieldFormatter} from '../app.module';
 
 @Component({
     selector: 'app-create-in-page',
@@ -22,7 +27,7 @@ import {TagSelectorComponent} from './tag-selector.component';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form djangoUrl="/api/1.0/test/" (submit)="submit($event)"
+                <inpage-django-form djangoUrl="/api/1.0/test/1/" (submit)="submit($event)"
                                     (cancel)="cancel($event)"></inpage-django-form>
             </div>
         </div>
@@ -77,6 +82,23 @@ class TestModel(models.Model):
     foreign_key = models.ForeignKey(City, null=True, blank=True, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, related_name='+', blank=True, verbose_name='Tags (many to many field)')
 
+# ForeignSerializerMixin - when tags arrive from client, it converts them back to Tag instances
+class TagSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        exclude = ()
+
+
+# ForeignSerializerMixin - patches the "update" method to handle tags. Alternatively provide your
+# own update method
+class TestModelSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+    foreign_key = CitySerializer()
+
+    class Meta:
+        model = TestModel
+        exclude = ()
+
 
 class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
     """
@@ -107,7 +129,7 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
                                               'email',
                                               'number',
                                               'foreign_key',
-                                              'm2m'
+                                              'tags'
                                           ])
             ]
         )
@@ -142,11 +164,11 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
             tab: 'Template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form djangoUrl="/api/1.0/test/" 
-                        (submit)="submit($event)" 
+    <inpage-django-form djangoUrl="/api/1.0/test/"
+                        (submit)="submit($event)"
                         (cancel)="cancel($event)"></inpage-django-form>
 </div>
-    `
+`
         },
         {
             tab: 'SCSS',
@@ -253,13 +275,7 @@ export class ForeignSelectorComponent implements ForeignFieldLookupComponent, Af
     }
 
     select(city: any) {
-        const result: ForeignFieldLookupResult[] = [
-            {
-                formatted_value: city.name,
-                key: city.id
-            }
-        ];
-        this.dialogRef.close(result);
+        this.dialogRef.close([city]);
     }
 
     clear() {
@@ -338,18 +354,13 @@ export class TagSelectorComponent implements ForeignFieldLookupComponent, AfterV
         this.http.get<any>(this.data.config.autocompleteUrl).subscribe((tags) => {
             this.tags = tags.map((tag) => ({
                 ...tag,
-                selected: this.data.initialValue.some((t) => tag.id === t.key)
+                selected: this.data.initialValue.some((t) => tag.id === t.id)
             }));
         });
     }
 
     save() {
-        const result = this.tags
-            .filter((tag) => tag.selected)
-            .map((tag) => ({
-                formatted_value: tag.name,
-                key: tag.id
-            }));
+        const result = this.tags.filter((tag) => tag.selected);
         this.dialogRef.close(result);
     }
 }
@@ -385,6 +396,16 @@ export class ForeignSelectorFactoryService implements ForeignFieldLookupFactory 
         {
             tab: 'app-module',
             text: `
+@Injectable()
+export class SimpleForeignFieldFormatter extends ForeignFieldFormatter {
+    public format(config: ForeignFieldLookupConfig, value: any) {
+        if (value.name) {
+            return value.name;
+        }
+        return JSON.stringify(value);
+    }
+}
+
 @NgModule({
     declarations: [
         ...
@@ -397,6 +418,10 @@ export class ForeignSelectorFactoryService implements ForeignFieldLookupFactory 
         {
             provide: FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
             useClass: ForeignSelectorFactoryService
+        },
+        {
+            provide: FOREIGN_FIELD_FORMATTER_PROVIDER,
+            useClass: SimpleForeignFieldFormatter
         }
     ]`
         },
