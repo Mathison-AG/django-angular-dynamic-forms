@@ -266,8 +266,10 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
 
             const value = Array.isArray(formModel.value) ? formModel.value : [formModel.value];
             const dialogRef = this.dialog.open(component, {
-                width: '50vw',
-                height: '50vh',
+                maxHeight: '90vh',
+                height: 'auto',
+                maxWidth: '90vw',
+                width: 'auto',
                 data: {
                     initialValue: value.filter((x) => !!x),
                     config: def
