@@ -21,6 +21,7 @@ export class DjangoFormDialogService {
 
         const dialogRef = this.dialog.open(DialogDjangoFormComponent, {
             // width: '250px',
+            maxHeight: '90vh',
             data: {
                 djangoUrl,
                 config: extraOptions.config,
