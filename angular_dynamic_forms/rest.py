@@ -51,14 +51,14 @@ class AngularFormMixin(object):
         See https://github.com/mesemus/django-angular-dynamic-forms/blob/develop/angular/src/impl/django-form-iface.ts
         for a list of recognized items.
     """
-    form_defaults = None
+    form_defaults = {}
 
     """
     These three is a map from form_id => layout, title, map of defaults for the case of multiple forms per viewset
     """
-    form_layouts  = None
-    form_titles   = None
-    form_defaults_map = None
+    form_layouts  = {}
+    form_titles   = {}
+    form_defaults_map = {}
 
     @staticmethod
     def fieldset(title, controls):
