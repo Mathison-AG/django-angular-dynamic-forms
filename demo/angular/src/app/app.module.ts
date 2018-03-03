@@ -43,6 +43,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ForeignSelectorFactoryService} from './all-controls/foreign-selector-factory.service';
 import {ForeignSelectorComponent} from './all-controls/foreign-selector.component';
 import {TagSelectorComponent} from './all-controls/tag-selector.component';
+import { CreateForeignComponent } from './create-foreign/create-foreign.component';
 
 
 @Injectable()
@@ -76,7 +77,8 @@ export class SimpleForeignFieldFormatter implements ForeignFieldFormatter {
         ForeignComponent,
         SampleForeignSelectorComponent,
         ForeignSelectorComponent,
-        TagSelectorComponent
+        TagSelectorComponent,
+        CreateForeignComponent
     ],
     imports: [
         BrowserAnimationsModule,
@@ -101,7 +103,7 @@ export class SimpleForeignFieldFormatter implements ForeignFieldFormatter {
         MatSortModule,
         MatSliderModule,
         MatSlideToggleModule,
-        FormsModule
+        FormsModule,
     ],
     providers: [
         {

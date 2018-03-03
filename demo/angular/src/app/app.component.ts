@@ -57,6 +57,7 @@ import {environment} from '../environments/environment';
                             </mat-expansion-panel-header>
                             <a routerLink="/foreign">Foreign Key</a>
                             <a routerLink="/all-controls">m2m in All available controls and layout demo</a>
+                            <a routerLink="/create-foreign">Create a new instance of referenced object</a>
                         </mat-expansion-panel>
                         <mat-expansion-panel>
                             <mat-expansion-panel-header>

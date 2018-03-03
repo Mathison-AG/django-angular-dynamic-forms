@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from api.models import City, Tag, TestModel
+from api.models import City, Tag, TestModel, Company
 
 
 class Command(BaseCommand):
@@ -32,3 +32,5 @@ class Command(BaseCommand):
         )
         tm.tags.set([t1, t2])
         tm.save()
+
+        company = Company.objects.create(name='UCT Prague')

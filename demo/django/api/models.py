@@ -42,3 +42,12 @@ class TestModel(models.Model):
     foreign_key = models.ForeignKey(City, null=True, blank=True, on_delete=models.CASCADE, related_name='+')
     tags = models.ManyToManyField(Tag, related_name='+', blank=True, verbose_name='Tags (many to many field)')
 
+
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Contact(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='contacts')
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)

@@ -1,0 +1,60 @@
+from rest_framework.decorators import detail_route
+from rest_framework.relations import PrimaryKeyRelatedField
+
+
+def linked_form(viewset, form_id=None, link=None, method='create'):
+    """
+    When having foreign key or m2m relationships between models A and B (B has foreign key to A named parent),
+    we want to have a form that sits on A's viewset but creates/edits B and sets it relationship to A
+    automatically.
+
+    In order to do so, define linked_forms on A's viewset containing a call to linked_form as follows:
+
+    @linked_forms()
+    class AViewSet(AngularFormMixin, ...):
+        linked_forms = {
+            'new-b': linked_form(BViewSet, link='parent')
+        }
+
+    Then, there will be a form definition on <aviewset>/pk/forms/new-b, with POST/PATCH operations pointing
+    to an automatically created endpoint <aviewset>/pk/linked-endpoint/new-b and detail-route named "new_b"
+
+    :param viewset:     the foreign viewset
+    :param form_id:     id of the form on the foreign viewset. If unset, use the default form
+    :param link:        either a field name on the foreign viewset or a callable that will get (foreign_instance, this_instance)
+    :return:            an internal definition of a linked form
+    """
+    return {
+        'viewset' : viewset,
+        'form_id' : form_id,
+        'link'    : link,
+        'method'  : method
+    }
+
+
+def linked_forms():
+    def build_form(clz, form_name, form_def):
+        def form_method(self, request, pk, *args, **kwargs):
+            viewset = form_def['viewset']()
+            viewset.request = request
+            viewset.format_kwarg = self.format_kwarg
+            link = form_def['link']
+            if isinstance(link, str):
+                serializer = viewset.get_serializer()
+                fld = serializer.fields[link]
+                if isinstance(fld, PrimaryKeyRelatedField):
+                    request.data[link] = self.get_object().pk
+                else:
+                    request.data[link] = self.get_object()
+            return getattr(viewset, form_def['method'])(request, *args, **kwargs)
+
+        setattr(clz, form_name.replace('-', '_'),
+                detail_route(methods=['get', 'post', 'patch'], url_path=form_name)(form_method))
+
+    def wrapper(clz):
+        forms = getattr(clz, 'linked_forms', {})
+        if forms:
+            for form_name, form_def in forms.items():
+                build_form(clz, form_name, form_def)
+        return clz
+    return wrapper

@@ -161,7 +161,7 @@ urlpatterns = [
             .catch(err => this.errors.showCommunicationError(err))
             .subscribe(resp => {
                 this.data = new MatTableDataSource(resp);
-            })
+            });
     }
 
     edit(id: string) {

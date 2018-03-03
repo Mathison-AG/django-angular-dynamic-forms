@@ -1,9 +1,10 @@
 # noinspection PyUnresolvedReferences
 import inspect
+import re
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import TextField
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, Http404
 from django.utils.translation import gettext
 from rest_framework import renderers
 from rest_framework.decorators import detail_route, list_route
@@ -60,6 +61,12 @@ class AngularFormMixin(object):
     form_titles   = {}
     form_defaults_map = {}
 
+    """
+    A map of linked forms, i.e. forms defined on other viewsets linked by foreign key or m2m. See @linked_forms
+    decorator and linked_form(...) call for details. 
+    """
+    linked_forms = {}
+
     @staticmethod
     def fieldset(title, controls):
         """
@@ -104,22 +111,22 @@ class AngularFormMixin(object):
     # noinspection PyUnusedLocal
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form(self, request, *args, **kwargs):
-        return self._get_form_metadata(has_instance=True)
+        return Response(self._get_form_metadata(has_instance=True))
 
     # noinspection PyUnusedLocal
     @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form_list(self, request, *args, **kwargs):
-        return self._get_form_metadata(has_instance=False)
+        return Response(self._get_form_metadata(has_instance=False))
 
     # noinspection PyUnusedLocal
     @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
     def form_with_name(self, request, *args, form_name=None, **kwargs):
-        return self._get_form_metadata(has_instance=True, form_name =form_name or '')
+        return Response(self._get_form_metadata(has_instance=True, form_name =form_name or ''))
 
     # noinspection PyUnusedLocal
     @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
     def form_list_with_name(self, request, *args, form_name=None, **kwargs):
-        return self._get_form_metadata(has_instance=False, form_name =form_name or '')
+        return Response(self._get_form_metadata(has_instance=False, form_name =form_name or ''))
 
     #
     # the rest of the methods on this class are private ones
@@ -272,12 +279,16 @@ class AngularFormMixin(object):
     def _get_form_metadata(self, has_instance, form_name=''):
 
         if form_name:
+
+            if form_name in self.linked_forms:
+                return self._linked_form_metadata(form_name)
+
             if not self.form_layouts:
-                return HttpResponseNotFound('Form layouts not configured. '
+                raise Http404('Form layouts not configured. '
                                             'Please add form_layouts attribute on the viewset class')
 
             if form_name not in self.form_layouts:
-                return HttpResponseNotFound('Form with name %s not found' % form_name)
+                raise Http404('Form with name %s not found' % form_name)
 
         ret = {}
 
@@ -301,8 +312,21 @@ class AngularFormMixin(object):
         ret['hasInitialData'] = has_instance
 
         # print(json.dumps(ret, indent=4))
+        return ret
 
-        return Response(ret)
+    def _linked_form_metadata(self, form_name):
+        form_def = self.linked_forms[form_name]
+        viewset = form_def['viewset']()
+        viewset.request = self.request
+        viewset.format_kwarg = self.format_kwarg
+        ret = viewset._get_form_metadata(False, form_name=form_def['form_id'])
+
+        path = self.request.path
+        # must be called from /form/ ...
+        path = re.sub(r'/form(/[^/]+)?/?$', '', path)
+
+        ret['djangoUrl'] = '%s/%s/' % (path, form_name)
+        return ret
 
     # @LoggerDecorator.log()
     def _decorate_layout(self, layout, fields_info):
@@ -340,3 +364,5 @@ class AngularFormMixin(object):
 def camel(snake_str):
     first, *others = snake_str.split('_')
     return ''.join([first.lower(), *map(str.title, others)])
+
+

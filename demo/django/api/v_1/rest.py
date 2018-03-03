@@ -1,9 +1,10 @@
 from rest_framework import viewsets, permissions, serializers
+from rest_framework.viewsets import ModelViewSet
 
 from angular_dynamic_forms.foreign_key import ForeignSerializerMixin
-from api.models import City, TestModel, Address, Tag
+from api.models import City, TestModel, Address, Tag, Contact, Company
 from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete, \
-    foreign_field_autocomplete, ForeignFieldAutoCompleteMixin
+    foreign_field_autocomplete, ForeignFieldAutoCompleteMixin, linked_forms, linked_form
 
 
 class CitySerializer(ForeignSerializerMixin, serializers.ModelSerializer):
@@ -39,6 +40,11 @@ class TestModelSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = TestModel
         exclude = ()
+
+
+class TagViewSet(AngularFormMixin, ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 
 
 class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, AngularFormMixin, viewsets.ModelViewSet):
@@ -117,3 +123,35 @@ class AddressViewSet(AutoCompleteMixin, ForeignFieldAutoCompleteMixin, AngularFo
         if query:
             qs = qs.filter(name__icontains=query)
         return qs
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        exclude = ()
+
+
+class ContactViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    form_layout = (
+        'name', 'email'
+    )
+
+
+class CompanySerializer(serializers.ModelSerializer):
+
+    contacts = ContactSerializer(many=True)
+
+    class Meta:
+        model = Company
+        exclude = ()
+
+
+@linked_forms()
+class CompanyViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    linked_forms = {
+        'contact': linked_form(ContactViewSet, link='company')
+    }
