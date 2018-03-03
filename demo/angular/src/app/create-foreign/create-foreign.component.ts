@@ -1,0 +1,167 @@
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {CodeSampleComponent} from '../code-sample/code-sample.component';
+import {MatTableDataSource} from '@angular/material';
+import {DjangoFormDialogService, ErrorService} from 'django-angular-dynamic-forms';
+import {HttpClient} from '@angular/common/http';
+
+@Component({
+    selector: 'app-create-foreign',
+    template: `
+        <h1>Create a foreign key object</h1>
+
+            <div *ngFor="let company of data">
+                <h2>{{company.name}}</h2>
+                <div><label>Contacts: </label></div>
+                <mat-list>
+                    <mat-list-item *ngFor="let contact of company.contacts">
+                        {{contact.name}} ({{contact.email}})
+                    </mat-list-item>
+                </mat-list>
+                <button mat-raised-button (click)="add_contact(company)">Add a new contact</button>
+            </div>
+
+        <code-sample [tabs]="tabs"></code-sample>
+    `,
+    styles: [`
+        .bordered {
+            border: 1px solid lightblue;
+            padding: 20px;
+        }
+    `]
+})
+export class CreateForeignComponent implements OnInit {
+    @ViewChild(CodeSampleComponent)
+    code: CodeSampleComponent;
+
+    tabs = [
+        {
+            tab: 'Typescript',
+            text: `
+    constructor(private http: HttpClient,
+                private errors: ErrorService,
+                private dialog: DjangoFormDialogService) {
+    }
+
+    add_contact(company: any) {
+        this.dialog.open(\`/api/1.0/companies/\${company.id}\`, {
+            formId: 'contact'
+        }).subscribe((result) => {
+            console.log(result);
+            this.reload();
+        });
+    }
+
+    ngOnInit() {
+        this.reload();
+    }
+
+    reload() {
+        this.http.get<any>('/api/1.0/companies/')
+            .catch(err => this.errors.showCommunicationError(err))
+            .subscribe(resp => {
+                this.data = resp;
+            });
+    }
+    `
+        },
+        {
+            tab: 'Page Template',
+            text: `
+            <div *ngFor="let company of data">
+                <h2>{{company.name}}</h2>
+                <div><label>Contacts: </label></div>
+                <mat-list>
+                    <mat-list-item *ngFor="let contact of company.contacts">
+                        {{contact.name}} ({{contact.email}})
+                    </mat-list-item>
+                </mat-list>
+                <button mat-raised-button (click)="add_contact(company)">Add a new contact</button>
+            </div>
+`
+        },
+        {
+            tab: 'Python',
+            text: `
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Contact(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='contacts')
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        exclude = ()
+
+
+class ContactViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    form_layout = (
+        'name', 'email'
+    )
+
+
+class CompanySerializer(serializers.ModelSerializer):
+
+    contacts = ContactSerializer(many=True)
+
+    class Meta:
+        model = Company
+        exclude = ()
+
+# decorator is used to generate a @detail_route(...) def contact(...) that takes care of creating a new contact
+@linked_forms()
+class CompanyViewSet(AngularFormMixin, viewsets.ModelViewSet):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    linked_forms = {
+        'contact': linked_form(ContactViewSet, link='company')
+    }
+
+router = DefaultRouter()
+router.register(r'companies', CompanyViewSet)
+
+urlpatterns = [
+    url(r'^', include(router.urls)),
+]
+`
+        },
+        {
+            tab: 'Response',
+            text: ''
+        }
+    ];
+
+    public data: any;
+
+    constructor(private http: HttpClient,
+                private errors: ErrorService,
+                private dialog: DjangoFormDialogService) {
+    }
+
+    ngOnInit() {
+        this.reload();
+    }
+
+    reload() {
+        this.http.get<any>('/api/1.0/companies/')
+            .catch(err => this.errors.showCommunicationError(err))
+            .subscribe(resp => {
+                this.data = resp;
+            });
+    }
+
+    add_contact(company: any) {
+        this.dialog.open(`/api/1.0/companies/${company.id}`, {
+            formId: 'contact'
+        }).subscribe((result) => {
+            console.log(result);
+            this.code.update('Response', result);
+            this.reload();
+        });
+    }
+}
