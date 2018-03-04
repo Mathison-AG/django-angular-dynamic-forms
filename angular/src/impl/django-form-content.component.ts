@@ -866,7 +866,9 @@ function mergeLayouts(layout1OrUndefined: DynamicFormControlLayout | undefined,
  */
 const originFormControlNgOnChanges = FormControlDirective.prototype.ngOnChanges;
 FormControlDirective.prototype.ngOnChanges = function() {
-    this.form.nativeElement = this.valueAccessor._element.nativeElement;
+    if (this.valueAccessor && this.valueAccessor._element) {
+        this.form.nativeElement = this.valueAccessor._element.nativeElement;
+    }
     return originFormControlNgOnChanges.apply(this, arguments);
 };
 
