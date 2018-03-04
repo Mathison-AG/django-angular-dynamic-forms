@@ -1,22 +1,22 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {CodeSampleComponent} from '../code-sample/code-sample.component';
-import {MatTableDataSource} from '@angular/material';
 import {DjangoFormDialogService, ErrorService} from 'django-angular-dynamic-forms';
 import {HttpClient} from '@angular/common/http';
 
 @Component({
     selector: 'app-create-foreign',
     template: `
-        <h1>Create a foreign key object</h1>
+        <h1>Create and edit foreign key object</h1>
 
             <div *ngFor="let company of data">
                 <h2>{{company.name}}</h2>
                 <div><label>Contacts: </label></div>
-                <mat-list>
-                    <mat-list-item *ngFor="let contact of company.contacts">
-                        {{contact.name}} ({{contact.email}})
-                    </mat-list-item>
-                </mat-list>
+                <table>
+                    <tr *ngFor="let contact of company.contacts">
+                        <td>{{contact.name}} ({{contact.email}})</td>
+                        <td><button mat-button (click)="edit_contact(company, contact)"><mat-icon>edit</mat-icon> Edit</button></td>
+                    </tr>
+                </table>
                 <button mat-raised-button (click)="add_contact(company)">Add a new contact</button>
             </div>
 
@@ -44,9 +44,23 @@ export class CreateForeignComponent implements OnInit {
 
     add_contact(company: any) {
         this.dialog.open(\`/api/1.0/companies/\${company.id}\`, {
-            formId: 'contact'
+            formId: 'new-contact'
         }).subscribe((result) => {
             console.log(result);
+            this.code.update('Response', result);
+            this.reload();
+        });
+    }
+
+    edit_contact(company: any, contact: any) {
+        this.dialog.open(\`/api/1.0/companies/\${company.id}\`, {
+            formId: 'edit-contact',
+            extraFormData: {
+                contactId: contact.id
+            }
+        }).subscribe((result) => {
+            console.log(result);
+            this.code.update('Response', result);
             this.reload();
         });
     }
@@ -67,14 +81,16 @@ export class CreateForeignComponent implements OnInit {
         {
             tab: 'Page Template',
             text: `
+
             <div *ngFor="let company of data">
                 <h2>{{company.name}}</h2>
                 <div><label>Contacts: </label></div>
-                <mat-list>
-                    <mat-list-item *ngFor="let contact of company.contacts">
-                        {{contact.name}} ({{contact.email}})
-                    </mat-list-item>
-                </mat-list>
+                <table>
+                    <tr *ngFor="let contact of company.contacts">
+                        <td>{{contact.name}} ({{contact.email}})</td>
+                        <td><button mat-button (click)="edit_contact(company, contact)"><mat-icon>edit</mat-icon> Edit</button></td>
+                    </tr>
+                </table>
                 <button mat-raised-button (click)="add_contact(company)">Add a new contact</button>
             </div>
 `
@@ -119,7 +135,8 @@ class CompanyViewSet(AngularFormMixin, viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     linked_forms = {
-        'contact': linked_form(ContactViewSet, link='company')
+        'new-contact': linked_form(ContactViewSet, link='company'),
+        'edit-contact': linked_form(ContactViewSet, link='company', link_id='contactId')
     }
 
 router = DefaultRouter()
@@ -157,7 +174,20 @@ urlpatterns = [
 
     add_contact(company: any) {
         this.dialog.open(`/api/1.0/companies/${company.id}`, {
-            formId: 'contact'
+            formId: 'new-contact'
+        }).subscribe((result) => {
+            console.log(result);
+            this.code.update('Response', result);
+            this.reload();
+        });
+    }
+
+    edit_contact(company: any, contact: any) {
+        this.dialog.open(`/api/1.0/companies/${company.id}`, {
+            formId: 'edit-contact',
+            extraFormData: {
+                contactId: contact.id
+            }
         }).subscribe((result) => {
             console.log(result);
             this.code.update('Response', result);

@@ -153,5 +153,6 @@ class CompanyViewSet(AngularFormMixin, viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     linked_forms = {
-        'contact': linked_form(ContactViewSet, link='company')
+        'new-contact': linked_form(ContactViewSet, link='company'),
+        'edit-contact': linked_form(ContactViewSet, link='company', link_id='contactId')
     }

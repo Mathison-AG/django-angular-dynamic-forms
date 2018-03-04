@@ -2,7 +2,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.relations import PrimaryKeyRelatedField
 
 
-def linked_form(viewset, form_id=None, link=None, method='create'):
+def linked_form(viewset, form_id=None, link=None, link_id=None, method=None):
     """
     When having foreign key or m2m relationships between models A and B (B has foreign key to A named parent),
     we want to have a form that sits on A's viewset but creates/edits B and sets it relationship to A
@@ -28,6 +28,7 @@ def linked_form(viewset, form_id=None, link=None, method='create'):
         'viewset' : viewset,
         'form_id' : form_id,
         'link'    : link,
+        'link_id' : link_id,
         'method'  : method
     }
 
@@ -45,8 +46,24 @@ def linked_forms():
                 if isinstance(fld, PrimaryKeyRelatedField):
                     request.data[link] = self.get_object().pk
                 else:
-                    request.data[link] = self.get_object()
-            return getattr(viewset, form_def['method'])(request, *args, **kwargs)
+                    request.data[link] = self.get_serializer(instance=self.get_object()).data
+
+            method = form_def['method']
+            if 'link_id' in form_def:
+                link_id = request.GET.get(form_def['link_id']) or request.data.get(form_def['link_id'])
+                viewset.lookup_url_kwarg = form_def['link_id']
+                viewset.kwargs = {
+                    viewset.lookup_url_kwarg: link_id
+                }
+            else:
+                link_id = None
+
+            if request._request.method == 'GET':
+                method = 'retrieve'
+            elif not method:
+                method = 'create' if not link_id else 'update'
+
+            return getattr(viewset, method)(request, *args, **kwargs)
 
         setattr(clz, form_name.replace('-', '_'),
                 detail_route(methods=['get', 'post', 'patch'], url_path=form_name)(form_method))

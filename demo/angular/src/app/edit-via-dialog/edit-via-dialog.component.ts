@@ -93,7 +93,7 @@ class City(models.Model):
     name = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
     comment = models.TextField(null=True, blank=True)
-    
+
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
@@ -103,7 +103,7 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     permission_classes = (permissions.AllowAny,)
-            
+
 router = DefaultRouter()
 router.register(r'cities', CityViewSet)
 

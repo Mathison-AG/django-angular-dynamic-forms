@@ -315,13 +315,21 @@ class AngularFormMixin(object):
         return ret
 
     def _linked_form_metadata(self, form_name):
+        request = self.request
+
         form_def = self.linked_forms[form_name]
         viewset = form_def['viewset']()
-        viewset.request = self.request
+        viewset.request = request
         viewset.format_kwarg = self.format_kwarg
-        ret = viewset._get_form_metadata(False, form_name=form_def['form_id'])
 
-        path = self.request.path
+        if 'link_id' in form_def:
+            link_id = request.GET.get(form_def['link_id']) or request.data.get(form_def['link_id'])
+        else:
+            link_id = None
+
+        ret = viewset._get_form_metadata(link_id, form_name=form_def['form_id'])
+
+        path = request.path
         # must be called from /form/ ...
         path = re.sub(r'/form(/[^/]+)?/?$', '', path)
 

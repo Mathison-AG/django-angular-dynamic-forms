@@ -93,7 +93,10 @@ export class DjangoFormBaseComponent implements OnInit {
             _configs[0].pipe(
                 mergeMap((_config: DjangoFormConfig) => this.httpClient
                     .get<any>(_config.djangoUrl as string,     // never null here
-                        {withCredentials: true})
+                        {
+                            withCredentials: true,
+                            params: this.extraFormData
+                        })
                     .pipe(
                         catchError((error) => this.errorService.showCommunicationError(error)),
                         map((response) => this.initialDataTransformation(response)),
