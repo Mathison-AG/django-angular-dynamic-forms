@@ -1,7 +1,7 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Inject, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClient, HttpParams} from '@angular/common/http';
 import {ErrorService} from './error-service';
 import {
     catchError, distinctUntilChanged, filter, map, mergeMap, partition, share, shareReplay,
@@ -179,6 +179,7 @@ export class DjangoFormBaseComponent implements OnInit {
             }
             if (config.djangoUrl) {
                 let call;
+                console.log('Saving to django url', config.djangoUrl);
                 switch (config.method) {
                     case 'post':
                         call = this.httpClient.post(config.djangoUrl, {...extra, ...data}, {withCredentials: true});
