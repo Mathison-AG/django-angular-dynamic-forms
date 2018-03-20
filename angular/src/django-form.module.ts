@@ -24,7 +24,6 @@ import {HttpClientModule} from '@angular/common/http';
         MatButtonModule,
         MatSnackBarModule,
         MatDialogModule,
-        HttpClientModule,
     ],
     providers: [
         {provide: NG_VALIDATORS, useValue: externalValidator, multi: true},
