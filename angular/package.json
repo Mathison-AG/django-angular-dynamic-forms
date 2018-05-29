@@ -1,6 +1,6 @@
 {
     "name": "django-angular-dynamic-forms",
-    "version": "0.7.5",
+    "version": "0.7.6",
     "license": "MIT",
     "description": "Django Rest Framework meets Angular 5 material.io dynamic forms - rapid development of create and edit dialogs",
     "typings": "./django-angular-dynamic-forms.d.ts",
@@ -17,12 +17,12 @@
         "explorer": "source-map-explorer ./dist//bundles/django-angular-dynamic-forms.umd.js",
         "gh-pages": "rimraf docs && npm run docs && gh-pages -d docs",
         "lint": "npm run tslint 'src/**/*.ts'",
+        "tslint": "./node_modules/.bin/tslint",
         "postversion": "git push && git push --tags",
         "prebuild": "rimraf dist tmp lib-dist",
         "preversion": "npm run ci",
         "test": "karma start",
         "test:watch": "karma start --auto-watch --no-single-run",
-        "tslint": "tslint",
         "pack:library": "npm run prebuild && angular-package-builder && cp package-dist.json dist/package.json && copyfiles -u 1 ../README.rst ../LICENSE dist"
     },
     "repository": {
@@ -87,7 +87,7 @@
         "rxjs": "^5.5.6",
         "source-map-explorer": "^1.5.0",
         "ts-node": "^5.0.1",
-        "tslint": "^5.9.1",
+        "tslint": "^5.10.0",
         "typescript": "^2.7.2",
         "zone.js": "^0.8.19"
     }
