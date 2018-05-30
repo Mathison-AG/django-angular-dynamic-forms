@@ -27,7 +27,7 @@ done
     yarn build || exit 1
     pandoc ../README.rst -o lib-dist/readme.md
     cd dist || exit 1
-    npm publish || exit 1
+    npm publish --registry=https://registry.npmjs.org/ || exit 1
 ) || exit 1
 
 (
