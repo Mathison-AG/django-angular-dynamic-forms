@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, serializers
 from rest_framework.viewsets import ModelViewSet
 
+from angular_dynamic_forms.decorators import form_action
 from angular_dynamic_forms.foreign_key import ForeignSerializerMixin
 from api.models import City, TestModel, Address, Tag, Contact, Company
 from angular_dynamic_forms import AngularFormMixin, AutoCompleteMixin, autocomplete, \
@@ -23,9 +24,17 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
 
     form_layouts = {
         'full': ['name', 'zipcode', 'comment'],
-        'simplified': ['name', 'zipcode']
+        'simplified': ['name', 'zipcode'],
+        'custom': ['name']
     }
 
+    @form_action(form_id='custom', detail=False, url_path='custom', methods=['GET', 'POST'])
+    def custom_form_action(self, request):
+        if request.method == 'POST':
+            request.data['zipcode'] = 'A10000'
+            return super().create(request)
+        else:
+            raise Exception()
 
 class TagSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
     class Meta:

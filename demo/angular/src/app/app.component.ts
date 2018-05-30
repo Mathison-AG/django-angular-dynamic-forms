@@ -21,6 +21,7 @@ import {environment} from '../environments/environment';
                             </mat-expansion-panel-header>
                             <a routerLink="/create-via-dialog">Create a new object via dialog</a>
                             <a routerLink="/create-in-page">Create a new object via in-page form</a>
+                            <a routerLink="/create-custom-save">Create a new object with a custom save method</a>
                         </mat-expansion-panel>
                         <mat-expansion-panel>
                             <mat-expansion-panel-header>

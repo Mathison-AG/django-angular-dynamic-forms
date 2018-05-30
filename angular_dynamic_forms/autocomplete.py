@@ -75,7 +75,7 @@ class AutoCompleteMixin(object):
         qs = qs(query)[:self.max_returned_items]
         formatter = autocomplete_definitions[name].formatter
         qs = [{
-            'id'    : item.id,
+            'id'    : getattr(item, 'id', None) or item.get('id', None),
             'label' : formatter.render(context=Context({'item': item}))
         } for item in qs]
         return Response(qs)

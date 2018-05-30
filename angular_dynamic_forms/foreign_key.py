@@ -3,12 +3,14 @@ import inspect
 import re
 from urllib.parse import urlsplit
 
+from django.db.models import ManyToManyField
 from django.http import HttpResponseNotFound, HttpResponseNotAllowed
 from rest_framework import renderers, serializers
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer
+import django.db.models
 
 
 class M2MEnabledMetadata(SimpleMetadata):
@@ -121,13 +123,41 @@ def foreign_field_autocomplete(field, serializer, pagination=False):
 class ForeignSerializerMixin:
 
     def to_internal_value(self, data):
+        self.__original_data = data
         if self.parent:
             return self.Meta.model.objects.get(pk=data['id'])
         return super().to_internal_value(data)
 
     def update(self, instance, validated_data):
+        delayed_m2m = {}
         if not self.parent:
             for k, v in list(validated_data.items()):
+                field = instance._meta.get_field(k)
                 if isinstance(v, list):
-                    validated_data[k] = set(v)
-        return super().update(instance, validated_data)
+                    if v:
+                        if isinstance(v[0], django.db.models.Model):
+                            validated_data[k] = set(v)
+                        elif isinstance(v[0], dict):
+                            related_model = field.related_model
+                            # convert the dict to model instances
+                            v = [vv['id'] for vv in self.__original_data.get(k, [])]  # validation strips id, why???
+                            v = set(related_model.objects.filter(pk__in=v))
+
+                    else:
+                        validated_data[k] = set()
+                if v is None:
+                    field = field
+                    # convert null to empty set
+                    if isinstance(field, ManyToManyField):
+                        validated_data[k] = set()
+
+                if isinstance(self.fields[k], ListSerializer):
+                    delayed_m2m[k] = v
+                    validated_data.pop(k)
+
+        inst = super().update(instance, validated_data)
+        if delayed_m2m:
+            for k, v in delayed_m2m.items():
+                getattr(inst, k).set(v or set())
+            inst.save()
+        return inst

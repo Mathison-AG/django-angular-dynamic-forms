@@ -14,6 +14,7 @@ import {CreateInPageMultipleFormsComponent} from './create-in-page-multiple-form
 import {AllControlsComponent} from './all-controls/all-controls.component';
 import {ForeignComponent} from './foreign/foreign.component';
 import {CreateForeignComponent} from './create-foreign/create-foreign.component';
+import {CreateCustomSaveComponent} from './create-custom-save/create-custom-save.component';
 
 const routes: Routes = [
     {
@@ -70,6 +71,11 @@ const routes: Routes = [
         path: 'create-foreign',
         pathMatch: 'full',
         component: CreateForeignComponent
+    },
+    {
+        path: 'create-custom-save',
+        pathMatch: 'full',
+        component: CreateCustomSaveComponent
     },
     {
         path: 'edit-in-page',

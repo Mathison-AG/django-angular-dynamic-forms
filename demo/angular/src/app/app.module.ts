@@ -44,6 +44,7 @@ import {ForeignSelectorFactoryService} from './all-controls/foreign-selector-fac
 import {ForeignSelectorComponent} from './all-controls/foreign-selector.component';
 import {TagSelectorComponent} from './all-controls/tag-selector.component';
 import { CreateForeignComponent } from './create-foreign/create-foreign.component';
+import {CreateCustomSaveComponent} from './create-custom-save/create-custom-save.component';
 
 
 @Injectable()
@@ -78,7 +79,8 @@ export class SimpleForeignFieldFormatter implements ForeignFieldFormatter {
         SampleForeignSelectorComponent,
         ForeignSelectorComponent,
         TagSelectorComponent,
-        CreateForeignComponent
+        CreateForeignComponent,
+        CreateCustomSaveComponent
     ],
     imports: [
         BrowserAnimationsModule,

@@ -350,14 +350,14 @@ class AngularFormMixin(object):
                 self._decorate_layout_item(layout)
                 return layout
             else:
-                md = dict(fields_info[layout['id']])
+                md = dict(fields_info.get(layout['id'], {}))
                 md.update(layout)
                 if md['type'] == 'choice':
                     md['type'] = 'select'
                 if md.get('choices'):
                     md['choices'] = [
                         {
-                            'label': x['display_name'],
+                            'label': x.get('label', None) or x.get('display_name', None),
                             'value': x['value']
                         } for x in md['choices']
                     ]

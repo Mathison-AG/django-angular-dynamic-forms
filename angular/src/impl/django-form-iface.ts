@@ -11,6 +11,7 @@ export enum SimpleFieldTypes {
     SELECT = 'select',
     EMAIL = 'email',
     FIELD = 'field',
+    FILE = 'file'
 }
 
 export enum CompositeFieldTypes {
@@ -54,6 +55,10 @@ export interface TextAreaFieldConfig extends FieldConfigBase {
 
 export interface DateFieldConfig extends FieldConfigBase {
     type: SimpleFieldTypes.DATE;
+}
+
+export interface FileFieldConfig extends FieldConfigBase {
+    type: SimpleFieldTypes.FILE;
 }
 
 export interface BooleanFieldConfig extends FieldConfigBase {
@@ -110,7 +115,7 @@ export interface GroupFieldConfig extends FieldConfigBase {
 
 export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig |
     IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig |
-    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig | ForeignFieldConfig;
+    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig | ForeignFieldConfig | FileFieldConfig;
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint

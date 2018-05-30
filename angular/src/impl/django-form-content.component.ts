@@ -1,14 +1,18 @@
 import {
     ChangeDetectorRef,
-    Component, ComponentRef,
+    Component,
     ContentChild,
     ElementRef,
-    EventEmitter, Inject,
-    Input, NgZone,
+    EventEmitter,
+    Inject,
+    Input,
+    NgZone,
     OnDestroy,
-    OnInit, Optional,
+    OnInit,
+    Optional,
     Output,
-    TemplateRef, Type
+    TemplateRef,
+    Type
 } from '@angular/core';
 
 import {
@@ -41,10 +45,10 @@ import {
     ColumnsFieldConfig,
     CompositeFieldTypes,
     EmailFieldConfig,
-    FieldChoice,
     FieldConfig,
     FieldSetConfig,
-    FloatFieldConfig, ForeignFieldConfig,
+    FloatFieldConfig,
+    ForeignFieldConfig,
     IntegerFieldConfig,
     RadioFieldConfig,
     SelectFieldConfig,
@@ -55,11 +59,14 @@ import {
 import {DynamicFormControlLayoutConfig} from '@ng-dynamic-forms/core/src/model/misc/dynamic-form-control-layout.model';
 import {
     FOREIGN_FIELD_FORMATTER_PROVIDER,
-    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER, FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER, ForeignFieldFormatter,
-    ForeignFieldLookupComponent, ForeignFieldLookupConfig, ForeignFieldLookupFactory, ForeignFieldLookupResult
+    FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER,
+    FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER,
+    ForeignFieldFormatter,
+    ForeignFieldLookupComponent,
+    ForeignFieldLookupConfig,
+    ForeignFieldLookupFactory,
+    ForeignFieldLookupResult
 } from '../foreign';
-import {ComponentPortal} from '@angular/cdk/portal';
-import {Overlay} from '@angular/cdk/overlay';
 import {MatDialog} from '@angular/material';
 
 /**

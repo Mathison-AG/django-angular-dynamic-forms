@@ -1,6 +1,8 @@
+from functools import wraps
+
 from rest_framework.decorators import detail_route
 from rest_framework.relations import PrimaryKeyRelatedField
-
+from rest_framework.decorators import action
 
 def linked_form(viewset, form_id=None, link=None, link_id=None, method=None):
     """
@@ -65,13 +67,19 @@ def linked_forms():
 
             return getattr(viewset, method)(request, *args, **kwargs)
 
-        setattr(clz, form_name.replace('-', '_'),
-                detail_route(methods=['get', 'post', 'patch'], url_path=form_name)(form_method))
+        form_method.__name__ = form_name.replace('-', '_')
+
+        return (
+            form_name.replace('-', '_'),
+            action(methods=['get', 'post', 'patch'], detail=True, url_path=form_name)(form_method))
 
     def wrapper(clz):
         forms = getattr(clz, 'linked_forms', {})
         if forms:
+            new_methods = []
             for form_name, form_def in forms.items():
-                build_form(clz, form_name, form_def)
+                new_methods.append(build_form(clz, form_name, form_def))
+            clz = type('%s_linked' % clz.__name__, (clz, ), dict(new_methods))
+
         return clz
     return wrapper
