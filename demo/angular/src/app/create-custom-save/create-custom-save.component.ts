@@ -26,7 +26,9 @@ constructor(private dialog: DjangoFormDialogService) {
 }
 click() {
     // note: do not forget the trailing '/'
-    this.dialog.open('/api/1.0/cities/custom/').subscribe(result => {
+    this.dialog.open('/api/1.0/cities/', {
+        formId: 'custom'
+    }).subscribe(result => {
         console.log(result);
     });
 }
@@ -73,7 +75,9 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
 
     click() {
 
-        this.dialog.open('/api/1.0/cities/custom/').subscribe(result => {
+        this.dialog.open('/api/1.0/cities/', {
+            formId: 'custom'
+        }).subscribe(result => {
             this.code.update('response', result);
         });
     }

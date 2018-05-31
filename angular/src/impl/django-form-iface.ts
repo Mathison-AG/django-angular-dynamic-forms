@@ -139,7 +139,7 @@ export interface DjangoFormConfig {
 
 export interface DjangoDialogConfig {
 
-    // django url, form will be downloaded from the url
+    // django url, form initial data will downloaded and saved to this url
     djangoUrl?: string;
 
     // config in case djangoUrl is not set
@@ -156,5 +156,4 @@ export interface DjangoDialogConfig {
 
     // form name in case there are multiple forms defined on a viewset
     formId?: string;
-
 }

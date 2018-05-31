@@ -1,13 +1,15 @@
 # noinspection PyUnresolvedReferences
+import functools
 import inspect
+import os
 import re
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import TextField
-from django.http import HttpResponseNotFound, Http404
+from django.http import Http404
 from django.utils.translation import gettext
 from rest_framework import renderers
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 
@@ -109,25 +111,36 @@ class AngularFormMixin(object):
 
 
     # noinspection PyUnusedLocal
-    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
+    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form(self, request, *args, **kwargs):
-        return Response(self._get_form_metadata(has_instance=True))
+        return Response(self._get_form_metadata(has_instance=True,
+                                                base_path=self._base_path(request.path)))
 
     # noinspection PyUnusedLocal
-    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form')
+    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='form')
     def form_list(self, request, *args, **kwargs):
-        return Response(self._get_form_metadata(has_instance=False))
+        return Response(self._get_form_metadata(has_instance=False,
+                                                base_path=self._base_path(request.path)))
 
     # noinspection PyUnusedLocal
-    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
     def form_with_name(self, request, *args, form_name=None, **kwargs):
-        return Response(self._get_form_metadata(has_instance=True, form_name =form_name or ''))
+        return Response(self._get_form_metadata(has_instance=True, form_name =form_name or '',
+                                                base_path=self._base_path(request.path, 2)))
 
     # noinspection PyUnusedLocal
-    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
     def form_list_with_name(self, request, *args, form_name=None, **kwargs):
-        return Response(self._get_form_metadata(has_instance=False, form_name =form_name or ''))
+        return Response(self._get_form_metadata(has_instance=False, form_name =form_name or '',
+                                                base_path=self._base_path(request.path, 2)))
 
+    @staticmethod
+    def _base_path(path, level=1):
+        if path.endswith('/'):
+            path = path[:-1]
+        for _lev in range(level):
+            path = os.path.dirname(path)
+        return path + '/'
     #
     # the rest of the methods on this class are private ones
     #
@@ -276,7 +289,7 @@ class AngularFormMixin(object):
                 },
             ]
 
-    def _get_form_metadata(self, has_instance, form_name=''):
+    def _get_form_metadata(self, has_instance, form_name='', base_path=None):
 
         if form_name:
 
@@ -310,8 +323,21 @@ class AngularFormMixin(object):
 
         ret['method'] = 'patch' if has_instance else 'post'
         ret['hasInitialData'] = has_instance
+        ret['djangoUrl'] = base_path + self._get_url_by_form_id(form_name)
 
         # print(json.dumps(ret, indent=4))
+        return ret
+
+    @functools.lru_cache(maxsize=16)
+    def _get_url_by_form_id(self, form_id):
+        if not form_id:
+            return ''
+        method = inspect.getmembers(self, lambda fld: callable(fld) and getattr(fld, 'angular_form_id', None) == form_id)
+        if not method:
+            return ''
+        ret = method[0][1].url_path
+        if not ret.endswith('/'):
+            ret += '/'
         return ret
 
     def _linked_form_metadata(self, form_name):
@@ -370,6 +396,8 @@ class AngularFormMixin(object):
 
 # privates
 def camel(snake_str):
+    if '_' not in snake_str:
+        return snake_str
     first, *others = snake_str.split('_')
     return ''.join([first.lower(), *map(str.title, others)])
 
