@@ -353,13 +353,14 @@ class AngularFormMixin(object):
         else:
             link_id = None
 
-        ret = viewset._get_form_metadata(link_id, form_name=form_def['form_id'])
 
         path = request.path
         # must be called from /form/ ...
         path = re.sub(r'/form(/[^/]+)?/?$', '', path)
+        path = '%s/%s/' % (path, form_name)
 
-        ret['djangoUrl'] = '%s/%s/' % (path, form_name)
+        ret = viewset._get_form_metadata(link_id, form_name=form_def['form_id'], base_path=path)
+
         return ret
 
     # @LoggerDecorator.log()
