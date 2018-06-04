@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from django.template import Template, Context
 from rest_framework import renderers
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, action
 from rest_framework.response import Response
 
 
@@ -26,13 +26,13 @@ class AutoCompleteMixin(object):
                 self.formatter = self.__DummyFormatter()
 
     # noinspection PyUnusedLocal
-    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
+    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
                   methods=['get', 'post'])
     def autocomplete(self, request, *args, **kwargs):
         return self._autocomplete(request, has_instance=True, **kwargs)
 
     # noinspection PyUnusedLocal
-    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
+    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='autocomplete/(?P<autocomplete_id>.*)',
                 methods=['get', 'post'])
     def autocomplete_list(self, request, *args, **kwargs):
         return self._autocomplete(request, has_instance=False, **kwargs)
