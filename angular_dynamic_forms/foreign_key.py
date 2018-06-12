@@ -6,10 +6,10 @@ from urllib.parse import urlsplit
 from django.db.models import ManyToManyField
 from django.http import HttpResponseNotFound, HttpResponseNotAllowed
 from rest_framework import renderers, serializers
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, action
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
-from rest_framework.serializers import ListSerializer
+from rest_framework.serializers import ListSerializer, ModelSerializer
 import django.db.models
 
 
@@ -33,13 +33,13 @@ class ForeignFieldAutoCompleteMixin(object):
             self.pagination = pagination
 
     # noinspection PyUnusedLocal
-    @detail_route(renderer_classes=[renderers.JSONRenderer], url_path='foreign-autocomplete/(?P<autocomplete_id>.*)',
+    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='foreign-autocomplete/(?P<autocomplete_id>.*)',
                   methods=['get', 'post'])
     def foreign_autocomplete(self, request, *args, **kwargs):
         return self._foreign_autocomplete(request, has_instance=True, **kwargs)
 
     # noinspection PyUnusedLocal
-    @list_route(renderer_classes=[renderers.JSONRenderer], url_path='foreign-autocomplete/(?P<autocomplete_id>.*)',
+    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='foreign-autocomplete/(?P<autocomplete_id>.*)',
                 methods=['get', 'post'])
     def foreign_autocomplete_list(self, request, *args, **kwargs):
         return self._foreign_autocomplete(request, has_instance=False, **kwargs)
@@ -124,15 +124,31 @@ class ForeignSerializerMixin:
 
     def to_internal_value(self, data):
         self.__original_data = data
-        if self.parent:
-            return self.Meta.model.objects.get(pk=data['id'])
         return super().to_internal_value(data)
 
     def update(self, instance, validated_data):
+        delayed_m2m = self._resolve_foreign_m2m(instance._meta, validated_data)
+        inst = super().update(instance, validated_data)
+        if delayed_m2m:
+            for k, v in delayed_m2m.items():
+                getattr(inst, k).set(v or set())
+            inst.save()
+        return inst
+
+    def create(self, validated_data):
+        delayed_m2m = self._resolve_foreign_m2m(self.Meta.model._meta, validated_data)
+        inst = super().create(validated_data)
+        if delayed_m2m:
+            for k, v in delayed_m2m.items():
+                getattr(inst, k).set(v or set())
+            inst.save()
+        return inst
+
+    def _resolve_foreign_m2m(self, meta, validated_data):
         delayed_m2m = {}
         if not self.parent:
             for k, v in list(validated_data.items()):
-                field = instance._meta.get_field(k)
+                field = meta.get_field(k)
                 if isinstance(v, list):
                     if v:
                         if isinstance(v[0], django.db.models.Model):
@@ -154,10 +170,8 @@ class ForeignSerializerMixin:
                 if isinstance(self.fields[k], ListSerializer):
                     delayed_m2m[k] = v
                     validated_data.pop(k)
-
-        inst = super().update(instance, validated_data)
-        if delayed_m2m:
-            for k, v in delayed_m2m.items():
-                getattr(inst, k).set(v or set())
-            inst.save()
-        return inst
+                elif isinstance(self.fields[k], ModelSerializer):
+                    related_model = field.related_model
+                    orig = self.__original_data.get(k, {})
+                    validated_data[k] = related_model.objects.get(pk=orig.get('id', None))
+        return delayed_m2m
