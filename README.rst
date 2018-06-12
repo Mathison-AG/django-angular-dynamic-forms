@@ -1,9 +1,9 @@
-Django Rest Framework meets Angular 5 dynamic forms
+Django Rest Framework meets Angular 6 dynamic forms
 ===================================================
 
 This repo provides Django mixins and Angular library for rapid
 development of create/edit dialogs for django rest framework.
-It depends on Angular5 and Material UI.
+It depends on Angular 6 and Material UI.
 
 On django side, extend your ``Viewset`` to use ``AngularFormMixin``
 and optionally configure the mixin by providing either layout
