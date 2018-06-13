@@ -249,7 +249,7 @@ class AngularFormMixin(object):
             form_title = self.form_titles.get(form_name, None)
 
         if form_title:
-            return self.form_title['edit' if has_instance else 'create']
+            return form_title['edit' if has_instance else 'create']
 
         # noinspection PyProtectedMember
         name = serializer.Meta.model._meta.verbose_name
