@@ -24,8 +24,8 @@ import {SimpleForeignFieldFormatter} from '../app.module';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form djangoUrl="/api/1.0/test/1/" (submit)="submit($event)"
-                                    (cancel)="cancel($event)"></inpage-django-form>
+                <django-inpage-form djangoUrl="/api/1.0/test/1/" (submit)="submit($event)"
+                                    (cancel)="cancel($event)"></django-inpage-form>
             </div>
         </div>
 
@@ -161,9 +161,9 @@ class TestModelViewSet(ForeignFieldAutoCompleteMixin, AutoCompleteMixin, Angular
             tab: 'Template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form djangoUrl="/api/1.0/test/"
+    <django-inpage-form djangoUrl="/api/1.0/test/"
                         (submit)="submit($event)"
-                        (cancel)="cancel($event)"></inpage-django-form>
+                        (cancel)="cancel($event)"></django-inpage-form>
 </div>
 `
         },

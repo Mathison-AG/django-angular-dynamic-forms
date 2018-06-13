@@ -4,13 +4,13 @@
         "directive-selector": [
             true,
             "attribute",
-            "lib",
+            "django",
             "camelCase"
         ],
         "component-selector": [
             true,
             "element",
-            "lib",
+            "django",
             "kebab-case"
         ]
     }

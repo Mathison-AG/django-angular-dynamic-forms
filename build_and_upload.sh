@@ -22,11 +22,12 @@ find . -name "setup.py" | grep -v "node_modules" | while read PJ; do
 done
 
 (
-    cd angular
-    yarn preversion || exit 1
-    yarn build || exit 1
-    pandoc ../README.rst -o lib-dist/readme.md
-    cd dist || exit 1
+    rm -rf dist
+    ng lint django-angular-dynamic-forms || exit 1
+    yarn build django-angular-dynamic-forms || exit 1
+    cp README.rst LICENSE dist/django-angular-dynamic-forms || exit 1
+    pandoc README.rst -o dist/django-angular-dynamic-forms/readme.md || exit 1
+    cd dist/django-angular-dynamic-forms || exit 1
     npm publish --registry=https://registry.npmjs.org/ || exit 1
 ) || exit 1
 

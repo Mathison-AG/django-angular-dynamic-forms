@@ -70,6 +70,40 @@ import {
 import {MatDialog} from '@angular/material';
 import {catchError} from 'rxjs/operators';
 
+
+class AutoCompleter {
+    constructor(private http: HttpClient,
+                private errors: ErrorService,
+                private autocompletionList: any[] | undefined,
+                private autocompletionUrl: string | undefined,
+                public model: any) {
+    }
+
+    public change(_widget: any, value: string, formValue: string) {
+        let filteredList;
+        if (this.autocompletionUrl) {
+            this.http
+                .post<any[]>(this.autocompletionUrl + '?query=' + encodeURIComponent(value), formValue)
+                .pipe(catchError((error) => {
+                    return this.errors.showCommunicationError(error);
+                }))
+                .subscribe((resp) => {
+                    resp = resp || [];
+                    filteredList = resp.map((x) => x.label);
+                    this.model.list = filteredList;
+                });
+        } else {
+            if (this.autocompletionList) {
+                filteredList = this.autocompletionList.filter((x) => x.indexOf(value) >= 0);
+                this.model.list = filteredList;
+            } else {
+                this.model.list = [];
+            }
+        }
+    }
+}
+
+
 /**
  * Form component targeted on django rest framework
  */
@@ -784,38 +818,6 @@ export function externalValidator(conf: { id: string; errors: any }): ValidatorF
             return {};
         }
     };
-}
-
-class AutoCompleter {
-    constructor(private http: HttpClient,
-                private errors: ErrorService,
-                private autocompletionList: any[] | undefined,
-                private autocompletionUrl: string | undefined,
-                public model: any) {
-    }
-
-    public change(_widget: any, value: string, formValue: string) {
-        let filteredList;
-        if (this.autocompletionUrl) {
-            this.http
-                .post<any[]>(this.autocompletionUrl + '?query=' + encodeURIComponent(value), formValue)
-                .pipe(catchError((error) => {
-                    return this.errors.showCommunicationError(error);
-                }))
-                .subscribe((resp) => {
-                    resp = resp || [];
-                    filteredList = resp.map((x) => x.label);
-                    this.model.list = filteredList;
-                });
-        } else {
-            if (this.autocompletionList) {
-                filteredList = this.autocompletionList.filter((x) => x.indexOf(value) >= 0);
-                this.model.list = filteredList;
-            } else {
-                this.model.list = [];
-            }
-        }
-    }
 }
 
 function mergeLayouts(layout1OrUndefined: DynamicFormControlLayout | undefined,

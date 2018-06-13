@@ -6,7 +6,7 @@ import {ErrorService} from './error-service';
 import {DjangoDialogConfig} from './django-form-iface';
 
 @Component({
-    selector: 'dialog-django-form',
+    selector: 'django-dialog-form',
     templateUrl: './dialog-django-form.component.html',
     styleUrls: ['./dialog-django-form.component.scss']
 })

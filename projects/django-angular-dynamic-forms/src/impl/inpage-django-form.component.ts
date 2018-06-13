@@ -5,7 +5,7 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorService} from './error-service';
 
 @Component({
-    selector: 'inpage-django-form',
+    selector: 'django-inpage-form',
     templateUrl: './inpage-django-form.component.html',
     styleUrls: ['./inpage-django-form.component.scss']
 })

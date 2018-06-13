@@ -1,6 +1,6 @@
 <div *ngIf="formGroup">
 
-    <form [formGroup]="formGroup" (ngSubmit)="onSubmitOnEnter()" (keydown.enter)="onSubmitOnEnter()">
+    <form [formGroup]="formGroup" (ngSubmit)="_onSubmitOnEnter()" (keydown.enter)="_onSubmitOnEnter()">
 
         <dynamic-material-form
             [group]="formGroup"

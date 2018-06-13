@@ -9,9 +9,9 @@ import {SampleForeignSelectorComponent} from './sample-foreign-selector.componen
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form djangoUrl="/api/1.0/addresses/" (submit)="submit($event)"
+                <django-inpage-form djangoUrl="/api/1.0/addresses/" (submit)="submit($event)"
                                     (cancel)="cancel($event)">
-                </inpage-django-form>
+                </django-inpage-form>
             </div>
         </div>
 
@@ -45,9 +45,9 @@ export class ForeignComponent implements OnInit {
             tab: 'Page Template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form djangoUrl="/api/1.0/addresses/"
+    <django-inpage-form djangoUrl="/api/1.0/addresses/"
                         (submit)="submit($event)"
-                        (cancel)="cancel($event)"></inpage-django-form>
+                        (cancel)="cancel($event)"></django-inpage-form>
 </div>`
         },
         {

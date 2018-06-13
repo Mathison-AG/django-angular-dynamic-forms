@@ -9,9 +9,9 @@ import {CodeSampleComponent} from '../code-sample/code-sample.component';
 
         <div fxLayout="row">
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
-                <inpage-django-form djangoUrl="/api/1.0/cities/"
+                <django-inpage-form djangoUrl="/api/1.0/cities/"
                                     [extraConfig]='config'
-                                    (submit)="submit($event)" (cancel)="cancel($event)"></inpage-django-form>
+                                    (submit)="submit($event)" (cancel)="cancel($event)"></django-inpage-form>
             </div>
         </div>
 
@@ -79,10 +79,10 @@ urlpatterns = [
             tab: 'template',
             text: `
 <div class='bordered' fxFlex="50" fxFlex.sm="100">
-    <inpage-django-form djangoUrl="/api/1.0/cities/" 
+    <django-inpage-form djangoUrl="/api/1.0/cities/" 
                         [extraConfig] = 'config'
                         (submit)="submit($event)" 
-                        (cancel)="cancel($event)"></inpage-django-form>
+                        (cancel)="cancel($event)"></django-inpage-form>
 </div>
     `
         },

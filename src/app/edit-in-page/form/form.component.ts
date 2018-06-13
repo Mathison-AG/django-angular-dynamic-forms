@@ -6,9 +6,9 @@ import {EditInPageComponent} from '../edit-in-page.component';
     selector: 'app-form',
     template: `
         <div class='bordered' fxFlex="50" fxFlex.sm="100">
-            <inpage-django-form [djangoUrl]="url"
+            <django-inpage-form [djangoUrl]="url"
                                 (submit)="submit($event)"
-                                (cancel)="cancel($event)"></inpage-django-form>
+                                (cancel)="cancel($event)"></django-inpage-form>
         </div>
     `,
     styles: [`

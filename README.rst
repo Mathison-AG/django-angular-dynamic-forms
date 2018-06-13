@@ -32,13 +32,13 @@ On angular side, use ``DjangoFormDialogService`` to display a dialog:
         });
     }
 
-You can also display the form inside your own component via ``<inpage-django-form>`` tag.
+You can also display the form inside your own component via ``<django-inpage-form>`` tag.
 
 .. code-block:: html
 
-    <inpage-django-form django_url="/api/1.0/cities/"
+    <django-inpage-form django_url="/api/1.0/cities/"
                         (submit)="submit($event)"
-                        (cancel)="cancel($event)"></inpage-django-form>
+                        (cancel)="cancel($event)"></django-inpage-form>
 
 
 
