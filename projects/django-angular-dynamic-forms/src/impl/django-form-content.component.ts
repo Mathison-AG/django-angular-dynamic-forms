@@ -79,7 +79,7 @@ class AutoCompleter {
                 public model: any) {
     }
 
-    public change(_widget: any, value: string, formValue: string) {
+    public change(_widget: any, value: string, formValue: string, check:  ChangeDetectorRef) {
         let filteredList;
         if (this.autocompletionUrl) {
             this.http
@@ -91,13 +91,16 @@ class AutoCompleter {
                     resp = resp || [];
                     filteredList = resp.map((x) => x.label);
                     this.model.list = filteredList;
+                    check.markForCheck();
                 });
         } else {
             if (this.autocompletionList) {
                 filteredList = this.autocompletionList.filter((x) => x.indexOf(value) >= 0);
                 this.model.list = filteredList;
+                check.markForCheck();
             } else {
                 this.model.list = [];
+                check.markForCheck();
             }
         }
     }
@@ -244,7 +247,7 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
             const widget = this.formGroup.get(this.formService.getPath(autocompleter.model));
             if (widget) {
                 widget.valueChanges.subscribe((value) => {
-                    autocompleter.change(widget, value, this.value);
+                    autocompleter.change(widget, value, this.value, this.check);
                 });
             }
         }

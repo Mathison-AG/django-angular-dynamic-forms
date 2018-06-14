@@ -36,6 +36,8 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
         else:
             raise Exception()
 
+
+
 class TagSerializer(ForeignSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Tag
