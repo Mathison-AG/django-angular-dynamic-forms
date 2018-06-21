@@ -1,13 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {BehaviorSubject, EMPTY, merge, Observable, Subject} from 'rxjs';
 import {MatSnackBar} from '@angular/material';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {ErrorService} from './error-service';
 import {catchError, filter, map, mergeMap, partition, shareReplay, take, tap} from 'rxjs/operators';
-import {merge, EMPTY} from 'rxjs';
 import {DjangoFormConfig} from './django-form-iface';
 import {DjangoFormContentComponent} from './django-form-content.component';
-import {from} from 'rxjs/internal/observable/from';
 
 /**
  * Form component targeted on django rest framework
@@ -108,6 +106,9 @@ export class DjangoFormBaseComponent implements OnInit {
             initialDataPartitionedConfigs[1]
         ).pipe(
             map((config) => this.configTransformation(config)),
+            tap(config => {
+                this.configLoaded(config);
+            }),
             shareReplay(1)
         );
     }
@@ -230,5 +231,8 @@ export class DjangoFormBaseComponent implements OnInit {
             }
             delete parent[name];
         }
+    }
+
+    protected configLoaded(config: any) {
     }
 }

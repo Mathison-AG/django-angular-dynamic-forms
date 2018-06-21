@@ -10,13 +10,13 @@ import {CodeSampleComponent} from '../code-sample/code-sample.component';
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
                 <h2>Simplified form</h2>
                 <django-inpage-form djangoUrl="/api/1.0/cities/" formId="simplified" (submit)="submit($event)"
-                                    (cancel)="cancel($event)"></django-inpage-form>
+                                    (cancel)="cancel($event)" (shown)="shown($event)"></django-inpage-form>
             </div>
 
             <div class='bordered' fxFlex="50" fxFlex.sm="100">
                 <h2>Full form</h2>
                 <django-inpage-form djangoUrl="/api/1.0/cities/" formId="full" (submit)="submit($event)"
-                                    (cancel)="cancel($event)"></django-inpage-form>
+                                    (cancel)="cancel($event)" (shown)="shown($event)"></django-inpage-form>
             </div>
         </div>
 
@@ -65,9 +65,9 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
             text: `
 
     <django-inpage-form djangoUrl="/api/1.0/cities/" formId="simplified" (submit)="submit($event)"
-                        (cancel)="cancel($event)"></django-inpage-form>
+                        (cancel)="cancel($event)" (shown)="shown($event)"></django-inpage-form>
     <django-inpage-form djangoUrl="/api/1.0/cities/" formId="full" (submit)="submit($event)"
-                        (cancel)="cancel($event)"></django-inpage-form>
+                        (cancel)="cancel($event)" (shown)="shown($event)"></django-inpage-form>
     `
         },
         {
@@ -88,5 +88,9 @@ class CityViewSet(AngularFormMixin, viewsets.ModelViewSet):
 
     cancel(data) {
         this.code.update('response', data);
+    }
+
+    shown(data) {
+        console.log('shown', data);
     }
 }
