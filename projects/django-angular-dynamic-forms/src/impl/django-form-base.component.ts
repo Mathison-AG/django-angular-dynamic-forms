@@ -42,6 +42,9 @@ export class DjangoFormBaseComponent implements OnInit {
     @Input()
     public extraConfig: any = {};
 
+    @Output()
+    valueChanged = new EventEmitter<any>();
+
     @ViewChild('form')
     protected form: DjangoFormContentComponent;
 

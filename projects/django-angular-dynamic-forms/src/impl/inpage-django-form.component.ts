@@ -23,4 +23,8 @@ export class InPageDjangoFormComponent extends DjangoFormBaseComponent {
             this.shown.emit({form: this, config: config});
         }
     }
+
+    onModified(data: any) {
+        this.valueChanged.emit(data);
+    }
 }

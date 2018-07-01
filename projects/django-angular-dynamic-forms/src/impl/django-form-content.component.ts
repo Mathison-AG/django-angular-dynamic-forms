@@ -69,6 +69,7 @@ import {
 } from '../foreign';
 import {MatDialog} from '@angular/material';
 import {catchError} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 
 class AutoCompleter {
@@ -137,6 +138,10 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
 
     private foreigns: any[] = [];
     private foreignDefinitions: { [s: string]: any; } = {};
+
+    @Output()
+    valueChanged = new EventEmitter<any>();
+    valueChangedSubscription: Subscription;
 
     @Input()
     public set layout(_layout: FieldConfig[]) {
@@ -215,6 +220,9 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy() {
         this._unbindForeignKey();
+        if (this.valueChangedSubscription) {
+            this.valueChangedSubscription.unsubscribe();
+        }
     }
 
     public get valid() {
@@ -240,6 +248,25 @@ export class DjangoFormContentComponent implements OnInit, OnDestroy {
         this._bindAutocomplete();
         this._bindForeignKey();
         this._updateInitialData();
+        if (this.valueChangedSubscription) {
+            this.valueChangedSubscription.unsubscribe();
+        }
+        this.valueChangedSubscription = this.formGroup.valueChanges.subscribe(value => {
+            function _flatten(o) {
+                if (o === undefined || o === null) {
+                    return [];
+                }
+                return [].concat(...Object.keys(o)
+                    .map(k =>
+                        typeof o[k] === 'object' ?
+                            _flatten(o[k]) :
+                            ({[k]: o[k]})
+                    )
+                );
+            }
+            value = Object.assign({}, ..._flatten(value));
+            this.valueChanged.emit(value);
+        });
     }
 
     private _bindAutocomplete() {

@@ -4,7 +4,8 @@
         <h1 mat-dialog-title *ngIf="config.formTitle">{{ config.formTitle }}</h1>
         <div mat-dialog-content>
             <django-form-content [layout]="config.layout" [initialData]="config.initialData" [errors]="errors$|async"
-                                 (submit)="submitted(undefined, undefined)" #form>
+                                 (submit)="submitted(undefined, undefined)"
+                                 #form>
             </django-form-content>
         </div>
 

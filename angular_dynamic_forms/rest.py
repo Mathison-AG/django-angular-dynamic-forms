@@ -4,6 +4,7 @@ import inspect
 import os
 import re
 
+from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import TextField
 from django.http import Http404
@@ -323,7 +324,11 @@ class AngularFormMixin(object):
 
         ret['method'] = 'patch' if has_instance else 'post'
         ret['hasInitialData'] = has_instance
-        ret['djangoUrl'] = base_path + self._get_url_by_form_id(form_name)
+
+        if getattr(settings, 'ANGULAR_FORM_ABSOLUTE_URLS', False):
+            ret['djangoUrl'] = self.request.build_absolute_uri(base_path + self._get_url_by_form_id(form_name))
+        else:
+            ret['djangoUrl'] = base_path + self._get_url_by_form_id(form_name)
 
         # print(json.dumps(ret, indent=4))
         return ret
