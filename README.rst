@@ -106,3 +106,14 @@ an example implementation.
     })
     export class AppModule {
     }
+
+
+Configuration
+-------------
+
+If your angular and django server are on the same host/port (see
+https://github.com/angular/angular-cli/blob/master/docs/documentation/stories/proxy.md for development tips),
+no configuration is necessary.
+
+If angular and django are on different hosts/ports, set django setting ``ANGULAR_FORM_ABSOLUTE_URLS=True`` (
+thanks @sssolid for pointing this out).
