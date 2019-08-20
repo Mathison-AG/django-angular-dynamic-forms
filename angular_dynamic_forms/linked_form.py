@@ -1,6 +1,5 @@
 from functools import wraps
 
-from rest_framework.decorators import detail_route
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.decorators import action
 
