@@ -60,8 +60,8 @@ class AngularFormMixin(object):
     """
     These three is a map from form_id => layout, title, map of defaults for the case of multiple forms per viewset
     """
-    form_layouts  = {}
-    form_titles   = {}
+    form_layouts = {}
+    form_titles = {}
     form_defaults_map = {}
 
     """
@@ -79,11 +79,7 @@ class AngularFormMixin(object):
         :param controls:    a list of controls
         :return:            fieldset record
         """
-        return {
-            'type': 'fieldset',
-            'label': title,
-            'controls': controls
-        }
+        return {"type": "fieldset", "label": title, "controls": controls}
 
     @staticmethod
     def columns(*controls):
@@ -95,10 +91,7 @@ class AngularFormMixin(object):
                             the components or .group(*controls) method
         :return:            record for a multiple columns layout
         """
-        return {
-            'type': 'columns',
-            'columns': controls
-        }
+        return {"type": "columns", "columns": controls}
 
     @staticmethod
     def group(*controls):
@@ -110,38 +103,62 @@ class AngularFormMixin(object):
         """
         return controls
 
-
     # noinspection PyUnusedLocal
-    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='form')
+    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path="form")
     def form(self, request, *args, **kwargs):
-        return Response(self._get_form_metadata(has_instance=True,
-                                                base_path=self._base_path(request.path)))
+        return Response(
+            self._get_form_metadata(
+                has_instance=True, base_path=self._base_path(request.path)
+            )
+        )
 
     # noinspection PyUnusedLocal
-    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='form')
+    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path="form")
     def form_list(self, request, *args, **kwargs):
-        return Response(self._get_form_metadata(has_instance=False,
-                                                base_path=self._base_path(request.path)))
+        return Response(
+            self._get_form_metadata(
+                has_instance=False, base_path=self._base_path(request.path)
+            )
+        )
 
     # noinspection PyUnusedLocal
-    @action(detail=True, renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    @action(
+        detail=True,
+        renderer_classes=[renderers.JSONRenderer],
+        url_path="form/(?P<form_name>.+)",
+    )
     def form_with_name(self, request, *args, form_name=None, **kwargs):
-        return Response(self._get_form_metadata(has_instance=True, form_name =form_name or '',
-                                                base_path=self._base_path(request.path, 2)))
+        return Response(
+            self._get_form_metadata(
+                has_instance=True,
+                form_name=form_name or "",
+                base_path=self._base_path(request.path, 2),
+            )
+        )
 
     # noinspection PyUnusedLocal
-    @action(detail=False, renderer_classes=[renderers.JSONRenderer], url_path='form/(?P<form_name>.+)')
+    @action(
+        detail=False,
+        renderer_classes=[renderers.JSONRenderer],
+        url_path="form/(?P<form_name>.+)",
+    )
     def form_list_with_name(self, request, *args, form_name=None, **kwargs):
-        return Response(self._get_form_metadata(has_instance=False, form_name =form_name or '',
-                                                base_path=self._base_path(request.path, 2)))
+        return Response(
+            self._get_form_metadata(
+                has_instance=False,
+                form_name=form_name or "",
+                base_path=self._base_path(request.path, 2),
+            )
+        )
 
     @staticmethod
     def _base_path(path, level=1):
-        if path.endswith('/'):
+        if path.endswith("/"):
             path = path[:-1]
         for _lev in range(level):
             path = os.path.dirname(path)
-        return path + '/'
+        return path + "/"
+
     #
     # the rest of the methods on this class are private ones
     #
@@ -167,8 +184,11 @@ class AngularFormMixin(object):
                 layout = form_layout
         else:
             # no layout, generate from fields
-            layout = [self._get_field_layout(field_name, fields[field_name])
-                        for field_name in fields if not fields[field_name]['read_only']]
+            layout = [
+                self._get_field_layout(field_name, fields[field_name])
+                for field_name in fields
+                if not fields[field_name]["read_only"]
+            ]
 
         layout = self._transform_layout(layout, form_defaults, wrap_array=False)
 
@@ -188,7 +208,7 @@ class AngularFormMixin(object):
         return x
 
     def _get_field_layout(self, field_name, field):
-        return {'id': field_name}
+        return {"id": field_name}
 
     # @LoggerDecorator.log()
     def _transform_layout(self, layout, form_defaults, wrap_array=True):
@@ -196,33 +216,37 @@ class AngularFormMixin(object):
         if isinstance(layout, dict):
             layout = layout.copy()
 
-            if 'id' in layout and layout['id'] in form_defaults:
-                layout.update(form_defaults[layout['id']])
+            if "id" in layout and layout["id"] in form_defaults:
+                layout.update(form_defaults[layout["id"]])
 
             for (k, v) in list(layout.items()):
                 if callable(v):
                     layout[k] = v(self)
 
-            layout_type = layout.get('type', 'string')
+            layout_type = layout.get("type", "string")
 
-            if layout_type in ('fieldset', 'group'):
-                layout['controls'] = self._transform_layout(layout['controls'], form_defaults, wrap_array=False)
+            if layout_type in ("fieldset", "group"):
+                layout["controls"] = self._transform_layout(
+                    layout["controls"], form_defaults, wrap_array=False
+                )
                 return layout
 
-            if layout_type == 'columns':
-                layout['controls'] = self._transform_layout(layout['columns'], form_defaults, wrap_array=False)
-                del layout['columns']
+            if layout_type == "columns":
+                layout["controls"] = self._transform_layout(
+                    layout["columns"], form_defaults, wrap_array=False
+                )
+                del layout["columns"]
                 return layout
 
-            if layout_type == 'string':
+            if layout_type == "string":
                 # string or textarea?
                 qs = self.get_queryset()
                 model = qs.model
                 if model:
                     try:
-                        field = model._meta.get_field(layout['id'])
+                        field = model._meta.get_field(layout["id"])
                         if isinstance(field, TextField):
-                            layout['type'] = 'textarea'
+                            layout["type"] = "textarea"
                     except FieldDoesNotExist:
                         pass
             return layout
@@ -231,16 +255,16 @@ class AngularFormMixin(object):
             # otherwise it is a group of controls
             if wrap_array:
                 return {
-                    'type': 'group',
-                    'controls': [self._transform_layout(l, form_defaults) for l in layout]
+                    "type": "group",
+                    "controls": [
+                        self._transform_layout(l, form_defaults) for l in layout
+                    ],
                 }
             else:
                 return [self._transform_layout(l, form_defaults) for l in layout]
 
         if isinstance(layout, str):
-            return self._transform_layout({
-                'id': layout
-            }, form_defaults)
+            return self._transform_layout({"id": layout}, form_defaults)
 
         raise NotImplementedError('Layout "%s" not implemented' % layout)
 
@@ -250,14 +274,14 @@ class AngularFormMixin(object):
             form_title = self.form_titles.get(form_name, None)
 
         if form_title:
-            return form_title['edit' if has_instance else 'create']
+            return form_title["edit" if has_instance else "create"]
 
         # noinspection PyProtectedMember
         name = serializer.Meta.model._meta.verbose_name
         if has_instance:
-            name = gettext('Editing %s') % name
+            name = gettext("Editing %s") % name
         else:
-            name = gettext('Creating a new %s') % name
+            name = gettext("Creating a new %s") % name
 
         return name
 
@@ -265,32 +289,16 @@ class AngularFormMixin(object):
     def _get_actions(self, has_instance, serializer):
         if has_instance:
             return [
-                {
-                    'id': 'save',
-                    'color': 'primary',
-                    'label': gettext('Save')
-                },
-                {
-                    'id': 'cancel',
-                    'label': gettext('Cancel'),
-                    'cancel': True
-                },
+                {"id": "save", "color": "primary", "label": gettext("Save")},
+                {"id": "cancel", "label": gettext("Cancel"), "cancel": True},
             ]
         else:
             return [
-                {
-                    'id': 'create',
-                    'color': 'primary',
-                    'label': gettext('Create')
-                },
-                {
-                    'id': 'cancel',
-                    'label': gettext('Cancel'),
-                    'cancel': True
-                },
+                {"id": "create", "color": "primary", "label": gettext("Create")},
+                {"id": "cancel", "label": gettext("Cancel"), "cancel": True},
             ]
 
-    def _get_form_metadata(self, has_instance, form_name='', base_path=None):
+    def _get_form_metadata(self, has_instance, form_name="", base_path=None):
 
         if form_name:
 
@@ -298,11 +306,13 @@ class AngularFormMixin(object):
                 return self._linked_form_metadata(form_name)
 
             if not self.form_layouts:
-                raise Http404('Form layouts not configured. '
-                                            'Please add form_layouts attribute on the viewset class')
+                raise Http404(
+                    "Form layouts not configured. "
+                    "Please add form_layouts attribute on the viewset class"
+                )
 
             if form_name not in self.form_layouts:
-                raise Http404('Form with name %s not found' % form_name)
+                raise Http404("Form with name %s not found" % form_name)
 
         ret = {}
 
@@ -316,19 +326,21 @@ class AngularFormMixin(object):
         layout = self._get_form_layout(fields_info, form_name)
         layout = self._decorate_layout(layout, fields_info)
 
-        ret['layout'] = self._convert_camel_case(layout)
+        ret["layout"] = self._convert_camel_case(layout)
 
-        ret['formTitle'] = self._get_form_title(has_instance, serializer, form_name)
+        ret["formTitle"] = self._get_form_title(has_instance, serializer, form_name)
 
-        ret['actions'] = self._get_actions(has_instance, serializer)
+        ret["actions"] = self._get_actions(has_instance, serializer)
 
-        ret['method'] = 'patch' if has_instance else 'post'
-        ret['hasInitialData'] = has_instance
+        ret["method"] = "patch" if has_instance else "post"
+        ret["hasInitialData"] = has_instance
 
-        if getattr(settings, 'ANGULAR_FORM_ABSOLUTE_URLS', False):
-            ret['djangoUrl'] = self.request.build_absolute_uri(base_path + self._get_url_by_form_id(form_name))
+        if getattr(settings, "ANGULAR_FORM_ABSOLUTE_URLS", False):
+            ret["djangoUrl"] = self.request.build_absolute_uri(
+                base_path + self._get_url_by_form_id(form_name)
+            )
         else:
-            ret['djangoUrl'] = base_path + self._get_url_by_form_id(form_name)
+            ret["djangoUrl"] = base_path + self._get_url_by_form_id(form_name)
 
         # print(json.dumps(ret, indent=4))
         return ret
@@ -336,35 +348,42 @@ class AngularFormMixin(object):
     @functools.lru_cache(maxsize=16)
     def _get_url_by_form_id(self, form_id):
         if not form_id:
-            return ''
-        method = inspect.getmembers(self, lambda fld: callable(fld) and getattr(fld, 'angular_form_id', None) == form_id)
+            return ""
+        method = inspect.getmembers(
+            self,
+            lambda fld: callable(fld)
+            and getattr(fld, "angular_form_id", None) == form_id,
+        )
         if not method:
-            return ''
+            return ""
         ret = method[0][1].url_path
-        if not ret.endswith('/'):
-            ret += '/'
+        if not ret.endswith("/"):
+            ret += "/"
         return ret
 
     def _linked_form_metadata(self, form_name):
         request = self.request
 
         form_def = self.linked_forms[form_name]
-        viewset = form_def['viewset']()
+        viewset = form_def["viewset"]()
         viewset.request = request
         viewset.format_kwarg = self.format_kwarg
 
-        if 'link_id' in form_def:
-            link_id = request.GET.get(form_def['link_id']) or request.data.get(form_def['link_id'])
+        if "link_id" in form_def:
+            link_id = request.GET.get(form_def["link_id"]) or request.data.get(
+                form_def["link_id"]
+            )
         else:
             link_id = None
 
-
         path = request.path
         # must be called from /form/ ...
-        path = re.sub(r'/form(/[^/]+)?/?$', '', path)
-        path = '%s/%s/' % (path, form_name)
+        path = re.sub(r"/form(/[^/]+)?/?$", "", path)
+        path = "%s/%s/" % (path, form_name)
 
-        ret = viewset._get_form_metadata(link_id, form_name=form_def['form_id'], base_path=path)
+        ret = viewset._get_form_metadata(
+            link_id, form_name=form_def["form_id"], base_path=path
+        )
 
         return ret
 
@@ -376,22 +395,26 @@ class AngularFormMixin(object):
                 ret.append(self._decorate_layout(it, fields_info))
             return ret
         elif isinstance(layout, dict):
-            if layout.get('type', None) in ('fieldset', 'columns', 'group'):
+            if layout.get("type", None) in ("fieldset", "columns", "group"):
                 layout = dict(layout)
-                layout['controls'] = self._decorate_layout(layout['controls'], fields_info)
+                layout["controls"] = self._decorate_layout(
+                    layout["controls"], fields_info
+                )
                 self._decorate_layout_item(layout)
                 return layout
             else:
-                md = dict(fields_info.get(layout['id'], {}))
+                md = dict(fields_info.get(layout["id"], {}))
                 md.update(layout)
-                if md['type'] == 'choice':
-                    md['type'] = 'select'
-                if md.get('choices'):
-                    md['choices'] = [
+                if md["type"] == "choice":
+                    md["type"] = "select"
+                if md.get("choices"):
+                    md["choices"] = [
                         {
-                            'label': x.get('label', None) or x.get('display_name', None),
-                            'value': x['value']
-                        } for x in md['choices']
+                            "label": x.get("label", None)
+                            or x.get("display_name", None),
+                            "value": x["value"],
+                        }
+                        for x in md["choices"]
                     ]
                 self._decorate_layout_item(md)
                 return md
@@ -402,9 +425,7 @@ class AngularFormMixin(object):
 
 # privates
 def camel(snake_str):
-    if '_' not in snake_str:
+    if "_" not in snake_str:
         return snake_str
-    first, *others = snake_str.split('_')
-    return ''.join([first.lower(), *map(str.title, others)])
-
-
+    first, *others = snake_str.split("_")
+    return "".join([first.lower(), *map(str.title, others)])
