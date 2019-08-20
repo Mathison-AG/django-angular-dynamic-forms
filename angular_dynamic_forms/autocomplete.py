@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from django.template import Template, Context
 from rest_framework import renderers
-from rest_framework.decorators import detail_route, list_route, action
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 
