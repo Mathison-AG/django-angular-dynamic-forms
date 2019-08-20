@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 from django.db.models import ManyToManyField
 from django.http import HttpResponseNotFound, HttpResponseNotAllowed
 from rest_framework import renderers, serializers
-from rest_framework.decorators import detail_route, list_route, action
+from rest_framework.decorators import action
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer, ModelSerializer
