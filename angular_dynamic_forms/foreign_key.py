@@ -16,7 +16,6 @@ import django.db.models
 class M2MEnabledMetadata(SimpleMetadata):
     def get_field_info(self, field):
         ret = super().get_field_info(field)
-        print('field', field)
         if isinstance(field, serializers.ManyRelatedField) or isinstance(field, ListSerializer):
             ret['multiple'] = True
         return ret
