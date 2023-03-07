@@ -1,17 +1,7 @@
 {
     "extends": "../../tslint.json",
     "rules": {
-        "directive-selector": [
-            true,
-            "attribute",
-            "django",
-            "camelCase"
-        ],
-        "component-selector": [
-            true,
-            "element",
-            "django",
-            "kebab-case"
-        ]
+        "directive-selector": [true, "attribute", "django", "camelCase"],
+        "component-selector": [true, "element", "django", "kebab-case"]
     }
 }
