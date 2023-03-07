@@ -1,8 +1,6 @@
-from functools import wraps
-
-from rest_framework.decorators import detail_route
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.decorators import action
+
 
 def linked_form(viewset, form_id=None, link=None, link_id=None, method=None):
     """
@@ -27,59 +25,65 @@ def linked_form(viewset, form_id=None, link=None, link_id=None, method=None):
     :return:            an internal definition of a linked form
     """
     return {
-        'viewset' : viewset,
-        'form_id' : form_id,
-        'link'    : link,
-        'link_id' : link_id,
-        'method'  : method
+        "viewset": viewset,
+        "form_id": form_id,
+        "link": link,
+        "link_id": link_id,
+        "method": method,
     }
 
 
 def linked_forms():
     def build_form(clz, form_name, form_def):
         def form_method(self, request, pk, *args, **kwargs):
-            viewset = form_def['viewset']()
+            viewset = form_def["viewset"]()
             viewset.request = request
             viewset.format_kwarg = self.format_kwarg
-            link = form_def['link']
+            link = form_def["link"]
             if isinstance(link, str):
                 serializer = viewset.get_serializer()
                 fld = serializer.fields[link]
                 if isinstance(fld, PrimaryKeyRelatedField):
                     request.data[link] = self.get_object().pk
                 else:
-                    request.data[link] = self.get_serializer(instance=self.get_object()).data
+                    request.data[link] = self.get_serializer(
+                        instance=self.get_object()
+                    ).data
 
-            method = form_def['method']
-            if 'link_id' in form_def:
-                link_id = request.GET.get(form_def['link_id']) or request.data.get(form_def['link_id'])
-                viewset.lookup_url_kwarg = form_def['link_id']
-                viewset.kwargs = {
-                    viewset.lookup_url_kwarg: link_id
-                }
+            method = form_def["method"]
+            if "link_id" in form_def:
+                link_id = request.GET.get(form_def["link_id"]) or request.data.get(
+                    form_def["link_id"]
+                )
+                viewset.lookup_url_kwarg = form_def["link_id"]
+                viewset.kwargs = {viewset.lookup_url_kwarg: link_id}
             else:
                 link_id = None
 
-            if request._request.method == 'GET':
-                method = 'retrieve'
+            if request._request.method == "GET":
+                method = "retrieve"
             elif not method:
-                method = 'create' if not link_id else 'update'
+                method = "create" if not link_id else "update"
 
             return getattr(viewset, method)(request, *args, **kwargs)
 
-        form_method.__name__ = form_name.replace('-', '_')
+        form_method.__name__ = form_name.replace("-", "_")
 
         return (
-            form_name.replace('-', '_'),
-            action(methods=['get', 'post', 'patch'], detail=True, url_path=form_name)(form_method))
+            form_name.replace("-", "_"),
+            action(methods=["get", "post", "patch"], detail=True, url_path=form_name)(
+                form_method
+            ),
+        )
 
     def wrapper(clz):
-        forms = getattr(clz, 'linked_forms', {})
+        forms = getattr(clz, "linked_forms", {})
         if forms:
             new_methods = []
             for form_name, form_def in forms.items():
                 new_methods.append(build_form(clz, form_name, form_def))
-            clz = type('%s_linked' % clz.__name__, (clz, ), dict(new_methods))
+            clz = type("%s_linked" % clz.__name__, (clz,), dict(new_methods))
 
         return clz
+
     return wrapper

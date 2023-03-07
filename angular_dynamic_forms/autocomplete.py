@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from django.template import Template, Context
 from rest_framework import renderers
-from rest_framework.decorators import detail_route, list_route, action
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 
@@ -64,7 +64,6 @@ class AutoCompleteMixin(object):
         super()._decorate_layout_item(item)
         name = item.get("id", None)
         if name in self._autocomplete_definitions():
-
             # noinspection PyUnresolvedReferences
             request = self.request
 
