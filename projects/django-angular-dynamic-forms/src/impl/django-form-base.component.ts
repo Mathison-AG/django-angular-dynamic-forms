@@ -1,21 +1,36 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {BehaviorSubject, EMPTY, merge, Observable, Subject} from 'rxjs';
-import {MatSnackBar} from '@angular/material';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {ErrorService} from './error-service';
-import {catchError, filter, map, mergeMap, partition, shareReplay, take, tap} from 'rxjs/operators';
-import {DjangoFormConfig} from './django-form-iface';
-import {DjangoFormContentComponent} from './django-form-content.component';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
+} from "@angular/core";
+import { BehaviorSubject, EMPTY, merge, Observable, Subject } from "rxjs";
+import { MatSnackBar } from "@angular/material";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { ErrorService } from "./error-service";
+import {
+    catchError,
+    filter,
+    map,
+    mergeMap,
+    partition,
+    shareReplay,
+    take,
+    tap,
+} from "rxjs/operators";
+import { DjangoFormConfig } from "./django-form-iface";
+import { DjangoFormContentComponent } from "./django-form-content.component";
 
 /**
  * Form component targeted on django rest framework
  */
 @Component({
-    selector: 'django-form-base',
-    template: ''
+    selector: "django-form-base",
+    template: "",
 })
 export class DjangoFormBaseComponent implements OnInit {
-
     public config$: Observable<DjangoFormConfig>;
     public errors$ = new Subject<any>();
 
@@ -24,7 +39,11 @@ export class DjangoFormBaseComponent implements OnInit {
      *
      */
     @Output()
-    public submit = new EventEmitter<{ data: any; response?: any, cancel: boolean }>();
+    public submit = new EventEmitter<{
+        data: any;
+        response?: any;
+        cancel: boolean;
+    }>();
 
     /**
      * Returns cancelled form data
@@ -45,20 +64,25 @@ export class DjangoFormBaseComponent implements OnInit {
     @Output()
     valueChanged = new EventEmitter<any>();
 
-    @ViewChild('form')
+    @ViewChild("form")
     protected form: DjangoFormContentComponent;
 
-    private url$ = new BehaviorSubject<string>('');
+    private url$ = new BehaviorSubject<string>("");
     private _config$ = new BehaviorSubject<DjangoFormConfig>({});
 
-    constructor(private httpClient: HttpClient, private snackBar: MatSnackBar, private errorService: ErrorService) {
-    }
+    constructor(
+        private httpClient: HttpClient,
+        private snackBar: MatSnackBar,
+        private errorService: ErrorService
+    ) {}
 
     @Input()
-    public initialDataTransformation: (initialData: any) => any = (x) => x
+    public initialDataTransformation: (initialData: any) => any = (x) => x;
 
     @Input()
-    public configTransformation: (config: DjangoFormConfig) => DjangoFormConfig = (x) => x
+    public configTransformation: (
+        config: DjangoFormConfig
+    ) => DjangoFormConfig = (x) => x;
 
     @Input()
     public set djangoUrl(_url: string) {
@@ -71,7 +95,7 @@ export class DjangoFormBaseComponent implements OnInit {
     }
 
     public ngOnInit(): void {
-        console.log('on init called');
+        console.log("on init called");
 
         const mergedConfigs: Observable<DjangoFormConfig> = merge(
             this.url$.pipe(
@@ -79,37 +103,45 @@ export class DjangoFormBaseComponent implements OnInit {
                 mergeMap((url: string) => this._downloadDjangoForm(url)), // url is never null here
                 shareReplay(1)
             ),
-            this._config$.pipe(
-                filter((x) => !!x)
-            )
+            this._config$.pipe(filter((x) => !!x))
         );
 
-        const initialDataPartitionedConfigs = partition((x: DjangoFormConfig) => x.hasInitialData)(mergedConfigs);
+        const initialDataPartitionedConfigs = partition(
+            (x: DjangoFormConfig) => x.hasInitialData
+        )(mergedConfigs);
 
         this.config$ = merge(
             // if need initial data, return observable that loads them
             initialDataPartitionedConfigs[0].pipe(
-                mergeMap((_config: DjangoFormConfig) => this.httpClient
-                    .get<any>(_config.djangoUrl as string,     // never null here
-                        {
-                            withCredentials: true,
-                            params: this.extraFormData
-                        })
-                    .pipe(
-                        catchError((error) => this.errorService.showCommunicationError(error)),
-                        map((response) => this.initialDataTransformation(response)),
-                        // and add the initial data as a property of the config
-                        map((response) => ({
-                            ..._config,
-                            initialData: response
-                        })))
+                mergeMap((_config: DjangoFormConfig) =>
+                    this.httpClient
+                        .get<any>(
+                            _config.djangoUrl as string, // never null here
+                            {
+                                withCredentials: true,
+                                params: this.extraFormData,
+                            }
+                        )
+                        .pipe(
+                            catchError((error) =>
+                                this.errorService.showCommunicationError(error)
+                            ),
+                            map((response) =>
+                                this.initialDataTransformation(response)
+                            ),
+                            // and add the initial data as a property of the config
+                            map((response) => ({
+                                ..._config,
+                                initialData: response,
+                            }))
+                        )
                 )
             ),
             // otherwise, just return
             initialDataPartitionedConfigs[1]
         ).pipe(
             map((config) => this.configTransformation(config)),
-            tap(config => {
+            tap((config) => {
                 this.configLoaded(config);
             }),
             shareReplay(1)
@@ -124,39 +156,40 @@ export class DjangoFormBaseComponent implements OnInit {
             value[buttonId] = true;
         }
         if (isCancel) {
-            this.cancel.emit({data: value});
+            this.cancel.emit({ data: value });
         } else {
             this._submitToDjango(value);
         }
     }
 
-    private _downloadDjangoForm(djangoUrl: string): Observable<DjangoFormConfig> {
+    private _downloadDjangoForm(
+        djangoUrl: string
+    ): Observable<DjangoFormConfig> {
         let djangoFormUrl = djangoUrl;
-        if (!djangoFormUrl.endsWith('/')) {
-            djangoFormUrl += '/';
+        if (!djangoFormUrl.endsWith("/")) {
+            djangoFormUrl += "/";
         }
-        djangoFormUrl += 'form/';
+        djangoFormUrl += "form/";
         if (this.formId) {
-            djangoFormUrl += this.formId + '/';
+            djangoFormUrl += this.formId + "/";
         }
         return this.httpClient
-            .get<DjangoFormConfig>(djangoFormUrl,
-                {
-                    withCredentials: true,
-                    params: this.extraFormData
-                })
+            .get<DjangoFormConfig>(djangoFormUrl, {
+                withCredentials: true,
+                params: this.extraFormData,
+            })
             .pipe(
-                catchError((error) => this.errorService.showCommunicationError(error)),
-                map((config) => (
-                    {
-                        djangoUrl,     // add django url if not present
-                        ...config
-                    }
-                )),
+                catchError((error) =>
+                    this.errorService.showCommunicationError(error)
+                ),
+                map((config) => ({
+                    djangoUrl, // add django url if not present
+                    ...config,
+                })),
                 map((config: DjangoFormConfig) => {
                     config = {
                         ...config,
-                        ...this.extraConfig
+                        ...this.extraConfig,
                     };
                     if (config.initialData) {
                         // initial data already filled, do not fill them again
@@ -180,16 +213,26 @@ export class DjangoFormBaseComponent implements OnInit {
             }
             if (config.djangoUrl) {
                 let call;
-                console.log('Saving to django url', config.djangoUrl);
+                console.log("Saving to django url", config.djangoUrl);
                 switch (config.method) {
-                    case 'post':
-                        call = this.httpClient.post(config.djangoUrl, {...extra, ...data}, {withCredentials: true});
+                    case "post":
+                        call = this.httpClient.post(
+                            config.djangoUrl,
+                            { ...extra, ...data },
+                            { withCredentials: true }
+                        );
                         break;
-                    case 'patch':
-                        call = this.httpClient.patch(config.djangoUrl, {...extra, ...data}, {withCredentials: true});
+                    case "patch":
+                        call = this.httpClient.patch(
+                            config.djangoUrl,
+                            { ...extra, ...data },
+                            { withCredentials: true }
+                        );
                         break;
                     default:
-                        throw new Error(`Unimplemented method ${config.method}`);
+                        throw new Error(
+                            `Unimplemented method ${config.method}`
+                        );
                 }
                 call.pipe(
                     catchError((error) => {
@@ -201,20 +244,20 @@ export class DjangoFormBaseComponent implements OnInit {
                     })
                 ).subscribe((response) => {
                     this.errors$.next(null);
-                    this.snackBar.open('Saved', 'Dismiss', {
+                    this.snackBar.open("Saved", "Dismiss", {
                         duration: 2000,
-                        politeness: 'polite'
+                        politeness: "polite",
                     });
                     this.submit.emit({
                         response,
                         data,
-                        cancel: false
+                        cancel: false,
                     });
                 });
             } else {
                 this.submit.emit({
                     data,
-                    cancel: false
+                    cancel: false,
                 });
             }
         });
@@ -228,7 +271,7 @@ export class DjangoFormBaseComponent implements OnInit {
             const val = current[k];
             this._flatten(k, val, current);
         }
-        if (name && name.startsWith('generated_')) {
+        if (name && name.startsWith("generated_")) {
             for (const k of Object.getOwnPropertyNames(current)) {
                 parent[k] = current[k];
             }
@@ -236,6 +279,5 @@ export class DjangoFormBaseComponent implements OnInit {
         }
     }
 
-    protected configLoaded(config: any) {
-    }
+    protected configLoaded(config: any) {}
 }

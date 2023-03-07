@@ -2,8 +2,8 @@
  * This module provides interfaces for implementing dialogs for filling foreign key fields.
  */
 
-import {Injectable, InjectionToken, Type} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+import { InjectionToken, Type } from "@angular/core";
+import { MatDialogRef } from "@angular/material";
 
 /**
  * An interface that represents a result of foreign field lookup (i.e. the result of foreign key dialog)
@@ -14,7 +14,6 @@ export type ForeignFieldLookupResult = any;
  * The configuration of the lookup component
  */
 export interface ForeignFieldLookupConfig {
-
     /**
      * true if multiple values are allowed, false otherwise
      */
@@ -27,7 +26,6 @@ export interface ForeignFieldLookupConfig {
 }
 
 export interface ForeignFieldLookupComponentData {
-
     /**
      * The configuration of the component
      */
@@ -37,7 +35,6 @@ export interface ForeignFieldLookupComponentData {
      * initial value of the component - an array of json objects
      */
     initialValue: ForeignFieldLookupResult[];
-
 }
 
 /**
@@ -102,7 +99,6 @@ export interface ForeignFieldLookupFactory {
  * To convert the object representation of the foreign key into a displayed text value, ForeignFieldFormatter is used.
  */
 export interface ForeignFieldFormatter {
-
     /**
      * Receives a form field configuration and value as object and returns displayable string value
      *
@@ -114,6 +110,12 @@ export interface ForeignFieldFormatter {
     format(config: ForeignFieldLookupConfig, value: any): string;
 }
 
-export const FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER = new InjectionToken('ForeignFieldLookup');
-export const FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER = new InjectionToken('ForeignFieldLookupFactory');
-export const FOREIGN_FIELD_FORMATTER_PROVIDER = new InjectionToken('ForeignFieldFormatterProvider');
+export const FOREIGN_FIELD_LOOKUP_COMPONENT_PROVIDER = new InjectionToken(
+    "ForeignFieldLookup"
+);
+export const FOREIGN_FIELD_LOOKUP_FACTORY_PROVIDER = new InjectionToken(
+    "ForeignFieldLookupFactory"
+);
+export const FOREIGN_FIELD_FORMATTER_PROVIDER = new InjectionToken(
+    "ForeignFieldFormatterProvider"
+);

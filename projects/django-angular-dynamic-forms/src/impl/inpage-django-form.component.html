@@ -1,10 +1,13 @@
 <ng-container *ngIf="config$">
-    <ng-container *ngIf="config$|async; let config">
-
-        <django-form-content [layout]="config.layout" [initialData]="config.initialData" [errors]="errors$|async"
-                             (submit)="submitted(undefined, undefined)"
-                             (valueChanged)="onModified($event)"
-                             #form>
+    <ng-container *ngIf="config$ | async; let config">
+        <django-form-content
+            [layout]="config.layout"
+            [initialData]="config.initialData"
+            [errors]="errors$ | async"
+            (submit)="submitted(undefined, undefined)"
+            (valueChanged)="onModified($event)"
+            #form
+        >
         </django-form-content>
 
         <div *ngIf="config.actions" fxLayout="row" class="dadf-buttons">
@@ -16,9 +19,9 @@
                 (click)="submitted(button.id, button.cancel)"
                 type="button"
                 [disabled]="!form.valid && !button.cancel"
-            >{{ button.label }}
+            >
+                {{ button.label }}
             </button>
         </div>
-
     </ng-container>
 </ng-container>

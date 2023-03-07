@@ -1,23 +1,23 @@
-import {DynamicFormControlLayout} from '@ng-dynamic-forms/core';
+import { DynamicFormControlLayout } from "@ng-dynamic-forms/core";
 
 export enum SimpleFieldTypes {
-    STRING = 'string',
-    TEXTAREA = 'textarea',
-    DATE = 'date',
-    INTEGER = 'integer',
-    FLOAT = 'float',
-    BOOLEAN = 'boolean',
-    RADIO = 'radio',
-    SELECT = 'select',
-    EMAIL = 'email',
-    FIELD = 'field',
-    FILE = 'file'
+    STRING = "string",
+    TEXTAREA = "textarea",
+    DATE = "date",
+    INTEGER = "integer",
+    FLOAT = "float",
+    BOOLEAN = "boolean",
+    RADIO = "radio",
+    SELECT = "select",
+    EMAIL = "email",
+    FIELD = "field",
+    FILE = "file",
 }
 
 export enum CompositeFieldTypes {
-    FIELDSET = 'fieldset',
-    COLUMNS = 'columns',
-    GROUP = 'group'
+    FIELDSET = "fieldset",
+    COLUMNS = "columns",
+    GROUP = "group",
 }
 
 export type FieldTypes = SimpleFieldTypes | CompositeFieldTypes;
@@ -113,9 +113,21 @@ export interface GroupFieldConfig extends FieldConfigBase {
     controls: FieldConfig[];
 }
 
-export type FieldConfig = StringFieldConfig | TextAreaFieldConfig | DateFieldConfig |
-    IntegerFieldConfig | FloatFieldConfig | BooleanFieldConfig | RadioFieldConfig | SelectFieldConfig | FieldSetConfig |
-    EmailFieldConfig | ColumnsFieldConfig | GroupFieldConfig | ForeignFieldConfig | FileFieldConfig;
+export type FieldConfig =
+    | StringFieldConfig
+    | TextAreaFieldConfig
+    | DateFieldConfig
+    | IntegerFieldConfig
+    | FloatFieldConfig
+    | BooleanFieldConfig
+    | RadioFieldConfig
+    | SelectFieldConfig
+    | FieldSetConfig
+    | EmailFieldConfig
+    | ColumnsFieldConfig
+    | GroupFieldConfig
+    | ForeignFieldConfig
+    | FileFieldConfig;
 
 export interface DjangoFormConfig {
     // url of the django rest framework endpoint
@@ -138,7 +150,6 @@ export interface DjangoFormConfig {
 }
 
 export interface DjangoDialogConfig {
-
     // django url, form initial data will downloaded and saved to this url
     djangoUrl?: string;
 
