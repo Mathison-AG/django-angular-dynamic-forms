@@ -117,3 +117,8 @@ no configuration is necessary.
 
 If angular and django are on different hosts/ports, set django setting ``ANGULAR_FORM_ABSOLUTE_URLS=True`` (
 thanks @sssolid for pointing this out).
+
+Sponsorship
+-----------
+
+This project is maintained by `Mathison AG | Mobile & Web Development <https://mathison.ch>`_.
